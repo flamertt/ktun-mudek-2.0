@@ -1,0 +1,935 @@
+﻿=vize!E1;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;SORU - DERS ÖĞRENİM ÇIKTI MATRİSİ;;Ders Soruları;;;;Anket Genel Soruları;;
+ARA SINAV;Ders Öğrenim Çıktıları;Soru Sayısı ve Ortalamalar;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;Ortalama;;;=vize!E1;;;;;;;;
+;; Soru 1; Soru 2; Soru 3; Soru 4; Soru 5; Soru 6; Soru 7; Soru 8; Soru 9; Soru 10; Soru 11; Soru 12; Soru 13; Soru 14; Soru 15; Soru 16; Soru 17; Soru 18; Soru 19; Soru 20; Soru 21; Soru 22; Soru 23; Soru 24; Soru 25; Soru 26; Soru 27; Soru 28; Soru 29; Soru 30; Soru 31; Soru 32; Soru 33; Soru 34; Soru 35; Soru 36; Soru 37; Soru 38; Soru 39; Soru 40;PROJE;;;;;;;;;;;;
+;;"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$95:$B$115,_xlpm.i),
+           INDEX(Ciktilar!$D$95:$D$114,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$95:$B$115,_xlpm.i),
+           INDEX(Ciktilar!$D$95:$D$114,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$95:$B$115,_xlpm.i),
+           INDEX(Ciktilar!$D$95:$D$114,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$95:$B$115,_xlpm.i),
+           INDEX(Ciktilar!$D$95:$D$114,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$95:$B$115,_xlpm.i),
+           INDEX(Ciktilar!$D$95:$D$114,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$95:$B$115,_xlpm.i),
+           INDEX(Ciktilar!$D$95:$D$114,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$95:$B$115,_xlpm.i),
+           INDEX(Ciktilar!$D$95:$D$114,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$95:$B$115,_xlpm.i),
+           INDEX(Ciktilar!$D$95:$D$114,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$95:$B$115,_xlpm.i),
+           INDEX(Ciktilar!$D$95:$D$114,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$95:$B$115,_xlpm.i),
+           INDEX(Ciktilar!$D$95:$D$114,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$95:$B$115,_xlpm.i),
+           INDEX(Ciktilar!$D$95:$D$114,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$95:$B$115,_xlpm.i),
+           INDEX(Ciktilar!$D$95:$D$114,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$95:$B$115,_xlpm.i),
+           INDEX(Ciktilar!$D$95:$D$114,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$95:$B$115,_xlpm.i),
+           INDEX(Ciktilar!$D$95:$D$114,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$95:$B$115,_xlpm.i),
+           INDEX(Ciktilar!$D$95:$D$114,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$95:$B$115,_xlpm.i),
+           INDEX(Ciktilar!$D$95:$D$114,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$95:$B$115,_xlpm.i),
+           INDEX(Ciktilar!$D$95:$D$114,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$95:$B$115,_xlpm.i),
+           INDEX(Ciktilar!$D$95:$D$114,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$95:$B$115,_xlpm.i),
+           INDEX(Ciktilar!$D$95:$D$114,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$95:$B$115,_xlpm.i),
+           INDEX(Ciktilar!$D$95:$D$114,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$95:$B$115,_xlpm.i),
+           INDEX(Ciktilar!$D$95:$D$114,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$95:$B$115,_xlpm.i),
+           INDEX(Ciktilar!$D$95:$D$114,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$95:$B$115,_xlpm.i),
+           INDEX(Ciktilar!$D$95:$D$114,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$95:$B$115,_xlpm.i),
+           INDEX(Ciktilar!$D$95:$D$114,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$95:$B$115,_xlpm.i),
+           INDEX(Ciktilar!$D$95:$D$114,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$95:$B$115,_xlpm.i),
+           INDEX(Ciktilar!$D$95:$D$114,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$95:$B$115,_xlpm.i),
+           INDEX(Ciktilar!$D$95:$D$114,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$95:$B$115,_xlpm.i),
+           INDEX(Ciktilar!$D$95:$D$114,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$95:$B$115,_xlpm.i),
+           INDEX(Ciktilar!$D$95:$D$114,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$95:$B$115,_xlpm.i),
+           INDEX(Ciktilar!$D$95:$D$114,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$95:$B$115,_xlpm.i),
+           INDEX(Ciktilar!$D$95:$D$114,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$95:$B$115,_xlpm.i),
+           INDEX(Ciktilar!$D$95:$D$114,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$95:$B$115,_xlpm.i),
+           INDEX(Ciktilar!$D$95:$D$114,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$95:$B$115,_xlpm.i),
+           INDEX(Ciktilar!$D$95:$D$114,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$95:$B$115,_xlpm.i),
+           INDEX(Ciktilar!$D$95:$D$114,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$95:$B$115,_xlpm.i),
+           INDEX(Ciktilar!$D$95:$D$114,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$95:$B$115,_xlpm.i),
+           INDEX(Ciktilar!$D$95:$D$114,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$95:$B$115,_xlpm.i),
+           INDEX(Ciktilar!$D$95:$D$114,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$95:$B$115,_xlpm.i),
+           INDEX(Ciktilar!$D$95:$D$114,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$95:$B$115,_xlpm.i),
+           INDEX(Ciktilar!$D$95:$D$114,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$95:$B$115,_xlpm.i),
+           INDEX(Ciktilar!$D$95:$D$114,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";;;;Ders Öğrenim Çıktıları;Ortalama ;Soru sayısı;Yüzdesi;DÖÇ ile Farkı;;Soru sayısı;Soru;Yüzdesi
+;DÖÇ-1;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"=IF(COUNTA(C5:AQ5)=0,""---"",SUMPRODUCT(C5:AQ5,C$4:AQ$4)/SUM(C5:AQ5))";;;;;;;;;;;
+;DÖÇ-2;1;0,5;0,5;0,5;0,5;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"=IF(COUNTA(C6:AQ6)=0,""---"",SUMPRODUCT(C6:AQ6,C$4:AQ$4)/SUM(C6:AQ6))";;;;;;;;;;;
+;DÖÇ-3;;0,5;;0,5;;1;1;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"=IF(COUNTA(C7:AQ7)=0,""---"",SUMPRODUCT(C7:AQ7,C$4:AQ$4)/SUM(C7:AQ7))";;;DÖÇ-1;"=IFERROR(IF(DOC!AR55<>0, AVERAGE(DOC!AR5, DOC!AR30, DOC!AR55), AVERAGE(DOC!AR5, DOC!AR30)), ""---"")";11. soru:;0,05;=AX7-AV7;;1. soru:;Dersin amaç ve içeriği bilgilendirmesi;
+;DÖÇ-4;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"=IF(COUNTA(C8:AQ8)=0,""---"",SUMPRODUCT(C8:AQ8,C$4:AQ$4)/SUM(C8:AQ8))";;;DÖÇ-2;"=IFERROR(IF(DOC!AR56<>0, AVERAGE(DOC!AR6, DOC!AR31, DOC!AR56), AVERAGE(DOC!AR6, DOC!AR31)), ""---"")";12. soru:;0,06;=AX8-AV8;;2. soru:;Beklentinin karşılanması;
+;DÖÇ-5;;;0,5;;0,5;;;0,5;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"=IF(COUNTA(C9:AQ9)=0,""---"",SUMPRODUCT(C9:AQ9,C$4:AQ$4)/SUM(C9:AQ9))";;;DÖÇ-3;"=IFERROR(IF(DOC!AR57<>0, AVERAGE(DOC!AR7, DOC!AR32, DOC!AR57), AVERAGE(DOC!AR7, DOC!AR32)), ""---"")";13. soru:;0,58;=AX9-AV9;;3. soru:;Çözümlerin sosyal, ekonomik vb. değinilmesi;
+;DÖÇ-6;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"=IF(COUNTA(C10:AQ10)=0,""---"",SUMPRODUCT(C10:AQ10,C$4:AQ$4)/SUM(C10:AQ10))";;;DÖÇ-4;"=IFERROR(IF(DOC!AR58<>0, AVERAGE(DOC!AR8, DOC!AR33, DOC!AR58), AVERAGE(DOC!AR8, DOC!AR33)), ""---"")";14. soru:;0,6625;=AX10-AV10;;4. soru:;Öğrenilenlerin yaklaşım geliştirmeye katkısı;
+;DÖÇ-7;;;;;;;;0,5;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"=IF(COUNTA(C11:AQ11)=0,""---"",SUMPRODUCT(C11:AQ11,C$4:AQ$4)/SUM(C11:AQ11))";;;DÖÇ-5;"=IFERROR(IF(DOC!AR59<>0, AVERAGE(DOC!AR9, DOC!AR34, DOC!AR59), AVERAGE(DOC!AR9, DOC!AR34)), ""---"")";15. soru:;0,2525;=AX11-AV11;;5. soru:;Gerekli temel altyapı kazandırılması;
+;DÖÇ-8;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"=IF(COUNTA(C12:AQ12)=0,""---"",SUMPRODUCT(C12:AQ12,C$4:AQ$4)/SUM(C12:AQ12))";;;DÖÇ-6;"=IFERROR(IF(DOC!AR60<>0, AVERAGE(DOC!AR10, DOC!AR35, DOC!AR60), AVERAGE(DOC!AR10, DOC!AR35)), ""---"")";16. soru:;0,785;=AX12-AV12;;6. soru:;Sınav sorularının dersin içeriğini yansıtması;
+;DÖÇ-9;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"=IF(COUNTA(C13:AQ13)=0,""---"",SUMPRODUCT(C13:AQ13,C$4:AQ$4)/SUM(C13:AQ13))";;;DÖÇ-7;"=IFERROR(IF(DOC!AR61<>0, AVERAGE(DOC!AR11, DOC!AR36, DOC!AR61), AVERAGE(DOC!AR11, DOC!AR36)), ""---"")";17. soru:;0,25;=AX13-AV13;;7. soru:;Anlatım ve işleyişin verimli olması;
+;DÖÇ-10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"=IF(COUNTA(C14:AQ14)=0,""---"",SUMPRODUCT(C14:AQ14,C$4:AQ$4)/SUM(C14:AQ14))";;;DÖÇ-8;"=IFERROR(IF(DOC!AR62<>0, AVERAGE(DOC!AR12, DOC!AR37, DOC!AR62), AVERAGE(DOC!AR12, DOC!AR37)), ""---"")";18. soru:;;=AX14-AV14;;8. soru:;Ders içerik ve sürenin verimliliği;
+;DÖÇ-11;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"=IF(COUNTA(C15:AQ15)=0,""---"",SUMPRODUCT(C15:AQ15,C$4:AQ$4)/SUM(C15:AQ15))";;;DÖÇ-9;"=IFERROR(IF(DOC!AR63<>0, AVERAGE(DOC!AR13, DOC!AR38, DOC!AR63), AVERAGE(DOC!AR13, DOC!AR38)), ""---"")";19. soru:;;=AX15-AV15;;9. soru:;Derste yeterince örnek verilmesi;
+;DÖÇ-12;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"=IF(COUNTA(C16:AQ16)=0,""---"",SUMPRODUCT(C16:AQ16,C$4:AQ$4)/SUM(C16:AQ16))";;;DÖÇ-10;"=IFERROR(IF(DOC!AR64<>0, AVERAGE(DOC!AR14, DOC!AR39, DOC!AR64), AVERAGE(DOC!AR14, DOC!AR39)), ""---"")";20. soru:;;=AX16-AV16;;10. soru:;Sınıf içi iletişim düzeyinin değerlendirilmesi;
+;DÖÇ-13;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"=IF(COUNTA(C17:AQ17)=0,""---"",SUMPRODUCT(C17:AQ17,C$4:AQ$4)/SUM(C17:AQ17))";;;DÖÇ-11;"=IFERROR(IF(DOC!AR65<>0, AVERAGE(DOC!AR15, DOC!AR40, DOC!AR65), AVERAGE(DOC!AR15, DOC!AR40)), ""---"")";;;;;;;
+;DÖÇ-14;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"=IF(COUNTA(C18:AQ18)=0,""---"",SUMPRODUCT(C18:AQ18,C$4:AQ$4)/SUM(C18:AQ18))";;;DÖÇ-12;"=IFERROR(IF(DOC!AR66<>0, AVERAGE(DOC!AR16, DOC!AR41, DOC!AR66), AVERAGE(DOC!AR16, DOC!AR41)), ""---"")";;;;;;;
+;DÖÇ-15;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"=IF(COUNTA(C19:AQ19)=0,""---"",SUMPRODUCT(C19:AQ19,C$4:AQ$4)/SUM(C19:AQ19))";;;DÖÇ-13;"=IFERROR(IF(DOC!AR67<>0, AVERAGE(DOC!AR17, DOC!AR42, DOC!AR67), AVERAGE(DOC!AR17, DOC!AR42)), ""---"")";;;;;;;
+;DÖÇ-16;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"=IF(COUNTA(C20:AQ20)=0,""---"",SUMPRODUCT(C20:AQ20,C$4:AQ$4)/SUM(C20:AQ20))";;;DÖÇ-14;"=IFERROR(IF(DOC!AR68<>0, AVERAGE(DOC!AR18, DOC!AR43, DOC!AR68), AVERAGE(DOC!AR18, DOC!AR43)), ""---"")";;;;;;;
+;DÖÇ-17;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"=IF(COUNTA(C21:AQ21)=0,""---"",SUMPRODUCT(C21:AQ21,C$4:AQ$4)/SUM(C21:AQ21))";;;DÖÇ-15;"=IFERROR(IF(DOC!AR69<>0, AVERAGE(DOC!AR19, DOC!AR44, DOC!AR69), AVERAGE(DOC!AR19, DOC!AR44)), ""---"")";;;;;;;
+;DÖÇ-18;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"=IF(COUNTA(C22:AQ22)=0,""---"",SUMPRODUCT(C22:AQ22,C$4:AQ$4)/SUM(C22:AQ22))";;;DÖÇ-16;"=IFERROR(IF(DOC!AR70<>0, AVERAGE(DOC!AR20, DOC!AR45, DOC!AR70), AVERAGE(DOC!AR20, DOC!AR45)), ""---"")";;;;;;;
+;DÖÇ-19;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"=IF(COUNTA(C23:AQ23)=0,""---"",SUMPRODUCT(C23:AQ23,C$4:AQ$4)/SUM(C23:AQ23))";;;DÖÇ-17;"=IFERROR(IF(DOC!AR71<>0, AVERAGE(DOC!AR21, DOC!AR46, DOC!AR71), AVERAGE(DOC!AR21, DOC!AR46)), ""---"")";;;;;;;
+;DÖÇ-20;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"=IF(COUNTA(C24:AQ24)=0,""---"",SUMPRODUCT(C24:AQ24,C$4:AQ$4)/SUM(C24:AQ24))";;;DÖÇ-18;"=IFERROR(IF(DOC!AR72<>0, AVERAGE(DOC!AR22, DOC!AR47, DOC!AR72), AVERAGE(DOC!AR22, DOC!AR47)), ""---"")";;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;DÖÇ-19;"=IFERROR(IF(DOC!AR73<>0, AVERAGE(DOC!AR23, DOC!AR48, DOC!AR73), AVERAGE(DOC!AR23, DOC!AR48)), ""---"")";;;;;;;
+=vize!E1;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;DÖÇ-20;"=IFERROR(IF(DOC!AR74<>0, AVERAGE(DOC!AR24, DOC!AR49, DOC!AR74), AVERAGE(DOC!AR24, DOC!AR49)), ""---"")";;;;;;;
+FİNAL SINAVI;Ders Öğrenim Çıktıları;Soru Sayısı ve Ortalamalar;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;Ortalama;;;;;;;;;;;
+;; Soru 1; Soru 2; Soru 3; Soru 4; Soru 5; Soru 6; Soru 7; Soru 8; Soru 9; Soru 10; Soru 11; Soru 12; Soru 13; Soru 14; Soru 15; Soru 16; Soru 17; Soru 18; Soru 19; Soru 20; Soru 21; Soru 22; Soru 23; Soru 24; Soru 25; Soru 26; Soru 27; Soru 28; Soru 29; Soru 30; Soru 31; Soru 32; Soru 33; Soru 34; Soru 35; Soru 36; Soru 37; Soru 38; Soru 39; Soru 40;PROJE;;;;;;;;;;;;
+;;"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$222:$B$242,_xlpm.i),
+           INDEX(Ciktilar!$D$222:$D$241,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$222:$B$242,_xlpm.i),
+           INDEX(Ciktilar!$D$222:$D$241,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$222:$B$242,_xlpm.i),
+           INDEX(Ciktilar!$D$222:$D$241,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$222:$B$242,_xlpm.i),
+           INDEX(Ciktilar!$D$222:$D$241,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$222:$B$242,_xlpm.i),
+           INDEX(Ciktilar!$D$222:$D$241,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$222:$B$242,_xlpm.i),
+           INDEX(Ciktilar!$D$222:$D$241,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$222:$B$242,_xlpm.i),
+           INDEX(Ciktilar!$D$222:$D$241,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$222:$B$242,_xlpm.i),
+           INDEX(Ciktilar!$D$222:$D$241,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$222:$B$242,_xlpm.i),
+           INDEX(Ciktilar!$D$222:$D$241,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$222:$B$242,_xlpm.i),
+           INDEX(Ciktilar!$D$222:$D$241,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$222:$B$242,_xlpm.i),
+           INDEX(Ciktilar!$D$222:$D$241,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$222:$B$242,_xlpm.i),
+           INDEX(Ciktilar!$D$222:$D$241,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$222:$B$242,_xlpm.i),
+           INDEX(Ciktilar!$D$222:$D$241,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$222:$B$242,_xlpm.i),
+           INDEX(Ciktilar!$D$222:$D$241,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$222:$B$242,_xlpm.i),
+           INDEX(Ciktilar!$D$222:$D$241,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$222:$B$242,_xlpm.i),
+           INDEX(Ciktilar!$D$222:$D$241,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$222:$B$242,_xlpm.i),
+           INDEX(Ciktilar!$D$222:$D$241,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$222:$B$242,_xlpm.i),
+           INDEX(Ciktilar!$D$222:$D$241,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$222:$B$242,_xlpm.i),
+           INDEX(Ciktilar!$D$222:$D$241,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$222:$B$242,_xlpm.i),
+           INDEX(Ciktilar!$D$222:$D$241,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$222:$B$242,_xlpm.i),
+           INDEX(Ciktilar!$D$222:$D$241,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$222:$B$242,_xlpm.i),
+           INDEX(Ciktilar!$D$222:$D$241,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$222:$B$242,_xlpm.i),
+           INDEX(Ciktilar!$D$222:$D$241,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$222:$B$242,_xlpm.i),
+           INDEX(Ciktilar!$D$222:$D$241,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$222:$B$242,_xlpm.i),
+           INDEX(Ciktilar!$D$222:$D$241,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$222:$B$242,_xlpm.i),
+           INDEX(Ciktilar!$D$222:$D$241,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$222:$B$242,_xlpm.i),
+           INDEX(Ciktilar!$D$222:$D$241,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$222:$B$242,_xlpm.i),
+           INDEX(Ciktilar!$D$222:$D$241,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$222:$B$242,_xlpm.i),
+           INDEX(Ciktilar!$D$222:$D$241,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$222:$B$242,_xlpm.i),
+           INDEX(Ciktilar!$D$222:$D$241,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$222:$B$242,_xlpm.i),
+           INDEX(Ciktilar!$D$222:$D$241,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$222:$B$242,_xlpm.i),
+           INDEX(Ciktilar!$D$222:$D$241,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$222:$B$242,_xlpm.i),
+           INDEX(Ciktilar!$D$222:$D$241,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$222:$B$242,_xlpm.i),
+           INDEX(Ciktilar!$D$222:$D$241,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$222:$B$242,_xlpm.i),
+           INDEX(Ciktilar!$D$222:$D$241,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$222:$B$242,_xlpm.i),
+           INDEX(Ciktilar!$D$222:$D$241,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$222:$B$242,_xlpm.i),
+           INDEX(Ciktilar!$D$222:$D$241,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$222:$B$242,_xlpm.i),
+           INDEX(Ciktilar!$D$222:$D$241,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$222:$B$242,_xlpm.i),
+           INDEX(Ciktilar!$D$222:$D$241,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$222:$B$242,_xlpm.i),
+           INDEX(Ciktilar!$D$222:$D$241,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$222:$B$242,_xlpm.i),
+           INDEX(Ciktilar!$D$222:$D$241,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";;;;DÖÇ;DERS ÖĞRENİM ÇIKTILARI;;;;;;;
+;DÖÇ-1;;;;1;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"=IF(COUNTA(C30:AQ30)=0,""---"",SUMPRODUCT(C30:AQ30,C$29:AQ$29)/SUM(C30:AQ30))";;;=B30;Sözlü ve yazılı sınavlara bireysel olarak hazırlanabilme;Sözlü ve yazılı sınavlara bireysel olarak hazırlanabilme;Sözlü ve yazılı sınavlara bireysel olarak hazırlanabilme;Sözlü ve yazılı sınavlara bireysel olarak hazırlanabilme;Sözlü ve yazılı sınavlara bireysel olarak hazırlanabilme;Sözlü ve yazılı sınavlara bireysel olarak hazırlanabilme;Sözlü ve yazılı sınavlara bireysel olarak hazırlanabilme;
+;DÖÇ-2;;1;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"=IF(COUNTA(C31:AQ31)=0,""---"",SUMPRODUCT(C31:AQ31,C$29:AQ$29)/SUM(C31:AQ31))";;;=B31;Açı ölçme aletlerini kullanabilme ve açı ölçme yöntemlerini öğrenebilme;Açı ölçme aletlerini kullanabilme ve açı ölçme yöntemlerini öğrenebilme;Açı ölçme aletlerini kullanabilme ve açı ölçme yöntemlerini öğrenebilme;Açı ölçme aletlerini kullanabilme ve açı ölçme yöntemlerini öğrenebilme;Açı ölçme aletlerini kullanabilme ve açı ölçme yöntemlerini öğrenebilme;Açı ölçme aletlerini kullanabilme ve açı ölçme yöntemlerini öğrenebilme;Açı ölçme aletlerini kullanabilme ve açı ölçme yöntemlerini öğrenebilme;
+;DÖÇ-3;;;1;;;1;1;1;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"=IF(COUNTA(C32:AQ32)=0,""---"",SUMPRODUCT(C32:AQ32,C$29:AQ$29)/SUM(C32:AQ32))";;;=B32;Koordinat sistemi ve temel ödevleri öğrenebilme;Koordinat sistemi ve temel ödevleri öğrenebilme;Koordinat sistemi ve temel ödevleri öğrenebilme;Koordinat sistemi ve temel ödevleri öğrenebilme;Koordinat sistemi ve temel ödevleri öğrenebilme;Koordinat sistemi ve temel ödevleri öğrenebilme;Koordinat sistemi ve temel ödevleri öğrenebilme;
+;DÖÇ-4;1;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"=IF(COUNTA(C33:AQ33)=0,""---"",SUMPRODUCT(C33:AQ33,C$29:AQ$29)/SUM(C33:AQ33))";;;=B33;Poligon noktalarının tesis, röper, ölçü ve hesabını yapabilme;Poligon noktalarının tesis, röper, ölçü ve hesabını yapabilme;Poligon noktalarının tesis, röper, ölçü ve hesabını yapabilme;Poligon noktalarının tesis, röper, ölçü ve hesabını yapabilme;Poligon noktalarının tesis, röper, ölçü ve hesabını yapabilme;Poligon noktalarının tesis, röper, ölçü ve hesabını yapabilme;Poligon noktalarının tesis, röper, ölçü ve hesabını yapabilme;
+;DÖÇ-5;;;;;;;;;0,5;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"=IF(COUNTA(C34:AQ34)=0,""---"",SUMPRODUCT(C34:AQ34,C$29:AQ$29)/SUM(C34:AQ34))";;;=B34;Nokta koordinatlarını hesaplayabilme ve bunları birbirine dönüştürebilme;Nokta koordinatlarını hesaplayabilme ve bunları birbirine dönüştürebilme;Nokta koordinatlarını hesaplayabilme ve bunları birbirine dönüştürebilme;Nokta koordinatlarını hesaplayabilme ve bunları birbirine dönüştürebilme;Nokta koordinatlarını hesaplayabilme ve bunları birbirine dönüştürebilme;Nokta koordinatlarını hesaplayabilme ve bunları birbirine dönüştürebilme;Nokta koordinatlarını hesaplayabilme ve bunları birbirine dönüştürebilme;
+;DÖÇ-6;;;;;1;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"=IF(COUNTA(C35:AQ35)=0,""---"",SUMPRODUCT(C35:AQ35,C$29:AQ$29)/SUM(C35:AQ35))";;;=B35;Takeometrik alım yapabilme, ölçüleri değerlendirebilme ve ölçü krokisi çizebilme;Takeometrik alım yapabilme, ölçüleri değerlendirebilme ve ölçü krokisi çizebilme;Takeometrik alım yapabilme, ölçüleri değerlendirebilme ve ölçü krokisi çizebilme;Takeometrik alım yapabilme, ölçüleri değerlendirebilme ve ölçü krokisi çizebilme;Takeometrik alım yapabilme, ölçüleri değerlendirebilme ve ölçü krokisi çizebilme;Takeometrik alım yapabilme, ölçüleri değerlendirebilme ve ölçü krokisi çizebilme;Takeometrik alım yapabilme, ölçüleri değerlendirebilme ve ölçü krokisi çizebilme;
+;DÖÇ-7;;;;;;;;;0,5;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"=IF(COUNTA(C36:AQ36)=0,""---"",SUMPRODUCT(C36:AQ36,C$29:AQ$29)/SUM(C36:AQ36))";;;=B36;aaaa;;;;;;;
+;DÖÇ-8;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"=IF(COUNTA(C37:AQ37)=0,""---"",SUMPRODUCT(C37:AQ37,C$29:AQ$29)/SUM(C37:AQ37))";;;=B37;;;;;;;;
+;DÖÇ-9;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"=IF(COUNTA(C38:AQ38)=0,""---"",SUMPRODUCT(C38:AQ38,C$29:AQ$29)/SUM(C38:AQ38))";;;=B38;;;;;;;;
+;DÖÇ-10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"=IF(COUNTA(C39:AQ39)=0,""---"",SUMPRODUCT(C39:AQ39,C$29:AQ$29)/SUM(C39:AQ39))";;;=B39;;;;;;;;
+;DÖÇ-11;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"=IF(COUNTA(C40:AQ40)=0,""---"",SUMPRODUCT(C40:AQ40,C$29:AQ$29)/SUM(C40:AQ40))";;;=B40;;;;;;;;
+;DÖÇ-12;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"=IF(COUNTA(C41:AQ41)=0,""---"",SUMPRODUCT(C41:AQ41,C$29:AQ$29)/SUM(C41:AQ41))";;;=B41;;;;;;;;
+;DÖÇ-13;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"=IF(COUNTA(C42:AQ42)=0,""---"",SUMPRODUCT(C42:AQ42,C$29:AQ$29)/SUM(C42:AQ42))";;;=B42;;;;;;;;
+;DÖÇ-14;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"=IF(COUNTA(C43:AQ43)=0,""---"",SUMPRODUCT(C43:AQ43,C$29:AQ$29)/SUM(C43:AQ43))";;;=B43;;;;;;;;
+;DÖÇ-15;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"=IF(COUNTA(C44:AQ44)=0,""---"",SUMPRODUCT(C44:AQ44,C$29:AQ$29)/SUM(C44:AQ44))";;;=B44;;;;;;;;
+;DÖÇ-16;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"=IF(COUNTA(C45:AQ45)=0,""---"",SUMPRODUCT(C45:AQ45,C$29:AQ$29)/SUM(C45:AQ45))";;;=B45;;;;;;;;
+;DÖÇ-17;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"=IF(COUNTA(C46:AQ46)=0,""---"",SUMPRODUCT(C46:AQ46,C$29:AQ$29)/SUM(C46:AQ46))";;;=B46;;;;;;;;
+;DÖÇ-18;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"=IF(COUNTA(C47:AQ47)=0,""---"",SUMPRODUCT(C47:AQ47,C$29:AQ$29)/SUM(C47:AQ47))";;;=B47;;;;;;;;
+;DÖÇ-19;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"=IF(COUNTA(C48:AQ48)=0,""---"",SUMPRODUCT(C48:AQ48,C$29:AQ$29)/SUM(C48:AQ48))";;;=B48;;;;;;;;
+;DÖÇ-20;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"=IF(COUNTA(C49:AQ49)=0,""---"",SUMPRODUCT(C49:AQ49,C$29:AQ$29)/SUM(C49:AQ49))";;;=B49;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+=vize!E1;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+BÜTÜNLEME SINAVI;Ders Öğrenim Çıktıları;Soru Sayısı ve Ortalamalar;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;Ortalama;;;;;;;;;;;
+;; Soru 1; Soru 2; Soru 3; Soru 4; Soru 5; Soru 6; Soru 7; Soru 8; Soru 9; Soru 10; Soru 11; Soru 12; Soru 13; Soru 14; Soru 15; Soru 16; Soru 17; Soru 18; Soru 19; Soru 20; Soru 21; Soru 22; Soru 23; Soru 24; Soru 25; Soru 26; Soru 27; Soru 28; Soru 29; Soru 30; Soru 31; Soru 32; Soru 33; Soru 34; Soru 35; Soru 36; Soru 37; Soru 38; Soru 39; Soru 40;PROJE;;;;;;;;;;;;
+;;"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$349:$B$369,_xlpm.i),
+           INDEX(Ciktilar!$D$349:$D$368,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$349:$B$369,_xlpm.i),
+           INDEX(Ciktilar!$D$349:$D$368,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$349:$B$369,_xlpm.i),
+           INDEX(Ciktilar!$D$349:$D$368,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$349:$B$369,_xlpm.i),
+           INDEX(Ciktilar!$D$349:$D$368,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$349:$B$369,_xlpm.i),
+           INDEX(Ciktilar!$D$349:$D$368,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$349:$B$369,_xlpm.i),
+           INDEX(Ciktilar!$D$349:$D$368,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$349:$B$369,_xlpm.i),
+           INDEX(Ciktilar!$D$349:$D$368,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$349:$B$369,_xlpm.i),
+           INDEX(Ciktilar!$D$349:$D$368,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$349:$B$369,_xlpm.i),
+           INDEX(Ciktilar!$D$349:$D$368,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$349:$B$369,_xlpm.i),
+           INDEX(Ciktilar!$D$349:$D$368,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$349:$B$369,_xlpm.i),
+           INDEX(Ciktilar!$D$349:$D$368,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$349:$B$369,_xlpm.i),
+           INDEX(Ciktilar!$D$349:$D$368,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$349:$B$369,_xlpm.i),
+           INDEX(Ciktilar!$D$349:$D$368,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$349:$B$369,_xlpm.i),
+           INDEX(Ciktilar!$D$349:$D$368,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$349:$B$369,_xlpm.i),
+           INDEX(Ciktilar!$D$349:$D$368,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$349:$B$369,_xlpm.i),
+           INDEX(Ciktilar!$D$349:$D$368,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$349:$B$369,_xlpm.i),
+           INDEX(Ciktilar!$D$349:$D$368,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$349:$B$369,_xlpm.i),
+           INDEX(Ciktilar!$D$349:$D$368,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$349:$B$369,_xlpm.i),
+           INDEX(Ciktilar!$D$349:$D$368,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$349:$B$369,_xlpm.i),
+           INDEX(Ciktilar!$D$349:$D$368,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$349:$B$369,_xlpm.i),
+           INDEX(Ciktilar!$D$349:$D$368,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$349:$B$369,_xlpm.i),
+           INDEX(Ciktilar!$D$349:$D$368,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$349:$B$369,_xlpm.i),
+           INDEX(Ciktilar!$D$349:$D$368,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$349:$B$369,_xlpm.i),
+           INDEX(Ciktilar!$D$349:$D$368,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$349:$B$369,_xlpm.i),
+           INDEX(Ciktilar!$D$349:$D$368,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$349:$B$369,_xlpm.i),
+           INDEX(Ciktilar!$D$349:$D$368,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$349:$B$369,_xlpm.i),
+           INDEX(Ciktilar!$D$349:$D$368,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$349:$B$369,_xlpm.i),
+           INDEX(Ciktilar!$D$349:$D$368,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$349:$B$369,_xlpm.i),
+           INDEX(Ciktilar!$D$349:$D$368,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$349:$B$369,_xlpm.i),
+           INDEX(Ciktilar!$D$349:$D$368,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$349:$B$369,_xlpm.i),
+           INDEX(Ciktilar!$D$349:$D$368,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$349:$B$369,_xlpm.i),
+           INDEX(Ciktilar!$D$349:$D$368,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$349:$B$369,_xlpm.i),
+           INDEX(Ciktilar!$D$349:$D$368,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$349:$B$369,_xlpm.i),
+           INDEX(Ciktilar!$D$349:$D$368,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$349:$B$369,_xlpm.i),
+           INDEX(Ciktilar!$D$349:$D$368,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$349:$B$369,_xlpm.i),
+           INDEX(Ciktilar!$D$349:$D$368,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$349:$B$369,_xlpm.i),
+           INDEX(Ciktilar!$D$349:$D$368,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$349:$B$369,_xlpm.i),
+           INDEX(Ciktilar!$D$349:$D$368,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$349:$B$369,_xlpm.i),
+           INDEX(Ciktilar!$D$349:$D$368,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$349:$B$369,_xlpm.i),
+           INDEX(Ciktilar!$D$349:$D$368,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";"=_xlfn.LET(
+    _xlpm.i,COLUMN()-COLUMN($C$1)+1,
+    _xlpm.x,IF(_xlpm.i<=21,
+           INDEX(Ciktilar!$B$349:$B$369,_xlpm.i),
+           INDEX(Ciktilar!$D$349:$D$368,_xlpm.i-21)
+    ),
+    IF(_xlpm.x=""---"",0,_xlpm.x)
+)";;;;;;;;;;;;
+;DÖÇ-1;;;;1;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"=IF(COUNTA(C55:AQ55)=0,""---"",SUMPRODUCT(C55:AQ55,C$54:AQ$54)/SUM(C55:AQ55))";;;;;;;;;;;
+;DÖÇ-2;;1;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"=IF(COUNTA(C56:AQ56)=0,""---"",SUMPRODUCT(C56:AQ56,C$54:AQ$54)/SUM(C56:AQ56))";;;;;;;;;;;
+;DÖÇ-3;;;1;;;1;1;1;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"=IF(COUNTA(C57:AQ57)=0,""---"",SUMPRODUCT(C57:AQ57,C$54:AQ$54)/SUM(C57:AQ57))";;;;;;;;;;;
+;DÖÇ-4;1;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"=IF(COUNTA(C58:AQ58)=0,""---"",SUMPRODUCT(C58:AQ58,C$54:AQ$54)/SUM(C58:AQ58))";;;;;;;;;;;
+;DÖÇ-5;;;;;;;;;0,5;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"=IF(COUNTA(C59:AQ59)=0,""---"",SUMPRODUCT(C59:AQ59,C$54:AQ$54)/SUM(C59:AQ59))";;;;;;;;;;;
+;DÖÇ-6;;;;;1;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"=IF(COUNTA(C60:AQ60)=0,""---"",SUMPRODUCT(C60:AQ60,C$54:AQ$54)/SUM(C60:AQ60))";;;;;;;;;;;
+;DÖÇ-7;;;;;;;;;0,5;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"=IF(COUNTA(C61:AQ61)=0,""---"",SUMPRODUCT(C61:AQ61,C$54:AQ$54)/SUM(C61:AQ61))";;;;;;;;;;;
+;DÖÇ-8;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"=IF(COUNTA(C62:AQ62)=0,""---"",SUMPRODUCT(C62:AQ62,C$54:AQ$54)/SUM(C62:AQ62))";;;;;;;;;;;
+;DÖÇ-9;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"=IF(COUNTA(C63:AQ63)=0,""---"",SUMPRODUCT(C63:AQ63,C$54:AQ$54)/SUM(C63:AQ63))";;;;;;;;;;;
+;DÖÇ-10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"=IF(COUNTA(C64:AQ64)=0,""---"",SUMPRODUCT(C64:AQ64,C$54:AQ$54)/SUM(C64:AQ64))";;;;;;;;;;;
+;DÖÇ-11;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"=IF(COUNTA(C65:AQ65)=0,""---"",SUMPRODUCT(C65:AQ65,C$54:AQ$54)/SUM(C65:AQ65))";;;;;;;;;;;
+;DÖÇ-12;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"=IF(COUNTA(C66:AQ66)=0,""---"",SUMPRODUCT(C66:AQ66,C$54:AQ$54)/SUM(C66:AQ66))";;;;;;;;;;;
+;DÖÇ-13;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"=IF(COUNTA(C67:AQ67)=0,""---"",SUMPRODUCT(C67:AQ67,C$54:AQ$54)/SUM(C67:AQ67))";;;;;;;;;;;
+;DÖÇ-14;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"=IF(COUNTA(C68:AQ68)=0,""---"",SUMPRODUCT(C68:AQ68,C$54:AQ$54)/SUM(C68:AQ68))";;;;;;;;;;;
+;DÖÇ-15;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"=IF(COUNTA(C69:AQ69)=0,""---"",SUMPRODUCT(C69:AQ69,C$54:AQ$54)/SUM(C69:AQ69))";;;;;;;;;;;
+;DÖÇ-16;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"=IF(COUNTA(C70:AQ70)=0,""---"",SUMPRODUCT(C70:AQ70,C$54:AQ$54)/SUM(C70:AQ70))";;;;;;;;;;;
+;DÖÇ-17;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"=IF(COUNTA(C71:AQ71)=0,""---"",SUMPRODUCT(C71:AQ71,C$54:AQ$54)/SUM(C71:AQ71))";;;;;;;;;;;
+;DÖÇ-18;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"=IF(COUNTA(C72:AQ72)=0,""---"",SUMPRODUCT(C72:AQ72,C$54:AQ$54)/SUM(C72:AQ72))";;;;;;;;;;;
+;DÖÇ-19;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"=IF(COUNTA(C73:AQ73)=0,""---"",SUMPRODUCT(C73:AQ73,C$54:AQ$54)/SUM(C73:AQ73))";;;;;;;;;;;
+;DÖÇ-20;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"=IF(COUNTA(C74:AQ74)=0,""---"",SUMPRODUCT(C74:AQ74,C$54:AQ$54)/SUM(C74:AQ74))";;;;;;;;;;;
