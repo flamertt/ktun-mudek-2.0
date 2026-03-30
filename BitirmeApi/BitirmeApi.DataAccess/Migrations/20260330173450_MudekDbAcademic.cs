@@ -208,6 +208,8 @@ namespace BitirmeApi.DataAccess.Migrations
                     CourseOfferingId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    LastCalculatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    IsCalculationDirty = table.Column<bool>(type: "bit", nullable: false),
                     StudentFeedbackEvaluation = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ProgramOutcomeEvaluation = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     GeneralEvaluation = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -248,6 +250,33 @@ namespace BitirmeApi.DataAccess.Migrations
                         name: "FK_Enrollments_Users_StudentId",
                         column: x => x.StudentId,
                         principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ProgramOutcomeEvaluationResults",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CourseOfferingId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ProgramOutcomeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    AchievementScore = table.Column<decimal>(type: "decimal(9,6)", precision: 9, scale: 6, nullable: true),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProgramOutcomeEvaluationResults", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ProgramOutcomeEvaluationResults_CourseOfferings_CourseOfferingId",
+                        column: x => x.CourseOfferingId,
+                        principalTable: "CourseOfferings",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ProgramOutcomeEvaluationResults_ProgramOutcomes_ProgramOutcomeId",
+                        column: x => x.ProgramOutcomeId,
+                        principalTable: "ProgramOutcomes",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -350,6 +379,40 @@ namespace BitirmeApi.DataAccess.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "StudentEvaluationResults",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CourseOfferingId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    EnrollmentId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    MidtermScore = table.Column<decimal>(type: "decimal(7,2)", precision: 7, scale: 2, nullable: true),
+                    FinalScore = table.Column<decimal>(type: "decimal(7,2)", precision: 7, scale: 2, nullable: true),
+                    MakeupScore = table.Column<decimal>(type: "decimal(7,2)", precision: 7, scale: 2, nullable: true),
+                    UsedExamType = table.Column<string>(type: "nvarchar(32)", maxLength: 32, nullable: false),
+                    SuccessGrade = table.Column<decimal>(type: "decimal(7,2)", precision: 7, scale: 2, nullable: true),
+                    LetterGrade = table.Column<string>(type: "nvarchar(5)", maxLength: 5, nullable: true),
+                    IsPassed = table.Column<bool>(type: "bit", nullable: false),
+                    IncludedInStatistics = table.Column<bool>(type: "bit", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_StudentEvaluationResults", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_StudentEvaluationResults_CourseOfferings_CourseOfferingId",
+                        column: x => x.CourseOfferingId,
+                        principalTable: "CourseOfferings",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_StudentEvaluationResults_Enrollments_EnrollmentId",
+                        column: x => x.EnrollmentId,
+                        principalTable: "Enrollments",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Questions",
                 columns: table => new
                 {
@@ -424,6 +487,76 @@ namespace BitirmeApi.DataAccess.Migrations
                     table.CheckConstraint("CK_AssessmentComponent_WeightPercentage", "[WeightPercentage] IS NULL OR ([WeightPercentage] >= 0 AND [WeightPercentage] <= 100)");
                     table.ForeignKey(
                         name: "FK_AssessmentComponents_Exams_ExamId",
+                        column: x => x.ExamId,
+                        principalTable: "Exams",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "CloEvaluationResults",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CourseOfferingId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CourseLearningOutcomeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ResultType = table.Column<string>(type: "nvarchar(32)", maxLength: 32, nullable: false),
+                    ExamId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    AchievementScore = table.Column<decimal>(type: "decimal(9,6)", precision: 9, scale: 6, nullable: true),
+                    CombinedAchievementScore = table.Column<decimal>(type: "decimal(9,6)", precision: 9, scale: 6, nullable: true),
+                    SurveyScore = table.Column<decimal>(type: "decimal(9,6)", precision: 9, scale: 6, nullable: true),
+                    SurveyDifference = table.Column<decimal>(type: "decimal(9,6)", precision: 9, scale: 6, nullable: true),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CloEvaluationResults", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_CloEvaluationResults_Clos_CourseLearningOutcomeId",
+                        column: x => x.CourseLearningOutcomeId,
+                        principalTable: "Clos",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_CloEvaluationResults_CourseOfferings_CourseOfferingId",
+                        column: x => x.CourseOfferingId,
+                        principalTable: "CourseOfferings",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_CloEvaluationResults_Exams_ExamId",
+                        column: x => x.ExamId,
+                        principalTable: "Exams",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ExamEvaluationResults",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CourseOfferingId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ExamId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ParticipantCount = table.Column<int>(type: "int", nullable: false),
+                    IncludedStudentCount = table.Column<int>(type: "int", nullable: false),
+                    PerfectScoreCount = table.Column<int>(type: "int", nullable: false),
+                    MaxTotalScore = table.Column<decimal>(type: "decimal(9,4)", precision: 9, scale: 4, nullable: true),
+                    MinTotalScore = table.Column<decimal>(type: "decimal(9,4)", precision: 9, scale: 4, nullable: true),
+                    AverageTotalScore = table.Column<decimal>(type: "decimal(9,4)", precision: 9, scale: 4, nullable: true),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ExamEvaluationResults", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ExamEvaluationResults_CourseOfferings_CourseOfferingId",
+                        column: x => x.CourseOfferingId,
+                        principalTable: "CourseOfferings",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ExamEvaluationResults_Exams_ExamId",
                         column: x => x.ExamId,
                         principalTable: "Exams",
                         principalColumn: "Id",
@@ -539,6 +672,52 @@ namespace BitirmeApi.DataAccess.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ExamQuestionEvaluationResults",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CourseOfferingId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ExamId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ExamQuestionId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    AssessmentComponentId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    QuestionNumber = table.Column<int>(type: "int", nullable: false),
+                    MaxScore = table.Column<decimal>(type: "decimal(7,2)", precision: 7, scale: 2, nullable: false),
+                    AverageScore = table.Column<decimal>(type: "decimal(9,4)", precision: 9, scale: 4, nullable: true),
+                    AchievementRate = table.Column<decimal>(type: "decimal(9,6)", precision: 9, scale: 6, nullable: true),
+                    IncludedStudentCount = table.Column<int>(type: "int", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ExamQuestionEvaluationResults", x => x.Id);
+                    table.CheckConstraint("CK_ExamQuestionEvalResult_SingleTarget", "([ExamQuestionId] IS NOT NULL AND [AssessmentComponentId] IS NULL) OR ([ExamQuestionId] IS NULL AND [AssessmentComponentId] IS NOT NULL)");
+                    table.ForeignKey(
+                        name: "FK_ExamQuestionEvaluationResults_AssessmentComponents_AssessmentComponentId",
+                        column: x => x.AssessmentComponentId,
+                        principalTable: "AssessmentComponents",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_ExamQuestionEvaluationResults_CourseOfferings_CourseOfferingId",
+                        column: x => x.CourseOfferingId,
+                        principalTable: "CourseOfferings",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ExamQuestionEvaluationResults_ExamQuestions_ExamQuestionId",
+                        column: x => x.ExamQuestionId,
+                        principalTable: "ExamQuestions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_ExamQuestionEvaluationResults_Exams_ExamId",
+                        column: x => x.ExamId,
+                        principalTable: "Exams",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ExamQuestionOutcomeMappings",
                 columns: table => new
                 {
@@ -633,6 +812,22 @@ namespace BitirmeApi.DataAccess.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_CloEvaluationResults_CourseLearningOutcomeId",
+                table: "CloEvaluationResults",
+                column: "CourseLearningOutcomeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CloEvaluationResults_CourseOfferingId_CourseLearningOutcomeId_ResultType",
+                table: "CloEvaluationResults",
+                columns: new[] { "CourseOfferingId", "CourseLearningOutcomeId", "ResultType" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CloEvaluationResults_ExamId",
+                table: "CloEvaluationResults",
+                column: "ExamId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_CloPoMaps_CourseLearningOutcomeId_ProgramOutcomeId",
                 table: "CloPoMaps",
                 columns: new[] { "CourseLearningOutcomeId", "ProgramOutcomeId" },
@@ -695,6 +890,46 @@ namespace BitirmeApi.DataAccess.Migrations
                 column: "StudentId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ExamEvaluationResults_CourseOfferingId_ExamId",
+                table: "ExamEvaluationResults",
+                columns: new[] { "CourseOfferingId", "ExamId" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ExamEvaluationResults_ExamId",
+                table: "ExamEvaluationResults",
+                column: "ExamId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ExamQuestionEvaluationResults_AssessmentComponentId",
+                table: "ExamQuestionEvaluationResults",
+                column: "AssessmentComponentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ExamQuestionEvaluationResults_CourseOfferingId_AssessmentComponentId",
+                table: "ExamQuestionEvaluationResults",
+                columns: new[] { "CourseOfferingId", "AssessmentComponentId" },
+                unique: true,
+                filter: "[AssessmentComponentId] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ExamQuestionEvaluationResults_CourseOfferingId_ExamQuestionId",
+                table: "ExamQuestionEvaluationResults",
+                columns: new[] { "CourseOfferingId", "ExamQuestionId" },
+                unique: true,
+                filter: "[ExamQuestionId] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ExamQuestionEvaluationResults_ExamId",
+                table: "ExamQuestionEvaluationResults",
+                column: "ExamId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ExamQuestionEvaluationResults_ExamQuestionId",
+                table: "ExamQuestionEvaluationResults",
+                column: "ExamQuestionId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ExamQuestionOutcomeMappings_CourseLearningOutcomeId",
                 table: "ExamQuestionOutcomeMappings",
                 column: "CourseLearningOutcomeId");
@@ -728,6 +963,17 @@ namespace BitirmeApi.DataAccess.Migrations
                 column: "CourseLearningOutcomeId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ProgramOutcomeEvaluationResults_CourseOfferingId_ProgramOutcomeId",
+                table: "ProgramOutcomeEvaluationResults",
+                columns: new[] { "CourseOfferingId", "ProgramOutcomeId" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProgramOutcomeEvaluationResults_ProgramOutcomeId",
+                table: "ProgramOutcomeEvaluationResults",
+                column: "ProgramOutcomeId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ProgramOutcomes_ProgramEntityId_Code",
                 table: "ProgramOutcomes",
                 columns: new[] { "ProgramEntityId", "Code" },
@@ -758,6 +1004,17 @@ namespace BitirmeApi.DataAccess.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_StudentAssessmentComponentScores_EnrollmentId",
                 table: "StudentAssessmentComponentScores",
+                column: "EnrollmentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_StudentEvaluationResults_CourseOfferingId_EnrollmentId",
+                table: "StudentEvaluationResults",
+                columns: new[] { "CourseOfferingId", "EnrollmentId" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_StudentEvaluationResults_EnrollmentId",
+                table: "StudentEvaluationResults",
                 column: "EnrollmentId");
 
             migrationBuilder.CreateIndex(
@@ -798,10 +1055,19 @@ namespace BitirmeApi.DataAccess.Migrations
                 name: "AssessmentComponentOutcomeMappings");
 
             migrationBuilder.DropTable(
+                name: "CloEvaluationResults");
+
+            migrationBuilder.DropTable(
                 name: "CloPoMaps");
 
             migrationBuilder.DropTable(
                 name: "CourseEvaluationLetterGradeRules");
+
+            migrationBuilder.DropTable(
+                name: "ExamEvaluationResults");
+
+            migrationBuilder.DropTable(
+                name: "ExamQuestionEvaluationResults");
 
             migrationBuilder.DropTable(
                 name: "ExamQuestionOutcomeMappings");
@@ -810,10 +1076,16 @@ namespace BitirmeApi.DataAccess.Migrations
                 name: "ProgramOutcomeContributions");
 
             migrationBuilder.DropTable(
+                name: "ProgramOutcomeEvaluationResults");
+
+            migrationBuilder.DropTable(
                 name: "StudentAnswers");
 
             migrationBuilder.DropTable(
                 name: "StudentAssessmentComponentScores");
+
+            migrationBuilder.DropTable(
+                name: "StudentEvaluationResults");
 
             migrationBuilder.DropTable(
                 name: "Questions");
@@ -822,10 +1094,10 @@ namespace BitirmeApi.DataAccess.Migrations
                 name: "Submissions");
 
             migrationBuilder.DropTable(
-                name: "ProgramOutcomes");
+                name: "Clos");
 
             migrationBuilder.DropTable(
-                name: "Clos");
+                name: "ProgramOutcomes");
 
             migrationBuilder.DropTable(
                 name: "ExamQuestions");

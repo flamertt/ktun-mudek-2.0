@@ -249,6 +249,57 @@ namespace BitirmeApi.DataAccess.Migrations
                         });
                 });
 
+            modelBuilder.Entity("BitirmeApi.Entity.Entities.CloEvaluationResult", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal?>("AchievementScore")
+                        .HasPrecision(9, 6)
+                        .HasColumnType("decimal(9,6)");
+
+                    b.Property<decimal?>("CombinedAchievementScore")
+                        .HasPrecision(9, 6)
+                        .HasColumnType("decimal(9,6)");
+
+                    b.Property<Guid>("CourseLearningOutcomeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CourseOfferingId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("ExamId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ResultType")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<decimal?>("SurveyDifference")
+                        .HasPrecision(9, 6)
+                        .HasColumnType("decimal(9,6)");
+
+                    b.Property<decimal?>("SurveyScore")
+                        .HasPrecision(9, 6)
+                        .HasColumnType("decimal(9,6)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CourseLearningOutcomeId");
+
+                    b.HasIndex("ExamId");
+
+                    b.HasIndex("CourseOfferingId", "CourseLearningOutcomeId", "ResultType")
+                        .IsUnique();
+
+                    b.ToTable("CloEvaluationResults");
+                });
+
             modelBuilder.Entity("BitirmeApi.Entity.Entities.CloPoMap", b =>
                 {
                     b.Property<Guid>("Id")
@@ -337,6 +388,12 @@ namespace BitirmeApi.DataAccess.Migrations
 
                     b.Property<string>("ImprovementSuggestions")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsCalculationDirty")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastCalculatedAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("ProgramOutcomeEvaluation")
                         .HasColumnType("nvarchar(max)");
@@ -548,6 +605,52 @@ namespace BitirmeApi.DataAccess.Migrations
                     b.ToTable("Exams");
                 });
 
+            modelBuilder.Entity("BitirmeApi.Entity.Entities.ExamEvaluationResult", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal?>("AverageTotalScore")
+                        .HasPrecision(9, 4)
+                        .HasColumnType("decimal(9,4)");
+
+                    b.Property<Guid>("CourseOfferingId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ExamId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("IncludedStudentCount")
+                        .HasColumnType("int");
+
+                    b.Property<decimal?>("MaxTotalScore")
+                        .HasPrecision(9, 4)
+                        .HasColumnType("decimal(9,4)");
+
+                    b.Property<decimal?>("MinTotalScore")
+                        .HasPrecision(9, 4)
+                        .HasColumnType("decimal(9,4)");
+
+                    b.Property<int>("ParticipantCount")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PerfectScoreCount")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ExamId");
+
+                    b.HasIndex("CourseOfferingId", "ExamId")
+                        .IsUnique();
+
+                    b.ToTable("ExamEvaluationResults");
+                });
+
             modelBuilder.Entity("BitirmeApi.Entity.Entities.ExamQuestion", b =>
                 {
                     b.Property<Guid>("Id")
@@ -584,6 +687,67 @@ namespace BitirmeApi.DataAccess.Migrations
                         .IsUnique();
 
                     b.ToTable("ExamQuestions");
+                });
+
+            modelBuilder.Entity("BitirmeApi.Entity.Entities.ExamQuestionEvaluationResult", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal?>("AchievementRate")
+                        .HasPrecision(9, 6)
+                        .HasColumnType("decimal(9,6)");
+
+                    b.Property<Guid?>("AssessmentComponentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal?>("AverageScore")
+                        .HasPrecision(9, 4)
+                        .HasColumnType("decimal(9,4)");
+
+                    b.Property<Guid>("CourseOfferingId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ExamId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("ExamQuestionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("IncludedStudentCount")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("MaxScore")
+                        .HasPrecision(7, 2)
+                        .HasColumnType("decimal(7,2)");
+
+                    b.Property<int>("QuestionNumber")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AssessmentComponentId");
+
+                    b.HasIndex("ExamId");
+
+                    b.HasIndex("ExamQuestionId");
+
+                    b.HasIndex("CourseOfferingId", "AssessmentComponentId")
+                        .IsUnique()
+                        .HasFilter("[AssessmentComponentId] IS NOT NULL");
+
+                    b.HasIndex("CourseOfferingId", "ExamQuestionId")
+                        .IsUnique()
+                        .HasFilter("[ExamQuestionId] IS NOT NULL");
+
+                    b.ToTable("ExamQuestionEvaluationResults", t =>
+                        {
+                            t.HasCheckConstraint("CK_ExamQuestionEvalResult_SingleTarget", "([ExamQuestionId] IS NOT NULL AND [AssessmentComponentId] IS NULL) OR ([ExamQuestionId] IS NULL AND [AssessmentComponentId] IS NOT NULL)");
+                        });
                 });
 
             modelBuilder.Entity("BitirmeApi.Entity.Entities.ExamQuestionOutcomeMapping", b =>
@@ -701,6 +865,35 @@ namespace BitirmeApi.DataAccess.Migrations
                     b.ToTable("ProgramOutcomeContributions");
                 });
 
+            modelBuilder.Entity("BitirmeApi.Entity.Entities.ProgramOutcomeEvaluationResult", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal?>("AchievementScore")
+                        .HasPrecision(9, 6)
+                        .HasColumnType("decimal(9,6)");
+
+                    b.Property<Guid>("CourseOfferingId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ProgramOutcomeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProgramOutcomeId");
+
+                    b.HasIndex("CourseOfferingId", "ProgramOutcomeId")
+                        .IsUnique();
+
+                    b.ToTable("ProgramOutcomeEvaluationResults");
+                });
+
             modelBuilder.Entity("BitirmeApi.Entity.Entities.Question", b =>
                 {
                     b.Property<Guid>("Id")
@@ -813,6 +1006,62 @@ namespace BitirmeApi.DataAccess.Migrations
                         .IsUnique();
 
                     b.ToTable("StudentAssessmentComponentScores");
+                });
+
+            modelBuilder.Entity("BitirmeApi.Entity.Entities.StudentEvaluationResult", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CourseOfferingId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("EnrollmentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal?>("FinalScore")
+                        .HasPrecision(7, 2)
+                        .HasColumnType("decimal(7,2)");
+
+                    b.Property<bool>("IncludedInStatistics")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsPassed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("LetterGrade")
+                        .HasMaxLength(5)
+                        .HasColumnType("nvarchar(5)");
+
+                    b.Property<decimal?>("MakeupScore")
+                        .HasPrecision(7, 2)
+                        .HasColumnType("decimal(7,2)");
+
+                    b.Property<decimal?>("MidtermScore")
+                        .HasPrecision(7, 2)
+                        .HasColumnType("decimal(7,2)");
+
+                    b.Property<decimal?>("SuccessGrade")
+                        .HasPrecision(7, 2)
+                        .HasColumnType("decimal(7,2)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UsedExamType")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EnrollmentId");
+
+                    b.HasIndex("CourseOfferingId", "EnrollmentId")
+                        .IsUnique();
+
+                    b.ToTable("StudentEvaluationResults");
                 });
 
             modelBuilder.Entity("BitirmeApi.Entity.Entities.Submission", b =>
@@ -935,6 +1184,32 @@ namespace BitirmeApi.DataAccess.Migrations
                     b.Navigation("CourseLearningOutcome");
                 });
 
+            modelBuilder.Entity("BitirmeApi.Entity.Entities.CloEvaluationResult", b =>
+                {
+                    b.HasOne("BitirmeApi.Entity.Entities.CourseLearningOutcome", "CourseLearningOutcome")
+                        .WithMany()
+                        .HasForeignKey("CourseLearningOutcomeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("BitirmeApi.Entity.Entities.CourseOffering", "CourseOffering")
+                        .WithMany("CloEvaluationResults")
+                        .HasForeignKey("CourseOfferingId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BitirmeApi.Entity.Entities.Exam", "Exam")
+                        .WithMany()
+                        .HasForeignKey("ExamId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("CourseLearningOutcome");
+
+                    b.Navigation("CourseOffering");
+
+                    b.Navigation("Exam");
+                });
+
             modelBuilder.Entity("BitirmeApi.Entity.Entities.CloPoMap", b =>
                 {
                     b.HasOne("BitirmeApi.Entity.Entities.CourseLearningOutcome", "CLO")
@@ -1054,6 +1329,25 @@ namespace BitirmeApi.DataAccess.Migrations
                     b.Navigation("CourseEvaluation");
                 });
 
+            modelBuilder.Entity("BitirmeApi.Entity.Entities.ExamEvaluationResult", b =>
+                {
+                    b.HasOne("BitirmeApi.Entity.Entities.CourseOffering", "CourseOffering")
+                        .WithMany("ExamEvaluationResults")
+                        .HasForeignKey("CourseOfferingId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BitirmeApi.Entity.Entities.Exam", "Exam")
+                        .WithMany()
+                        .HasForeignKey("ExamId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CourseOffering");
+
+                    b.Navigation("Exam");
+                });
+
             modelBuilder.Entity("BitirmeApi.Entity.Entities.ExamQuestion", b =>
                 {
                     b.HasOne("BitirmeApi.Entity.Entities.Exam", "Exam")
@@ -1063,6 +1357,39 @@ namespace BitirmeApi.DataAccess.Migrations
                         .IsRequired();
 
                     b.Navigation("Exam");
+                });
+
+            modelBuilder.Entity("BitirmeApi.Entity.Entities.ExamQuestionEvaluationResult", b =>
+                {
+                    b.HasOne("BitirmeApi.Entity.Entities.AssessmentComponent", "AssessmentComponent")
+                        .WithMany()
+                        .HasForeignKey("AssessmentComponentId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("BitirmeApi.Entity.Entities.CourseOffering", "CourseOffering")
+                        .WithMany("ExamQuestionEvaluationResults")
+                        .HasForeignKey("CourseOfferingId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BitirmeApi.Entity.Entities.Exam", "Exam")
+                        .WithMany()
+                        .HasForeignKey("ExamId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BitirmeApi.Entity.Entities.ExamQuestion", "ExamQuestion")
+                        .WithMany()
+                        .HasForeignKey("ExamQuestionId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("AssessmentComponent");
+
+                    b.Navigation("CourseOffering");
+
+                    b.Navigation("Exam");
+
+                    b.Navigation("ExamQuestion");
                 });
 
             modelBuilder.Entity("BitirmeApi.Entity.Entities.ExamQuestionOutcomeMapping", b =>
@@ -1114,6 +1441,25 @@ namespace BitirmeApi.DataAccess.Migrations
                     b.Navigation("CourseLearningOutcome");
                 });
 
+            modelBuilder.Entity("BitirmeApi.Entity.Entities.ProgramOutcomeEvaluationResult", b =>
+                {
+                    b.HasOne("BitirmeApi.Entity.Entities.CourseOffering", "CourseOffering")
+                        .WithMany("ProgramOutcomeEvaluationResults")
+                        .HasForeignKey("CourseOfferingId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BitirmeApi.Entity.Entities.ProgramOutcome", "ProgramOutcome")
+                        .WithMany()
+                        .HasForeignKey("ProgramOutcomeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("CourseOffering");
+
+                    b.Navigation("ProgramOutcome");
+                });
+
             modelBuilder.Entity("BitirmeApi.Entity.Entities.Question", b =>
                 {
                     b.HasOne("BitirmeApi.Entity.Entities.Survey", "Survey")
@@ -1159,6 +1505,25 @@ namespace BitirmeApi.DataAccess.Migrations
                         .IsRequired();
 
                     b.Navigation("AssessmentComponent");
+
+                    b.Navigation("Enrollment");
+                });
+
+            modelBuilder.Entity("BitirmeApi.Entity.Entities.StudentEvaluationResult", b =>
+                {
+                    b.HasOne("BitirmeApi.Entity.Entities.CourseOffering", "CourseOffering")
+                        .WithMany("StudentEvaluationResults")
+                        .HasForeignKey("CourseOfferingId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("BitirmeApi.Entity.Entities.Enrollment", "Enrollment")
+                        .WithMany("EvaluationResults")
+                        .HasForeignKey("EnrollmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CourseOffering");
 
                     b.Navigation("Enrollment");
                 });
@@ -1232,9 +1597,19 @@ namespace BitirmeApi.DataAccess.Migrations
 
             modelBuilder.Entity("BitirmeApi.Entity.Entities.CourseOffering", b =>
                 {
+                    b.Navigation("CloEvaluationResults");
+
                     b.Navigation("CourseEvaluation");
 
                     b.Navigation("Enrollments");
+
+                    b.Navigation("ExamEvaluationResults");
+
+                    b.Navigation("ExamQuestionEvaluationResults");
+
+                    b.Navigation("ProgramOutcomeEvaluationResults");
+
+                    b.Navigation("StudentEvaluationResults");
 
                     b.Navigation("Surveys");
                 });
@@ -1242,6 +1617,8 @@ namespace BitirmeApi.DataAccess.Migrations
             modelBuilder.Entity("BitirmeApi.Entity.Entities.Enrollment", b =>
                 {
                     b.Navigation("ComponentScores");
+
+                    b.Navigation("EvaluationResults");
 
                     b.Navigation("StudentAnswers");
                 });

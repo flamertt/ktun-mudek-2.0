@@ -11,15 +11,18 @@ namespace BitirmeApi.Business.Concrete
         private readonly ICourseEvaluationLetterGradeRuleDal _ruleDal;
         private readonly ICourseEvaluationDal _evaluationDal;
         private readonly IMapper _mapper;
+        private readonly IMudekEvaluationCalculatorService _mudekStale;
 
         public CourseEvaluationLetterGradeRuleService(
             ICourseEvaluationLetterGradeRuleDal ruleDal,
             ICourseEvaluationDal evaluationDal,
-            IMapper mapper)
+            IMapper mapper,
+            IMudekEvaluationCalculatorService mudekStale)
         {
             _ruleDal = ruleDal;
             _evaluationDal = evaluationDal;
             _mapper = mapper;
+            _mudekStale = mudekStale;
         }
 
         public async Task<List<CourseEvaluationLetterGradeRuleDto>> GetAllAsync()
@@ -82,7 +85,9 @@ namespace BitirmeApi.Business.Concrete
             if (await _ruleDal.ExistsLetterAsync(createDto.CourseEvaluationId, createDto.LetterGrade))
                 throw new InvalidOperationException("Aynı harf notu bu evaluation için zaten tanımlı.");
             await ValidateNoOverlapAsync(createDto.CourseEvaluationId, createDto.MinScore, createDto.MaxScore, null);
-            return await AddAsync(createDto);
+            var added = await AddAsync(createDto);
+            await _mudekStale.MarkStaleByCourseEvaluationIdAsync(createDto.CourseEvaluationId);
+            return added;
         }
 
         public async Task<CourseEvaluationLetterGradeRuleDto> UpdateForTeacherAsync(UpdateCourseEvaluationLetterGradeRuleDto updateDto, Guid teacherId)
@@ -95,7 +100,9 @@ namespace BitirmeApi.Business.Concrete
             if (await _ruleDal.ExistsLetterAsync(snapshot.CourseEvaluationId, updateDto.LetterGrade, updateDto.Id))
                 throw new InvalidOperationException("Aynı harf notu bu evaluation için zaten tanımlı.");
             await ValidateNoOverlapAsync(snapshot.CourseEvaluationId, updateDto.MinScore, updateDto.MaxScore, updateDto.Id);
-            return await UpdateAsync(updateDto);
+            var updated = await UpdateAsync(updateDto);
+            await _mudekStale.MarkStaleByCourseEvaluationIdAsync(snapshot.CourseEvaluationId);
+            return updated;
         }
 
         public async Task DeleteForTeacherAsync(Guid id, Guid teacherId)
@@ -104,7 +111,9 @@ namespace BitirmeApi.Business.Concrete
                 ?? throw new KeyNotFoundException("Rule bulunamadı.");
             if (snapshot.CourseEvaluation?.CourseOffering?.TeacherId != teacherId)
                 throw new UnauthorizedAccessException("Bu rule sizin dersinize ait değil.");
+            var evalId = snapshot.CourseEvaluationId;
             await DeleteAsync(id);
+            await _mudekStale.MarkStaleByCourseEvaluationIdAsync(evalId);
         }
 
         private async Task EnsureEvaluationOwnershipAsync(Guid evaluationId, Guid teacherId)

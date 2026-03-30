@@ -23,6 +23,7 @@ namespace BitirmeApi.Presentation.Controllers
         private readonly IStudentAssessmentComponentScoreService _componentScoreService;
         private readonly ICourseEvaluationLetterGradeRuleService _letterRuleService;
         private readonly ICourseLearningOutcomeService _cloService;
+        private readonly IMudekEvaluationCalculatorService _mudekCalculator;
 
         public TeacherController(
             ICourseOfferingService offeringService,
@@ -36,7 +37,8 @@ namespace BitirmeApi.Presentation.Controllers
             IStudentAnswerService studentAnswerService,
             IStudentAssessmentComponentScoreService componentScoreService,
             ICourseEvaluationLetterGradeRuleService letterRuleService,
-            ICourseLearningOutcomeService cloService)
+            ICourseLearningOutcomeService cloService,
+            IMudekEvaluationCalculatorService mudekCalculator)
         {
             _offeringService = offeringService;
             _enrollmentService = enrollmentService;
@@ -50,6 +52,7 @@ namespace BitirmeApi.Presentation.Controllers
             _componentScoreService = componentScoreService;
             _letterRuleService = letterRuleService;
             _cloService = cloService;
+            _mudekCalculator = mudekCalculator;
         }
 
         private Guid GetTeacherId()
@@ -536,6 +539,57 @@ namespace BitirmeApi.Presentation.Controllers
             var offering = await _offeringService.GetByIdForTeacherAsync(offeringId, GetTeacherId());
             if (offering == null) return NotFound(new { message = "Ders açılışı bulunamadı veya erişim yetkiniz yok." });
             return Ok(await _cloService.GetByCourseIdAsync(offering.CourseId));
+        }
+
+        // ════════════════════════════════════════════════════════════════════════
+        // MÜDEK snapshot hesapları (docs/MUDEK_Rapor.md zinciri — geçme notu → çıktılar → DÖÇ → PÇ)
+        // ════════════════════════════════════════════════════════════════════════
+
+        /// <summary>Kaydedilmiş MÜDEK sonuç özeti. Ham veri değiştiyse <see cref="MudekEvaluationSnapshotDto.IsCalculationDirty"/> true olabilir.</summary>
+        [HttpGet("my-courses/{offeringId}/mudek-evaluation/results")]
+        public async Task<IActionResult> GetMudekResults(Guid offeringId)
+        {
+            if (await _offeringService.GetByIdForTeacherAsync(offeringId, GetTeacherId()) == null)
+                return NotFound(new { message = "Ders açılışı bulunamadı veya erişim yetkiniz yok." });
+
+            return Ok(await _mudekCalculator.GetSnapshotForTeacherAsync(offeringId, GetTeacherId()));
+        }
+
+        /// <summary>
+        /// <b>Hesapla:</b> Vize/final/büt soru ve bileşen notları, harf kuralları, soru–DÖÇ ve DÖÇ–PÇ eşlemeleriyle
+        /// rapordaki zinciri çalıştırır; sonuç tablolarına yazar. Önce değerlendirme kaydı ve sınavlar oluşturulmuş olmalıdır.
+        /// </summary>
+        [HttpPost("my-courses/{offeringId}/mudek-evaluation/calculate")]
+        public Task<IActionResult> CalculateMudek(Guid offeringId) => ExecuteMudekRecalculateAsync(offeringId);
+
+        /// <summary>
+        /// Aynı işlem <c>calculate</c> ile. Offering için mevcut snapshot satırlarını siler, baştan hesaplar, tek transaction’da kaydeder.
+        /// </summary>
+        [HttpPost("my-courses/{offeringId}/mudek-evaluation/recalculate")]
+        public Task<IActionResult> RecalculateMudek(Guid offeringId) => ExecuteMudekRecalculateAsync(offeringId);
+
+        /// <summary>
+        /// Değerlendirme ekranında yalnızca <c>evaluationId</c> varsa: aynı hesaplamayı bu id üzerinden tetikler.
+        /// </summary>
+        [HttpPost("evaluations/{evaluationId}/mudek-evaluation/calculate")]
+        public async Task<IActionResult> CalculateMudekForEvaluation(Guid evaluationId)
+        {
+            var eval = await _evaluationService.GetByIdAsync(evaluationId);
+            if (eval == null)
+                return NotFound(new { message = "Değerlendirme bulunamadı." });
+            if (await _offeringService.GetByIdForTeacherAsync(eval.CourseOfferingId, GetTeacherId()) == null)
+                return NotFound(new { message = "Ders açılışı bulunamadı veya erişim yetkiniz yok." });
+            return await ExecuteMudekRecalculateAsync(eval.CourseOfferingId);
+        }
+
+        private async Task<IActionResult> ExecuteMudekRecalculateAsync(Guid courseOfferingId)
+        {
+            try
+            {
+                return Ok(await _mudekCalculator.RecalculateForTeacherAsync(courseOfferingId, GetTeacherId()));
+            }
+            catch (InvalidOperationException ex) { return BadRequest(new { message = ex.Message }); }
+            catch (UnauthorizedAccessException) { return Forbid(); }
         }
 
         [HttpGet("evaluations/{evaluationId}/full-detail")]

@@ -51,5 +51,11 @@ namespace BitirmeApi.Entity.Entities
 
         /// <summary>1 Opening = 1 Evaluation (unique constraint ile garanti edilir)</summary>
         public CourseEvaluation? CourseEvaluation { get; set; }
+
+        public ICollection<StudentEvaluationResult> StudentEvaluationResults { get; set; } = new List<StudentEvaluationResult>();
+        public ICollection<ExamEvaluationResult> ExamEvaluationResults { get; set; } = new List<ExamEvaluationResult>();
+        public ICollection<ExamQuestionEvaluationResult> ExamQuestionEvaluationResults { get; set; } = new List<ExamQuestionEvaluationResult>();
+        public ICollection<CloEvaluationResult> CloEvaluationResults { get; set; } = new List<CloEvaluationResult>();
+        public ICollection<ProgramOutcomeEvaluationResult> ProgramOutcomeEvaluationResults { get; set; } = new List<ProgramOutcomeEvaluationResult>();
     }
 }

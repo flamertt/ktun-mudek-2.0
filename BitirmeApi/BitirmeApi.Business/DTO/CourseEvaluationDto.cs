@@ -11,6 +11,8 @@ namespace BitirmeApi.Business.DTO
         public string? TeacherName { get; set; }
         public DateTime CreatedDate { get; set; }
         public DateTime? UpdatedAt { get; set; }
+        public DateTime? LastCalculatedAt { get; set; }
+        public bool IsCalculationDirty { get; set; }
     }
 
     /// <summary>Ders değerlendirme tam detay</summary>
@@ -29,6 +31,8 @@ namespace BitirmeApi.Business.DTO
 
         public DateTime CreatedDate { get; set; }
         public DateTime? UpdatedAt { get; set; }
+        public DateTime? LastCalculatedAt { get; set; }
+        public bool IsCalculationDirty { get; set; }
 
         public string? StudentFeedbackEvaluation { get; set; }
         public string? ProgramOutcomeEvaluation { get; set; }

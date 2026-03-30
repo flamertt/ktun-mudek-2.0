@@ -10,14 +10,18 @@ namespace BitirmeApi.Business.Concrete
         private readonly IStudentAnswerDal _studentAnswerDal;
         private readonly IExamQuestionDal _questionDal;
         private readonly IEnrollmentDal _enrollmentDal;
+        private readonly IMudekEvaluationCalculatorService _mudekStale;
+
         public StudentAnswerService(
             IStudentAnswerDal studentAnswerDal,
             IExamQuestionDal questionDal,
-            IEnrollmentDal enrollmentDal)
+            IEnrollmentDal enrollmentDal,
+            IMudekEvaluationCalculatorService mudekStale)
         {
             _studentAnswerDal = studentAnswerDal;
             _questionDal = questionDal;
             _enrollmentDal = enrollmentDal;
+            _mudekStale = mudekStale;
         }
 
         public async Task<List<StudentAnswerDto>> GetByQuestionForTeacherAsync(Guid questionId, Guid teacherId)
@@ -53,6 +57,7 @@ namespace BitirmeApi.Business.Concrete
             };
             _studentAnswerDal.Add(entity);
             await _studentAnswerDal.SaveChangesAsync();
+            await _mudekStale.MarkStaleByEnrollmentIdAsync(entity.EnrollmentId);
             return new StudentAnswerDto
             {
                 Id = entity.Id,
@@ -85,6 +90,9 @@ namespace BitirmeApi.Business.Concrete
                     result.Errors.Add($"{item.EnrollmentId}: {ex.Message}");
                 }
             }
+
+            var qMeta = await _questionDal.GetAsync(q => q.Id == questionId);
+            if (qMeta != null) await _mudekStale.MarkStaleByExamIdAsync(qMeta.ExamId);
             return result;
         }
 
@@ -102,6 +110,7 @@ namespace BitirmeApi.Business.Concrete
             tracked.Score = dto.Score;
             _studentAnswerDal.Update(tracked);
             await _studentAnswerDal.SaveChangesAsync();
+            await _mudekStale.MarkStaleByEnrollmentIdAsync(tracked.EnrollmentId);
             return new StudentAnswerDto
             {
                 Id = tracked.Id,
@@ -119,8 +128,10 @@ namespace BitirmeApi.Business.Concrete
                 throw new UnauthorizedAccessException("Bu cevap sizin dersinize ait değil.");
             var tracked = await _studentAnswerDal.GetAsync(a => a.Id == id)
                 ?? throw new KeyNotFoundException("Cevap bulunamadı.");
+            var enId = tracked.EnrollmentId;
             _studentAnswerDal.Delete(tracked);
             await _studentAnswerDal.SaveChangesAsync();
+            await _mudekStale.MarkStaleByEnrollmentIdAsync(enId);
         }
 
         private async Task<ExamQuestion> EnsureQuestionOwnershipAsync(Guid questionId, Guid teacherId)

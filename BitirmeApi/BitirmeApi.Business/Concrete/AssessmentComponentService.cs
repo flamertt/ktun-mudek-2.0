@@ -13,19 +13,22 @@ namespace BitirmeApi.Business.Concrete
         private readonly IStudentAssessmentComponentScoreDal _scoreDal;
         private readonly IAssessmentComponentOutcomeMappingDal _mappingDal;
         private readonly IMapper _mapper;
+        private readonly IMudekEvaluationCalculatorService _mudekStale;
 
         public AssessmentComponentService(
             IAssessmentComponentDal componentDal,
             IExamDal examDal,
             IStudentAssessmentComponentScoreDal scoreDal,
             IAssessmentComponentOutcomeMappingDal mappingDal,
-            IMapper mapper)
+            IMapper mapper,
+            IMudekEvaluationCalculatorService mudekStale)
         {
             _componentDal = componentDal;
             _examDal = examDal;
             _scoreDal = scoreDal;
             _mappingDal = mappingDal;
             _mapper = mapper;
+            _mudekStale = mudekStale;
         }
 
         public async Task<List<AssessmentComponentListDto>> GetAllAsync()
@@ -106,7 +109,9 @@ namespace BitirmeApi.Business.Concrete
                 throw new InvalidOperationException("WeightPercentage 0-100 aralığında olmalıdır.");
             if ((await _componentDal.GetListAsync(c => c.ExamId == createDto.ExamId && c.OrderIndex == createDto.OrderIndex)).Any())
                 throw new InvalidOperationException("Aynı sınav altında OrderIndex benzersiz olmalıdır.");
-            return await AddAsync(createDto);
+            var added = await AddAsync(createDto);
+            await _mudekStale.MarkStaleByExamIdAsync(createDto.ExamId);
+            return added;
         }
 
         public async Task<AssessmentComponentDto> UpdateForTeacherAsync(UpdateAssessmentComponentDto updateDto, Guid teacherId)
@@ -120,7 +125,9 @@ namespace BitirmeApi.Business.Concrete
                 throw new InvalidOperationException("WeightPercentage 0-100 aralığında olmalıdır.");
             if ((await _componentDal.GetListAsync(c => c.ExamId == snapshot.ExamId && c.OrderIndex == updateDto.OrderIndex && c.Id != updateDto.Id)).Any())
                 throw new InvalidOperationException("Aynı sınav altında OrderIndex benzersiz olmalıdır.");
-            return await UpdateAsync(updateDto);
+            var updated = await UpdateAsync(updateDto);
+            await _mudekStale.MarkStaleByExamIdAsync(snapshot.ExamId);
+            return updated;
         }
 
         public async Task DeleteForTeacherAsync(Guid id, Guid teacherId)
@@ -132,7 +139,9 @@ namespace BitirmeApi.Business.Concrete
             if ((await _scoreDal.GetListAsync(s => s.AssessmentComponentId == id)).Any() ||
                 (await _mappingDal.GetListAsync(m => m.AssessmentComponentId == id)).Any())
                 throw new InvalidOperationException("Component altında score/mapping olduğu için silinemez.");
+            var examId = snapshot.ExamId;
             await DeleteAsync(id);
+            await _mudekStale.MarkStaleByExamIdAsync(examId);
         }
     }
 }

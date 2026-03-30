@@ -55,6 +55,8 @@ namespace BitirmeApi.Business.ServiceRegistration
             services.AddScoped<ICourseEvaluationDal, CourseEvaluationDal>();
             services.AddScoped<ICourseEvaluationService, CourseEvaluationService>();
 
+            services.AddScoped<IMudekEvaluationCalculatorService, MudekEvaluationCalculatorService>();
+
             services.AddScoped<IExamDal, ExamDal>();
             services.AddScoped<IExamService, ExamService>();
 

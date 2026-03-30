@@ -1,4 +1,4 @@
-﻿using BitirmeApi.Entity.Entities;
+using BitirmeApi.Entity.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace BitirmeApi.DataAccess.Concrete.EntityFramework.Context
@@ -53,6 +53,13 @@ namespace BitirmeApi.DataAccess.Concrete.EntityFramework.Context
 
         // ───── Harf Notu Kuralları ────────────────────────────────────────────────
         public DbSet<CourseEvaluationLetterGradeRule> CourseEvaluationLetterGradeRules => Set<CourseEvaluationLetterGradeRule>();
+
+        // ───── MÜDEK önceden hesaplanmış sonuçlar (offering başına tek snapshot) ──
+        public DbSet<StudentEvaluationResult> StudentEvaluationResults => Set<StudentEvaluationResult>();
+        public DbSet<ExamEvaluationResult> ExamEvaluationResults => Set<ExamEvaluationResult>();
+        public DbSet<ExamQuestionEvaluationResult> ExamQuestionEvaluationResults => Set<ExamQuestionEvaluationResult>();
+        public DbSet<CloEvaluationResult> CloEvaluationResults => Set<CloEvaluationResult>();
+        public DbSet<ProgramOutcomeEvaluationResult> ProgramOutcomeEvaluationResults => Set<ProgramOutcomeEvaluationResult>();
         //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         //{
         //    optionsBuilder.UseSqlServer((@"Server=(localdb)\mssqllocaldb;database=MudekDbAcademic;Trusted_Connection=True;"));
@@ -456,6 +463,133 @@ namespace BitirmeApi.DataAccess.Concrete.EntityFramework.Context
                 e.HasIndex(x => new { x.CourseEvaluationId, x.LetterGrade }).IsUnique();
                 e.HasCheckConstraint("CK_LetterGradeRule_ScoreRange", "[MaxScore] >= [MinScore]");
                 e.HasCheckConstraint("CK_LetterGradeRule_ScoreBounds", "[MinScore] >= 0 AND [MaxScore] <= 100");
+            });
+
+            // ═══════════════════════════════════════════════════════════════════════
+            // MÜDEK HESAP SONUÇLARI (snapshot — versioning yok)
+            // ═══════════════════════════════════════════════════════════════════════
+
+            b.Entity<StudentEvaluationResult>(e =>
+            {
+                e.Property(x => x.MidtermScore).HasPrecision(7, 2);
+                e.Property(x => x.FinalScore).HasPrecision(7, 2);
+                e.Property(x => x.MakeupScore).HasPrecision(7, 2);
+                e.Property(x => x.SuccessGrade).HasPrecision(7, 2);
+
+                e.HasIndex(x => new { x.CourseOfferingId, x.EnrollmentId }).IsUnique();
+
+                // CourseOffering üzerinden CASCADE + Enrollment üzerinden CASCADE aynı tabloda
+                // SQL Server'da "multiple cascade paths" hatasına yol açar. Tek zincir: Offering → Enrollment → bu satır.
+                e.HasOne(x => x.CourseOffering)
+                 .WithMany(o => o.StudentEvaluationResults)
+                 .HasForeignKey(x => x.CourseOfferingId)
+                 .OnDelete(DeleteBehavior.Restrict);
+
+                e.HasOne(x => x.Enrollment)
+                 .WithMany(en => en.EvaluationResults)
+                 .HasForeignKey(x => x.EnrollmentId)
+                 .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            b.Entity<ExamEvaluationResult>(e =>
+            {
+                e.Property(x => x.MaxTotalScore).HasPrecision(9, 4);
+                e.Property(x => x.MinTotalScore).HasPrecision(9, 4);
+                e.Property(x => x.AverageTotalScore).HasPrecision(9, 4);
+
+                e.HasIndex(x => new { x.CourseOfferingId, x.ExamId }).IsUnique();
+
+                e.HasOne(x => x.CourseOffering)
+                 .WithMany(o => o.ExamEvaluationResults)
+                 .HasForeignKey(x => x.CourseOfferingId)
+                 .OnDelete(DeleteBehavior.Cascade);
+
+                e.HasOne(x => x.Exam)
+                 .WithMany()
+                 .HasForeignKey(x => x.ExamId)
+                 .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            b.Entity<ExamQuestionEvaluationResult>(e =>
+            {
+                e.Property(x => x.MaxScore).HasPrecision(7, 2);
+                e.Property(x => x.AverageScore).HasPrecision(9, 4);
+                e.Property(x => x.AchievementRate).HasPrecision(9, 6);
+
+                e.HasIndex(x => new { x.CourseOfferingId, x.ExamQuestionId })
+                 .IsUnique()
+                 .HasFilter("[ExamQuestionId] IS NOT NULL");
+
+                e.HasIndex(x => new { x.CourseOfferingId, x.AssessmentComponentId })
+                 .IsUnique()
+                 .HasFilter("[AssessmentComponentId] IS NOT NULL");
+
+                e.HasCheckConstraint("CK_ExamQuestionEvalResult_SingleTarget",
+                    "([ExamQuestionId] IS NOT NULL AND [AssessmentComponentId] IS NULL) OR ([ExamQuestionId] IS NULL AND [AssessmentComponentId] IS NOT NULL)");
+
+                e.HasOne(x => x.CourseOffering)
+                 .WithMany(o => o.ExamQuestionEvaluationResults)
+                 .HasForeignKey(x => x.CourseOfferingId)
+                 .OnDelete(DeleteBehavior.Cascade);
+
+                e.HasOne(x => x.Exam)
+                 .WithMany()
+                 .HasForeignKey(x => x.ExamId)
+                 .OnDelete(DeleteBehavior.Cascade);
+
+                // ExamId ile CASCADE zaten sınav silinince satırı temizler; ExamQuestion / Component
+                // üzerinden ikinci CASCADE yolu SQL Server'da "multiple cascade paths" üretir.
+                e.HasOne(x => x.ExamQuestion)
+                 .WithMany()
+                 .HasForeignKey(x => x.ExamQuestionId)
+                 .OnDelete(DeleteBehavior.Restrict);
+
+                e.HasOne(x => x.AssessmentComponent)
+                 .WithMany()
+                 .HasForeignKey(x => x.AssessmentComponentId)
+                 .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            b.Entity<CloEvaluationResult>(e =>
+            {
+                e.Property(x => x.AchievementScore).HasPrecision(9, 6);
+                e.Property(x => x.CombinedAchievementScore).HasPrecision(9, 6);
+                e.Property(x => x.SurveyScore).HasPrecision(9, 6);
+                e.Property(x => x.SurveyDifference).HasPrecision(9, 6);
+
+                e.HasIndex(x => new { x.CourseOfferingId, x.CourseLearningOutcomeId, x.ResultType }).IsUnique();
+
+                e.HasOne(x => x.CourseOffering)
+                 .WithMany(o => o.CloEvaluationResults)
+                 .HasForeignKey(x => x.CourseOfferingId)
+                 .OnDelete(DeleteBehavior.Cascade);
+
+                e.HasOne(x => x.CourseLearningOutcome)
+                 .WithMany()
+                 .HasForeignKey(x => x.CourseLearningOutcomeId)
+                 .OnDelete(DeleteBehavior.Restrict);
+
+                e.HasOne(x => x.Exam)
+                 .WithMany()
+                 .HasForeignKey(x => x.ExamId)
+                 .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            b.Entity<ProgramOutcomeEvaluationResult>(e =>
+            {
+                e.Property(x => x.AchievementScore).HasPrecision(9, 6);
+
+                e.HasIndex(x => new { x.CourseOfferingId, x.ProgramOutcomeId }).IsUnique();
+
+                e.HasOne(x => x.CourseOffering)
+                 .WithMany(o => o.ProgramOutcomeEvaluationResults)
+                 .HasForeignKey(x => x.CourseOfferingId)
+                 .OnDelete(DeleteBehavior.Cascade);
+
+                e.HasOne(x => x.ProgramOutcome)
+                 .WithMany()
+                 .HasForeignKey(x => x.ProgramOutcomeId)
+                 .OnDelete(DeleteBehavior.Restrict);
             });
         }
     }

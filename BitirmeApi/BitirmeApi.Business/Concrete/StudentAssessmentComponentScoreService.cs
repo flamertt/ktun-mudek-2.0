@@ -12,17 +12,20 @@ namespace BitirmeApi.Business.Concrete
         private readonly IAssessmentComponentDal _componentDal;
         private readonly IEnrollmentDal _enrollmentDal;
         private readonly IMapper _mapper;
+        private readonly IMudekEvaluationCalculatorService _mudekStale;
 
         public StudentAssessmentComponentScoreService(
             IStudentAssessmentComponentScoreDal scoreDal,
             IAssessmentComponentDal componentDal,
             IEnrollmentDal enrollmentDal,
-            IMapper mapper)
+            IMapper mapper,
+            IMudekEvaluationCalculatorService mudekStale)
         {
             _scoreDal = scoreDal;
             _componentDal = componentDal;
             _enrollmentDal = enrollmentDal;
             _mapper = mapper;
+            _mudekStale = mudekStale;
         }
 
         public async Task<List<StudentAssessmentComponentScoreDto>> GetAllAsync()
@@ -102,7 +105,9 @@ namespace BitirmeApi.Business.Concrete
                 throw new InvalidOperationException($"Score 0 ile {component.MaxScore} arasında olmalıdır.");
             if (await _scoreDal.ExistsAsync(createDto.AssessmentComponentId, createDto.EnrollmentId))
                 throw new InvalidOperationException("Bu component ve enrollment için score zaten mevcut.");
-            return await AddAsync(createDto);
+            var dto = await AddAsync(createDto);
+            await _mudekStale.MarkStaleByEnrollmentIdAsync(createDto.EnrollmentId);
+            return dto;
         }
 
         public async Task<BulkOperationResultDto<Guid>> AddBulkForTeacherAsync(Guid componentId, List<StudentScoreItem> items, Guid teacherId)
@@ -127,6 +132,9 @@ namespace BitirmeApi.Business.Concrete
                     result.Errors.Add($"{item.EnrollmentId}: {ex.Message}");
                 }
             }
+
+            var comp = await _componentDal.GetAsync(c => c.Id == componentId);
+            if (comp != null) await _mudekStale.MarkStaleByExamIdAsync(comp.ExamId);
             return result;
         }
 
@@ -138,7 +146,9 @@ namespace BitirmeApi.Business.Concrete
                 throw new UnauthorizedAccessException("Bu score sizin dersinize ait değil.");
             if (updateDto.Score.HasValue && (updateDto.Score < 0 || updateDto.Score > snapshot.AssessmentComponent.MaxScore))
                 throw new InvalidOperationException($"Score 0 ile {snapshot.AssessmentComponent.MaxScore} arasında olmalıdır.");
-            return await UpdateAsync(updateDto);
+            var dto = await UpdateAsync(updateDto);
+            await _mudekStale.MarkStaleByEnrollmentIdAsync(snapshot.EnrollmentId);
+            return dto;
         }
 
         public async Task DeleteForTeacherAsync(Guid id, Guid teacherId)
@@ -147,7 +157,9 @@ namespace BitirmeApi.Business.Concrete
                 ?? throw new KeyNotFoundException("Score bulunamadı.");
             if (snapshot.AssessmentComponent?.Exam?.CourseEvaluation?.CourseOffering?.TeacherId != teacherId)
                 throw new UnauthorizedAccessException("Bu score sizin dersinize ait değil.");
+            var enId = snapshot.EnrollmentId;
             await DeleteAsync(id);
+            await _mudekStale.MarkStaleByEnrollmentIdAsync(enId);
         }
 
         private async Task<AssessmentComponent> EnsureComponentOwnershipAsync(Guid componentId, Guid teacherId)

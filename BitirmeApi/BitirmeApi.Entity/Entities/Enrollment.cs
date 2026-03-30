@@ -34,6 +34,8 @@ namespace BitirmeApi.Entity.Entities
         // Öğrencinin bu ders açılışındaki sınav puanları
         public ICollection<StudentAnswer> StudentAnswers { get; set; } = new List<StudentAnswer>();
         public ICollection<StudentAssessmentComponentScore> ComponentScores { get; set; } = new List<StudentAssessmentComponentScore>();
+
+        public ICollection<StudentEvaluationResult> EvaluationResults { get; set; } = new List<StudentEvaluationResult>();
     }
 
     /// <summary>Kayıt durumu sabitleri</summary>

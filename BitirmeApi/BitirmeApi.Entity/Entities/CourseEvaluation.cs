@@ -30,6 +30,12 @@ namespace BitirmeApi.Entity.Entities
         public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
         public DateTime? UpdatedAt { get; set; }
 
+        /// <summary>Son tam MÜDEK hesap çalıştırma zamanı (UTC).</summary>
+        public DateTime? LastCalculatedAt { get; set; }
+
+        /// <summary>Offering ile ilgili ham veri değiştiyse true; yeniden hesap sonrası false.</summary>
+        public bool IsCalculationDirty { get; set; } = true;
+
         public string? StudentFeedbackEvaluation { get; set; }
         public string? ProgramOutcomeEvaluation { get; set; }
         public string? GeneralEvaluation { get; set; }

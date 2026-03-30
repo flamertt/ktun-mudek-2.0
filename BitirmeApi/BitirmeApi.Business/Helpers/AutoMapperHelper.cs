@@ -95,7 +95,9 @@ namespace BitirmeApi.Business.Helpers
                 .ForMember(d => d.CourseName, o => o.MapFrom(s => s.CourseOffering.Course.Name))
                 .ForMember(d => d.TermName, o => o.MapFrom(s => s.CourseOffering.AcademicTerm.Name))
                 .ForMember(d => d.TeacherName, o => o.MapFrom(s =>
-                    s.CourseOffering.Teacher != null ? s.CourseOffering.Teacher.FullName : null));
+                    s.CourseOffering.Teacher != null ? s.CourseOffering.Teacher.FullName : null))
+                .ForMember(d => d.LastCalculatedAt, o => o.MapFrom(s => s.LastCalculatedAt))
+                .ForMember(d => d.IsCalculationDirty, o => o.MapFrom(s => s.IsCalculationDirty));
 
             CreateMap<CourseEvaluation, CourseEvaluationDetailDto>()
                 .ForMember(d => d.CourseCode, o => o.MapFrom(s => s.CourseOffering.Course.Code))
@@ -107,7 +109,9 @@ namespace BitirmeApi.Business.Helpers
                 .ForMember(d => d.ProgramName, o => o.MapFrom(s =>
                     s.CourseOffering.Course.Program != null ? s.CourseOffering.Course.Program.Name : null))
                 .ForMember(d => d.StudentCount, o => o.MapFrom(s =>
-                    s.CourseOffering.Enrollments != null ? s.CourseOffering.Enrollments.Count : 0));
+                    s.CourseOffering.Enrollments != null ? s.CourseOffering.Enrollments.Count : 0))
+                .ForMember(d => d.LastCalculatedAt, o => o.MapFrom(s => s.LastCalculatedAt))
+                .ForMember(d => d.IsCalculationDirty, o => o.MapFrom(s => s.IsCalculationDirty));
 
             // ── CourseLearningOutcome (Katalog CLO) ───────────────────────────────
             CreateMap<CourseLearningOutcome, CourseLearningOutcomeDto>()

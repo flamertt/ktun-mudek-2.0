@@ -13,19 +13,22 @@ namespace BitirmeApi.Business.Concrete
         private readonly IExamQuestionDal _questionDal;
         private readonly IAssessmentComponentDal _componentDal;
         private readonly IMapper _mapper;
+        private readonly IMudekEvaluationCalculatorService _mudekStale;
 
         public ExamService(
             IExamDal examDal,
             ICourseEvaluationDal evaluationDal,
             IExamQuestionDal questionDal,
             IAssessmentComponentDal componentDal,
-            IMapper mapper)
+            IMapper mapper,
+            IMudekEvaluationCalculatorService mudekStale)
         {
             _examDal = examDal;
             _evaluationDal = evaluationDal;
             _questionDal = questionDal;
             _componentDal = componentDal;
             _mapper = mapper;
+            _mudekStale = mudekStale;
         }
 
         public async Task<List<ExamListDto>> GetByEvaluationIdAsync(Guid evaluationId) =>
@@ -80,6 +83,7 @@ namespace BitirmeApi.Business.Concrete
 
             _examDal.Add(entity);
             await _examDal.SaveChangesAsync();
+            await _mudekStale.MarkStaleByCourseEvaluationIdAsync(dto.CourseEvaluationId);
 
             return _mapper.Map<ExamDetailDto>((await _examDal.GetByIdWithDetailsAsync(entity.Id))!);
         }
@@ -111,6 +115,7 @@ namespace BitirmeApi.Business.Concrete
 
             _examDal.Update(tracked);
             await _examDal.SaveChangesAsync();
+            await _mudekStale.MarkStaleByCourseEvaluationIdAsync(snapshot.CourseEvaluationId);
 
             return _mapper.Map<ExamDetailDto>((await _examDal.GetByIdWithDetailsAsync(dto.Id))!);
         }
@@ -129,8 +134,10 @@ namespace BitirmeApi.Business.Concrete
             var tracked = await _examDal.GetAsync(e => e.Id == id)
                 ?? throw new KeyNotFoundException("Sınav bulunamadı.");
 
+            var evalId = snapshot.CourseEvaluationId;
             _examDal.Delete(tracked);
             await _examDal.SaveChangesAsync();
+            await _mudekStale.MarkStaleByCourseEvaluationIdAsync(evalId);
         }
     }
 }

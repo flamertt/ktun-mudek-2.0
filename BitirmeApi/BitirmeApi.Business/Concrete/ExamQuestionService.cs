@@ -14,6 +14,7 @@ namespace BitirmeApi.Business.Concrete
         private readonly IExamQuestionOutcomeMappingDal _mappingDal;
         private readonly IStudentAnswerDal _answerDal;
         private readonly IMapper _mapper;
+        private readonly IMudekEvaluationCalculatorService _mudekStale;
 
         public ExamQuestionService(
             IExamQuestionDal questionDal,
@@ -21,7 +22,8 @@ namespace BitirmeApi.Business.Concrete
             ICourseLearningOutcomeDal cloDal,
             IExamQuestionOutcomeMappingDal mappingDal,
             IStudentAnswerDal answerDal,
-            IMapper mapper)
+            IMapper mapper,
+            IMudekEvaluationCalculatorService mudekStale)
         {
             _questionDal = questionDal;
             _examDal = examDal;
@@ -29,6 +31,7 @@ namespace BitirmeApi.Business.Concrete
             _mappingDal = mappingDal;
             _answerDal = answerDal;
             _mapper = mapper;
+            _mudekStale = mudekStale;
         }
 
         public async Task<List<ExamQuestionDto>> GetByExamIdAsync(Guid examId) =>
@@ -81,6 +84,7 @@ namespace BitirmeApi.Business.Concrete
 
             _questionDal.Add(entity);
             await _questionDal.SaveChangesAsync();
+            await _mudekStale.MarkStaleByExamIdAsync(dto.ExamId);
 
             return _mapper.Map<ExamQuestionDto>((await _questionDal.GetByIdWithDetailsAsync(entity.Id))!);
         }
@@ -108,6 +112,7 @@ namespace BitirmeApi.Business.Concrete
 
             _questionDal.Update(tracked);
             await _questionDal.SaveChangesAsync();
+            await _mudekStale.MarkStaleByExamIdAsync(tracked.ExamId);
 
             return _mapper.Map<ExamQuestionDto>((await _questionDal.GetByIdWithDetailsAsync(dto.Id))!);
         }
@@ -122,8 +127,10 @@ namespace BitirmeApi.Business.Concrete
             var tracked = await _questionDal.GetAsync(q => q.Id == id)
                 ?? throw new KeyNotFoundException("Sınav sorusu bulunamadı.");
 
+            var examId = tracked.ExamId;
             _questionDal.Delete(tracked);
             await _questionDal.SaveChangesAsync();
+            await _mudekStale.MarkStaleByExamIdAsync(examId);
         }
 
         // ── CLO Eşleme ────────────────────────────────────────────────────────
@@ -167,6 +174,7 @@ namespace BitirmeApi.Business.Concrete
 
             _mappingDal.Add(entity);
             await _mappingDal.SaveChangesAsync();
+            if (question.ExamId != Guid.Empty) await _mudekStale.MarkStaleByExamIdAsync(question.ExamId);
 
             var mappings = await _mappingDal.GetByQuestionIdWithDetailsAsync(questionId);
             return _mapper.Map<ExamQuestionOutcomeMappingDto>(mappings.First(m => m.CourseLearningOutcomeId == cloId));
@@ -186,6 +194,8 @@ namespace BitirmeApi.Business.Concrete
             mapping.Weight = weight;
             _mappingDal.Update(mapping);
             await _mappingDal.SaveChangesAsync();
+            var qSnap = await _questionDal.GetAsync(x => x.Id == questionId);
+            if (qSnap != null) await _mudekStale.MarkStaleByExamIdAsync(qSnap.ExamId);
 
             var mappings = await _mappingDal.GetByQuestionIdWithDetailsAsync(questionId);
             return _mapper.Map<ExamQuestionOutcomeMappingDto>(mappings.First(m => m.CourseLearningOutcomeId == cloId));
@@ -198,8 +208,10 @@ namespace BitirmeApi.Business.Concrete
             var mapping = await _mappingDal.GetByIdsAsync(questionId, cloId)
                 ?? throw new KeyNotFoundException("Belirtilen soru–CLO eşlemesi bulunamadı.");
 
+            var qSnap = await _questionDal.GetAsync(x => x.Id == questionId);
             _mappingDal.Delete(mapping);
             await _mappingDal.SaveChangesAsync();
+            if (qSnap != null) await _mudekStale.MarkStaleByExamIdAsync(qSnap.ExamId);
         }
 
         // ── Ownership yardımcısı ──────────────────────────────────────────────

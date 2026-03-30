@@ -12,17 +12,20 @@ namespace BitirmeApi.Business.Concrete
         private readonly ICourseLearningOutcomeDal _cloDal;
         private readonly IProgramOutcomeDal _poDal;
         private readonly IMapper _mapper;
+        private readonly IMudekEvaluationCalculatorService _mudekStale;
 
         public CloPoMapService(
             ICloPoMapDal mapDal,
             ICourseLearningOutcomeDal cloDal,
             IProgramOutcomeDal poDal,
-            IMapper mapper)
+            IMapper mapper,
+            IMudekEvaluationCalculatorService mudekStale)
         {
             _mapDal = mapDal;
             _cloDal = cloDal;
             _poDal = poDal;
             _mapper = mapper;
+            _mudekStale = mudekStale;
         }
 
         public async Task<List<CloPoMapDto>> GetByCloIdAsync(Guid cloId) =>
@@ -60,6 +63,7 @@ namespace BitirmeApi.Business.Concrete
 
             _mapDal.Add(entity);
             await _mapDal.SaveChangesAsync();
+            await _mudekStale.MarkStaleByCourseLearningOutcomeIdAsync(dto.CourseLearningOutcomeId);
 
             // Detaylarıyla çek (CLO ve PO include)
             var maps = await _mapDal.GetByCloIdAsync(dto.CourseLearningOutcomeId);
@@ -77,6 +81,7 @@ namespace BitirmeApi.Business.Concrete
             entity.Weight = weight;
             _mapDal.Update(entity);
             await _mapDal.SaveChangesAsync();
+            await _mudekStale.MarkStaleByCourseLearningOutcomeIdAsync(cloId);
 
             var maps = await _mapDal.GetByCloIdAsync(cloId);
             return _mapper.Map<CloPoMapDto>(maps.First(m => m.ProgramOutcomeId == programOutcomeId));
@@ -89,6 +94,7 @@ namespace BitirmeApi.Business.Concrete
 
             _mapDal.Delete(entity);
             await _mapDal.SaveChangesAsync();
+            await _mudekStale.MarkStaleByCourseLearningOutcomeIdAsync(cloId);
         }
     }
 }

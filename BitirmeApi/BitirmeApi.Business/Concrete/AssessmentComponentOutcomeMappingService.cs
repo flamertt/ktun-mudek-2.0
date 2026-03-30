@@ -12,17 +12,20 @@ namespace BitirmeApi.Business.Concrete
         private readonly IAssessmentComponentDal _componentDal;
         private readonly ICourseLearningOutcomeDal _cloDal;
         private readonly IMapper _mapper;
+        private readonly IMudekEvaluationCalculatorService _mudekStale;
 
         public AssessmentComponentOutcomeMappingService(
             IAssessmentComponentOutcomeMappingDal mappingDal,
             IAssessmentComponentDal componentDal,
             ICourseLearningOutcomeDal cloDal,
-            IMapper mapper)
+            IMapper mapper,
+            IMudekEvaluationCalculatorService mudekStale)
         {
             _mappingDal = mappingDal;
             _componentDal = componentDal;
             _cloDal = cloDal;
             _mapper = mapper;
+            _mudekStale = mudekStale;
         }
 
         public async Task<List<AssessmentComponentOutcomeMappingDto>> GetAllAsync()
@@ -89,7 +92,9 @@ namespace BitirmeApi.Business.Concrete
                 throw new InvalidOperationException("Weight değeri 0 ile 1 arasında olmalıdır.");
             if (await _mappingDal.ExistsAsync(createDto.AssessmentComponentId, createDto.CourseLearningOutcomeId))
                 throw new InvalidOperationException("Bu component için CLO eşlemesi zaten var.");
-            return await AddAsync(createDto);
+            var created = await AddAsync(createDto);
+            await _mudekStale.MarkStaleByExamIdAsync(component.ExamId);
+            return created;
         }
 
         public async Task<AssessmentComponentOutcomeMappingDto> UpdateForTeacherAsync(UpdateAssessmentComponentOutcomeMappingDto updateDto, Guid teacherId)
@@ -100,7 +105,10 @@ namespace BitirmeApi.Business.Concrete
                 throw new UnauthorizedAccessException("Bu mapping size ait değil.");
             if (updateDto.Weight < 0 || updateDto.Weight > 1)
                 throw new InvalidOperationException("Weight değeri 0 ile 1 arasında olmalıdır.");
-            return await UpdateAsync(updateDto);
+            var updated = await UpdateAsync(updateDto);
+            if (snapshot.AssessmentComponent != null)
+                await _mudekStale.MarkStaleByExamIdAsync(snapshot.AssessmentComponent.ExamId);
+            return updated;
         }
 
         public async Task DeleteForTeacherAsync(Guid id, Guid teacherId)
@@ -109,7 +117,9 @@ namespace BitirmeApi.Business.Concrete
                 ?? throw new KeyNotFoundException("Mapping bulunamadı.");
             if (snapshot.AssessmentComponent?.Exam?.CourseEvaluation?.CourseOffering?.TeacherId != teacherId)
                 throw new UnauthorizedAccessException("Bu mapping size ait değil.");
+            var examId = snapshot.AssessmentComponent?.ExamId;
             await DeleteAsync(id);
+            if (examId.HasValue) await _mudekStale.MarkStaleByExamIdAsync(examId.Value);
         }
 
         private async Task<AssessmentComponent> EnsureComponentOwnershipAsync(Guid componentId, Guid teacherId)

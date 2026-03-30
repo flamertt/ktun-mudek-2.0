@@ -12,17 +12,20 @@ namespace BitirmeApi.Business.Concrete
         private readonly IExamQuestionDal _questionDal;
         private readonly ICourseLearningOutcomeDal _cloDal;
         private readonly IMapper _mapper;
+        private readonly IMudekEvaluationCalculatorService _mudekStale;
 
         public ExamQuestionOutcomeMappingService(
             IExamQuestionOutcomeMappingDal mappingDal,
             IExamQuestionDal questionDal,
             ICourseLearningOutcomeDal cloDal,
-            IMapper mapper)
+            IMapper mapper,
+            IMudekEvaluationCalculatorService mudekStale)
         {
             _mappingDal = mappingDal;
             _questionDal = questionDal;
             _cloDal = cloDal;
             _mapper = mapper;
+            _mudekStale = mudekStale;
         }
 
         public async Task<List<ExamQuestionOutcomeMappingDto>> GetAllAsync()
@@ -88,7 +91,10 @@ namespace BitirmeApi.Business.Concrete
             if (await _mappingDal.ExistsAsync(createDto.ExamQuestionId, createDto.CourseLearningOutcomeId))
                 throw new InvalidOperationException("Bu soru için CLO eşlemesi zaten mevcut.");
 
-            return await AddAsync(createDto);
+            var created = await AddAsync(createDto);
+            var q = await _questionDal.GetAsync(x => x.Id == createDto.ExamQuestionId);
+            if (q != null) await _mudekStale.MarkStaleByExamIdAsync(q.ExamId);
+            return created;
         }
 
         public async Task<ExamQuestionOutcomeMappingDto> UpdateForTeacherAsync(UpdateExamQuestionOutcomeMappingDto updateDto, Guid teacherId)
@@ -100,7 +106,10 @@ namespace BitirmeApi.Business.Concrete
             if (updateDto.Weight < 0 || updateDto.Weight > 1)
                 throw new InvalidOperationException("Weight değeri 0 ile 1 arasında olmalıdır.");
 
-            return await UpdateAsync(updateDto);
+            var updated = await UpdateAsync(updateDto);
+            if (existing.ExamQuestion?.ExamId != null)
+                await _mudekStale.MarkStaleByExamIdAsync(existing.ExamQuestion.ExamId);
+            return updated;
         }
 
         public async Task DeleteForTeacherAsync(Guid id, Guid teacherId)
@@ -109,7 +118,9 @@ namespace BitirmeApi.Business.Concrete
                 ?? throw new KeyNotFoundException("Mapping bulunamadı.");
             if (existing.ExamQuestion?.Exam?.CourseEvaluation?.CourseOffering?.TeacherId != teacherId)
                 throw new UnauthorizedAccessException("Bu mapping sizin dersinize ait değil.");
+            var examId = existing.ExamQuestion?.ExamId;
             await DeleteAsync(id);
+            if (examId.HasValue) await _mudekStale.MarkStaleByExamIdAsync(examId.Value);
         }
 
         private async Task VerifyQuestionOwnershipAsync(Guid questionId, Guid teacherId)
