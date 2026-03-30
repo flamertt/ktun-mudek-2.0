@@ -47,13 +47,14 @@ namespace BitirmeApi.Presentation.Services
 
                 var teacher = await EnsureUserAsync(
                     context,
-                    "selim.karahan@ktun.edu.tr",
-                    "Selim Karahan",
+                    "mesut.gunduz@ktun.edu.tr",
+                    "Mesut Gündüz",
                     "Teacher",
                     program.Id,
                     studentNumber: null,
                     title: "Doç. Dr.",
-                    phone: "+90 332 000 0002");
+                    phone: "+90 332 000 0002",
+                    lookupEmails: new[] { "selim.karahan@ktun.edu.tr" });
 
                 var studentNames = new List<(string FullName, string StudentNo)>
                 {
@@ -381,10 +382,48 @@ namespace BitirmeApi.Presentation.Services
             Guid? programId,
             string? studentNumber,
             string? title,
-            string? phone)
+            string? phone,
+            IEnumerable<string>? lookupEmails = null)
         {
-            var user = await context.Users.FirstOrDefaultAsync(u => u.Email == email);
-            if (user != null) return user;
+            var emailsToLookup = new List<string> { email };
+            if (lookupEmails != null)
+                emailsToLookup.AddRange(lookupEmails);
+
+            var normalizedEmails = emailsToLookup
+                .Where(e => !string.IsNullOrWhiteSpace(e))
+                .Select(e => e.Trim().ToLower())
+                .Distinct()
+                .ToList();
+
+            var user = await context.Users.FirstOrDefaultAsync(u => normalizedEmails.Contains(u.Email.ToLower()));
+            if (user != null)
+            {
+                var hasChanges =
+                    user.Email != email ||
+                    user.FullName != fullName ||
+                    user.Role != role ||
+                    user.ProgramEntityId != programId ||
+                    user.StudentNumber != studentNumber ||
+                    user.Title != title ||
+                    user.PhoneNumber != phone ||
+                    user.IsActive == false;
+
+                if (hasChanges)
+                {
+                    user.Email = email;
+                    user.FullName = fullName;
+                    user.Role = role;
+                    user.ProgramEntityId = programId;
+                    user.StudentNumber = studentNumber;
+                    user.Title = title;
+                    user.PhoneNumber = phone;
+                    user.IsActive = true;
+                    user.UpdatedAt = DateTime.UtcNow;
+                    await context.SaveChangesAsync();
+                }
+
+                return user;
+            }
 
             user = new AppUser
             {

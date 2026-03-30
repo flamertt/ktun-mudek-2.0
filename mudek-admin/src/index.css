@@ -1,0 +1,19 @@
+@import './styles/root.css';
+
+body {
+  margin: 0;
+  font: 16px/145% var(--sans);
+  letter-spacing: 0.12px;
+  color: var(--text);
+  background: var(--bg);
+  overflow-x: hidden;
+
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  min-height: 100svh;
+  overflow-x: hidden;
+}
+

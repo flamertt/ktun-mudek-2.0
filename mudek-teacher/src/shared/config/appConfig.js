@@ -1,0 +1,98 @@
+export const appConfig = {
+  role: 'teacher',
+  appTitle: 'MUDEK Öğretmen Paneli',
+  sidebarTitle: 'Öğretmen Paneli',
+  storage: {
+    tokenKey: 'mudek_teacher_token',
+    userKey: 'mudek_teacher_user',
+    themeKey: 'mudek_teacher_theme',
+  },
+  routes: {
+    home: '/home',
+    courses: '/courses',
+    evaluations: '/evaluations',
+    surveyCreate: '/survey-create',
+    outcomes: '/outcomes',
+    stats: '/stats',
+  },
+  navSections: [
+    {
+      key: 'main',
+      title: '',
+      items: [
+        { key: 'home', label: 'Anasayfa', path: '/home', icon: 'home' },
+        { key: 'courses', label: 'Derslerim', path: '/courses', icon: 'book-open' },
+        {
+          key: 'evaluations',
+          label: 'Ders Değerlendirmelerim',
+          path: '/evaluations',
+          icon: 'clipboard-check',
+        },
+        {
+          key: 'surveyCreate',
+          label: 'Anket Oluştur',
+          path: '/survey-create',
+          icon: 'square-pen',
+        },
+        { key: 'outcomes', label: 'Program Çıktılarım', path: '/outcomes', icon: 'target' },
+        { key: 'stats', label: 'İstatistikler', path: '/stats', icon: 'bar-chart' },
+      ],
+    },
+  ],
+  home: {
+    title: 'Öğretmen Anasayfa',
+    subtitle: 'Ders, sınav ve değerlendirme süreçlerini buradan takip edebilirsin.',
+    stats: [
+      { label: 'Aktif Ders', value: '6' },
+      { label: 'Tanımlı Sınav', value: '18' },
+      { label: 'Bekleyen Not Girişi', value: '4' },
+      { label: 'CLO Hesaplama', value: '2' },
+    ],
+    highlights: [
+      'my-courses',
+      'evaluations',
+      'exams',
+      'mudek-evaluation/results',
+    ],
+  },
+  pages: {
+    courses: {
+      title: 'Derslerim',
+      description: 'my-courses, students, exams ve CLO ilişkileri burada yönetilecek.',
+    },
+    evaluations: {
+      title: 'Ders Değerlendirmelerim',
+      description: 'Ders değerlendirme süreçleri, sınavlar ve kurallar bu bölümde olacak.',
+    },
+    surveyCreate: {
+      title: 'Anket Oluştur',
+      description: 'Ders ve dönem bazlı anket oluşturma ekranı burada yer alacak.',
+    },
+    outcomes: {
+      title: 'Program Çıktılarım',
+      description: 'CLO ve program çıktısı ilişkilerini bu ekranda takip edebilirsin.',
+    },
+    stats: {
+      title: 'İstatistikler',
+      description: 'Ders, değerlendirme ve başarı istatistikleri bu bölümde gösterilecek.',
+    },
+  },
+  ui: {
+    logoAlt: 'Kurum logosu',
+    universityLogoAlt: 'KTUN logosu',
+    collapseOpen: 'Aç',
+    collapseClose: 'Kapat',
+    themeDark: 'Dark',
+    themeLight: 'Light',
+    toggleSidebarLabel: 'Sidebar aç kapa',
+    toggleThemeLabel: 'Tema değiştir',
+    toggleFullscreenLabel: 'Tam ekran',
+    messagesLabel: 'Mesajlar',
+    profileLabel: 'Profil',
+    profileName: 'Öğretmen Kullanıcı',
+    logoutLabel: 'Güvenli Çıkış',
+    logoutError: 'Çıkış yapılırken bir hata oluştu.',
+    homeFocusTitle: 'API tabanlı mock odak alanları',
+  },
+}
+

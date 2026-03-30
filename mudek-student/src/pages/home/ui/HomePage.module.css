@@ -1,0 +1,67 @@
+.root {
+  display: grid;
+  gap: 16px;
+}
+
+.heading {
+  margin: 0;
+  font-size: 24px;
+  color: var(--text-h);
+}
+
+.sub {
+  margin: 0;
+  color: var(--text);
+  font-size: 14px;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.card {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 14px;
+  background: var(--surface);
+}
+
+.statLabel {
+  margin: 0;
+  color: var(--text);
+  font-size: 14px;
+}
+
+.statValue {
+  margin: 6px 0 0;
+  font-size: 24px;
+  color: var(--text-h);
+  font-weight: 700;
+}
+
+.list {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 14px 16px;
+  background: var(--surface);
+}
+
+.listTitle {
+  margin: 0 0 10px;
+  font-size: 16px;
+}
+
+.listItem {
+  font-family: var(--mono);
+  font-size: 14px;
+  color: var(--text);
+}
+
+@media (max-width: 1024px) {
+  .stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+

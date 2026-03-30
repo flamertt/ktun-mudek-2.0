@@ -1,0 +1,66 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+:root {
+  --sidebar-width: 300px;
+  --sidebar-collapsed-width: 80px;
+  --brand: #b52525;
+  --text: #5f6774;
+  --text-h: #1b2430;
+  --bg: #f5f6f8;
+  --border: #e5e4e7;
+  --code-bg: #f4f3ec;
+  --accent: #aa3bff;
+  --accent-bg: rgba(170, 59, 255, 0.1);
+  --accent-border: rgba(170, 59, 255, 0.5);
+  --social-bg: rgba(244, 243, 236, 0.5);
+  --shadow: rgba(0, 0, 0, 0.1) 0 10px 15px -3px,
+    rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+
+  --sans: 'Google Sans Flex', 'Google Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --heading: 'Google Sans Flex', 'Google Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --mono: ui-monospace, Consolas, monospace;
+
+  color-scheme: light;
+  --app-bg: #eef2f6;
+  --surface: #f7f9fc;
+  --surface-muted: #edf1f6;
+  --sidebar-bg: #f3f7fb;
+  --line: #d6dde8;
+  --logo-bg: rgba(0, 0, 0, 0.04);
+  --on-brand: #ffffff;
+  --navbar-bg: #566676;
+  --navbar-fg: #ffffff;
+  --navbar-control-bg: rgba(255, 255, 255, 0.12);
+  --navbar-control-border: rgba(255, 255, 255, 0.28);
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --text: #9ca3af;
+  --text-h: #f3f4f6;
+  --bg: #16171d;
+  --border: #2e303a;
+  --code-bg: #1f2028;
+  --accent: #c084fc;
+  --accent-bg: rgba(192, 132, 252, 0.15);
+  --accent-border: rgba(192, 132, 252, 0.5);
+  --social-bg: rgba(47, 48, 58, 0.5);
+  --shadow: rgba(0, 0, 0, 0.4) 0 10px 15px -3px,
+    rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
+  --app-bg: #121318;
+  --surface: #1a1d24;
+  --surface-muted: #232834;
+  --sidebar-bg: #171a21;
+  --line: #2a2f3d;
+  --logo-bg: rgba(255, 255, 255, 0.04);
+  --on-brand: #ffffff;
+  --navbar-bg: #566676;
+  --navbar-fg: #ffffff;
+  --navbar-control-bg: rgba(255, 255, 255, 0.12);
+  --navbar-control-border: rgba(255, 255, 255, 0.28);
+}
+
