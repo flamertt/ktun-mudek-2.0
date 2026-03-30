@@ -2,8 +2,10 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import {
   BarChart3,
+  Bell,
   BookOpen,
   Building2,
+  ChevronRight,
   ClipboardCheck,
   ClipboardList,
   GraduationCap,
@@ -12,6 +14,7 @@ import {
   Menu,
   MessageSquareMore,
   Minimize2,
+  Search,
   Settings,
   SquarePen,
   Target,
@@ -46,6 +49,7 @@ export function AppShell() {
   const profileRef = useRef(null)
 
   const [isCollapsed, setIsCollapsed] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
   const [isFullscreen, setIsFullscreen] = useState(Boolean(document.fullscreenElement))
   const [isProfileOpen, setIsProfileOpen] = useState(false)
   const [logoutError, setLogoutError] = useState('')
@@ -136,8 +140,8 @@ export function AppShell() {
         <div className={styles.navLeft}>
           <div className={`${styles.navBrand} ${isCollapsed ? styles.navBrandCollapsed : ''}`}>
             <img
-              className={styles.universityLogo}
-              src={isCollapsed ? '/sidebar_logo_collapsed.png' : '/ktun_logo_koyu_zemin.gif'}
+              className={`${styles.universityLogo} ${isCollapsed ? styles.universityLogoCollapsed : ''}`}
+              src={isCollapsed ? '/sidebar_logo_collapsed.png' : '/logo.png'}
               alt={appConfig.ui.universityLogoAlt}
             />
           </div>
@@ -150,11 +154,39 @@ export function AppShell() {
             >
               <Menu className={styles.navIcon} aria-hidden="true" />
             </button>
-            <h1 className={styles.pageTitle}>{pageTitle}</h1>
+            <nav className={styles.breadcrumb} aria-label={appConfig.ui.breadcrumbAriaLabel}>
+              <span className={styles.crumbRoot}>{appConfig.ui.breadcrumbRoot}</span>
+              <ChevronRight className={styles.crumbSep} aria-hidden="true" />
+              <span className={styles.crumbCurrent}>{pageTitle}</span>
+            </nav>
           </div>
         </div>
 
+        <div className={styles.navCenter}>
+          <label className={styles.searchWrap}>
+            <span className={styles.visuallyHidden}>{appConfig.ui.searchInputLabel}</span>
+            <Search className={styles.searchIcon} aria-hidden="true" />
+            <input
+              className={styles.searchInput}
+              type="search"
+              name="shell-search"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder={appConfig.ui.searchPlaceholder}
+              autoComplete="off"
+            />
+          </label>
+        </div>
+
         <div className={styles.rightGroup}>
+          <button
+            className={styles.iconButton}
+            type="button"
+            aria-label={appConfig.ui.notificationsLabel}
+          >
+            <Bell className={styles.navIcon} aria-hidden="true" />
+          </button>
+
           <button
             className={styles.iconButton}
             type="button"
@@ -162,6 +194,12 @@ export function AppShell() {
           >
             <MessageSquareMore className={styles.navIcon} aria-hidden="true" />
           </button>
+
+          <button className={styles.iconButton} type="button" aria-label={appConfig.ui.settingsLabel}>
+            <Settings className={styles.navIcon} aria-hidden="true" />
+          </button>
+
+          <span className={styles.rightDivider} aria-hidden="true" />
 
           <button
             className={styles.iconButton}
@@ -186,7 +224,10 @@ export function AppShell() {
               <span className={styles.profileAvatar} aria-hidden="true">
                 {profileName.slice(0, 1).toUpperCase()}
               </span>
-              <span className={styles.profileName}>{profileName}</span>
+              <span className={styles.profileText}>
+                <span className={styles.profileName}>{profileName}</span>
+                <span className={styles.profileRole}>{appConfig.ui.profileRole}</span>
+              </span>
             </button>
 
             {isProfileOpen ? (
@@ -241,4 +282,3 @@ export function AppShell() {
     </div>
   )
 }
-

@@ -4,8 +4,12 @@ import styles from './HomePage.module.css'
 export function HomePage() {
   return (
     <section className={styles.root}>
-      <h2 className={styles.heading}>{appConfig.home.title}</h2>
-      <p className={styles.sub}>{appConfig.home.subtitle}</p>
+      <header className={styles.hero}>
+        <div>
+          <h2 className={styles.heading}>{appConfig.home.title}</h2>
+          <p className={styles.sub}>{appConfig.home.subtitle}</p>
+        </div>
+      </header>
 
       <div className={styles.stats}>
         {appConfig.home.stats.map((stat) => (

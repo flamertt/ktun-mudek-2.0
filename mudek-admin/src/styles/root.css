@@ -1,37 +1,73 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Manrope:wght@600;700;800&display=swap');
 
+/* Referans: Material 3 benzeri yüzey / birincil tonları */
 :root {
+  --md-background: #fff8f7;
+  --md-surface: #fff8f7;
+  --md-on-surface: #261816;
+  --md-on-surface-variant: #5a403e;
+  --md-surface-container-lowest: #ffffff;
+  --md-surface-container-low: #fff0ef;
+  --md-surface-container-high: #fee2df;
+  --md-surface-container-highest: #f8dcd9;
+  --md-outline-variant: #e2beba;
+  --md-primary: #920410;
+  --md-primary-container: #b52525;
+  --md-on-primary: #ffffff;
+  --md-on-primary-container: #ffcdc8;
+  --md-secondary: #4c616c;
+  --md-secondary-container: #cfe6f2;
+  --md-on-secondary-fixed-variant: #354a53;
+  --md-tertiary: #004c6c;
+  --md-error: #ba1a1a;
+
   --sidebar-width: 300px;
   --sidebar-collapsed-width: 80px;
-  --brand: #b52525;
-  --text: #5f6774;
-  --text-h: #1b2430;
-  --bg: #f5f6f8;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow: rgba(0, 0, 0, 0.1) 0 10px 15px -3px,
-    rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
 
-  --sans: 'Google Sans Flex', 'Google Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  --heading: 'Google Sans Flex', 'Google Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --sans: 'Inter', system-ui, 'Segoe UI', Roboto, sans-serif;
+  --heading: 'Manrope', 'Inter', system-ui, sans-serif;
   --mono: ui-monospace, Consolas, monospace;
 
   color-scheme: light;
-  --app-bg: #eef2f6;
-  --surface: #f7f9fc;
-  --surface-muted: #edf1f6;
-  --sidebar-bg: #f3f7fb;
-  --line: #d6dde8;
-  --logo-bg: rgba(0, 0, 0, 0.04);
-  --on-brand: #ffffff;
-  --navbar-bg: #566676;
+
+  --brand: var(--md-primary-container);
+  --text: var(--md-on-surface-variant);
+  --text-h: var(--md-on-surface);
+  --bg: var(--md-background);
+  --border: var(--md-outline-variant);
+  --code-bg: var(--md-surface-container-low);
+  --accent: var(--md-tertiary);
+  --accent-bg: color-mix(in srgb, var(--md-tertiary) 12%, transparent);
+  --accent-border: color-mix(in srgb, var(--md-tertiary) 35%, transparent);
+  --social-bg: color-mix(in srgb, var(--md-surface-container-high) 55%, transparent);
+  --shadow: rgba(38, 24, 22, 0.08) 0 10px 24px -8px, rgba(38, 24, 22, 0.05) 0 4px 10px -4px;
+
+  --app-bg: var(--md-background);
+  --surface: var(--md-surface-container-lowest);
+  --surface-muted: var(--md-surface-container-low);
+  --sidebar-bg: #fafafa;
+  --line: var(--md-outline-variant);
+  --logo-bg: color-mix(in srgb, var(--md-on-surface) 4%, transparent);
+  --on-brand: var(--md-on-primary);
+
+  /* Üst bar: primary-container’a göre hafif daha koyu (primary ile karışım) */
+  --navbar-bg: color-mix(in srgb, var(--md-primary-container) 58%, var(--md-primary) 42%);
   --navbar-fg: #ffffff;
-  --navbar-control-bg: rgba(255, 255, 255, 0.12);
-  --navbar-control-border: rgba(255, 255, 255, 0.28);
+  --navbar-fg-muted: rgba(255, 255, 255, 0.82);
+  --navbar-icon: rgba(255, 255, 255, 0.92);
+  --navbar-border: rgba(255, 255, 255, 0.22);
+  --navbar-shadow: rgba(60, 10, 10, 0.25) 0 2px 12px -2px;
+  --navbar-control-bg: transparent;
+  --navbar-control-bg-hover: rgba(255, 255, 255, 0.14);
+  --navbar-control-border: rgba(255, 255, 255, 0.35);
+  --navbar-search-bg: rgba(255, 255, 255, 0.16);
+  --navbar-search-border: rgba(255, 255, 255, 0.22);
+  --navbar-search-fg: #ffffff;
+  --navbar-search-placeholder: rgba(255, 255, 255, 0.65);
+  --navbar-divider: rgba(255, 255, 255, 0.28);
+  --navbar-active-sidebar-bg: var(--md-primary-container);
+  --navbar-active-sidebar-shadow: 0 10px 15px -3px rgba(127, 29, 29, 0.22),
+    0 4px 6px -2px rgba(127, 29, 29, 0.12);
 }
 
 :root[data-theme='light'] {
@@ -49,8 +85,7 @@
   --accent-bg: rgba(192, 132, 252, 0.15);
   --accent-border: rgba(192, 132, 252, 0.5);
   --social-bg: rgba(47, 48, 58, 0.5);
-  --shadow: rgba(0, 0, 0, 0.4) 0 10px 15px -3px,
-    rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
+  --shadow: rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
   --app-bg: #121318;
   --surface: #1a1d24;
   --surface-muted: #232834;
@@ -58,9 +93,20 @@
   --line: #2a2f3d;
   --logo-bg: rgba(255, 255, 255, 0.04);
   --on-brand: #ffffff;
-  --navbar-bg: #566676;
+  --navbar-bg: color-mix(in srgb, var(--md-primary-container) 52%, var(--md-primary) 48%);
   --navbar-fg: #ffffff;
-  --navbar-control-bg: rgba(255, 255, 255, 0.12);
+  --navbar-fg-muted: rgba(255, 255, 255, 0.82);
+  --navbar-icon: rgba(255, 255, 255, 0.92);
+  --navbar-border: rgba(255, 255, 255, 0.2);
+  --navbar-shadow: rgba(0, 0, 0, 0.35) 0 2px 10px -2px;
+  --navbar-control-bg: transparent;
+  --navbar-control-bg-hover: rgba(255, 255, 255, 0.12);
   --navbar-control-border: rgba(255, 255, 255, 0.28);
+  --navbar-search-bg: rgba(0, 0, 0, 0.18);
+  --navbar-search-border: rgba(255, 255, 255, 0.18);
+  --navbar-search-fg: #ffffff;
+  --navbar-search-placeholder: rgba(255, 255, 255, 0.62);
+  --navbar-divider: rgba(255, 255, 255, 0.28);
+  --navbar-active-sidebar-bg: var(--md-primary-container);
+  --navbar-active-sidebar-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.35);
 }
-

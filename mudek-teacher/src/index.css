@@ -12,6 +12,12 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+h1,
+h2,
+h3 {
+  font-family: var(--heading);
+}
+
 #root {
   min-height: 100svh;
   overflow-x: hidden;
