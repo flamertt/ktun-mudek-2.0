@@ -10,6 +10,7 @@ export function LoginCard() {
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [rememberMe, setRememberMe] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
 
@@ -42,61 +43,97 @@ export function LoginCard() {
   }
 
   return (
-    <section className={styles.card} aria-label={authTexts.ariaLabel}>
-      <img className={styles.logo} src="/logo.png" alt={authTexts.logoAlt} />
-
-      <h1 className={styles.title}>{authTexts.title}</h1>
-
-      <form className={styles.form} onSubmit={handleSubmit}>
-        <div className={styles.field}>
-          <label className={styles.label} htmlFor="username">
-            {authTexts.usernameLabel}
-          </label>
-          <input
-            className={styles.input}
-            id="username"
-            name="username"
-            type="email"
-            autoComplete="username"
-            placeholder={authTexts.usernamePlaceholder}
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-          />
+    <section className={styles.root} aria-label={authTexts.ariaLabel}>
+      <div className={styles.panel}>
+        <div className={styles.header}>
+          <div className={styles.logoWrap}>
+            <img className={styles.logo} src="/login_logo.png" alt={authTexts.logoAlt} />
+          </div>
+          <h1 className={styles.title}>{authTexts.title}</h1>
+          <p className={styles.subtitle}>{authTexts.subtitle}</p>
         </div>
 
-        <div className={styles.field}>
-          <label className={styles.label} htmlFor="password">
-            {authTexts.passwordLabel}
-          </label>
-          <input
-            className={styles.input}
-            id="password"
-            name="password"
-            type="password"
-            autoComplete="current-password"
-            placeholder={authTexts.passwordPlaceholder}
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-          />
+        <form className={styles.form} onSubmit={handleSubmit}>
+          <div className={styles.field}>
+            <label className={styles.label} htmlFor="username">
+              {authTexts.usernameLabel}
+            </label>
+            <input
+              className={styles.input}
+              id="username"
+              name="username"
+              type="email"
+              autoComplete="username"
+              placeholder={authTexts.usernamePlaceholder}
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+            />
+          </div>
+
+          <div className={styles.field}>
+            <div className={styles.passwordLabelRow}>
+              <label className={styles.label} htmlFor="password">
+                {authTexts.passwordLabel}
+              </label>
+              <a className={styles.forgotLink} href={authTexts.forgotPasswordHref}>
+                {authTexts.forgotPassword}
+              </a>
+            </div>
+            <input
+              className={styles.input}
+              id="password"
+              name="password"
+              type="password"
+              autoComplete="current-password"
+              placeholder={authTexts.passwordPlaceholder}
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+            />
+          </div>
+
+          <div className={styles.rememberRow}>
+            <input
+              className={styles.checkbox}
+              id="remember"
+              name="remember"
+              type="checkbox"
+              checked={rememberMe}
+              onChange={(event) => setRememberMe(event.target.checked)}
+            />
+            <label className={styles.rememberLabel} htmlFor="remember">
+              {authTexts.rememberLabel}
+            </label>
+          </div>
+
+          <div className={styles.captcha} aria-label={authTexts.captchaLabel}>
+            {authTexts.captchaPlaceholder}
+          </div>
+
+          <button className={styles.button} type="submit" disabled={isSubmitting}>
+            <span>{isSubmitting ? authTexts.submitting : authTexts.submit}</span>
+            <span className={styles.buttonArrow} aria-hidden>
+              →
+            </span>
+          </button>
+
+          {errorMessage ? <p className={styles.errorText}>{errorMessage}</p> : null}
+        </form>
+      </div>
+
+      <div className={styles.trustBadges} aria-hidden>
+        <div className={styles.trustItem}>
+          <span className={styles.trustIcon} aria-hidden>
+            ✓
+          </span>
+          <span className={styles.trustLabel}>{authTexts.trustSecure}</span>
         </div>
-
-        <div className={styles.actionsRow}>
-          <a className={styles.forgotLink} href={authTexts.forgotPasswordHref}>
-            {authTexts.forgotPassword}
-          </a>
+        <div className={styles.trustItem}>
+          <span className={styles.trustIcon} aria-hidden>
+            ✓
+          </span>
+          <span className={styles.trustLabel}>{authTexts.trustSsl}</span>
         </div>
-
-        <div className={styles.captcha} aria-label={authTexts.captchaLabel}>
-          {authTexts.captchaPlaceholder}
-        </div>
-
-        <button className={styles.button} type="submit" disabled={isSubmitting}>
-          {isSubmitting ? authTexts.submitting : authTexts.submit}
-        </button>
-
-        {errorMessage ? <p className={styles.errorText}>{errorMessage}</p> : null}
-      </form>
+      </div>
     </section>
   )
 }
-

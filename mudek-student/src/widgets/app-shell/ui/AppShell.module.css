@@ -36,12 +36,11 @@
 .universityLogo {
   display: block;
   width: 100%;
-  height: 44px;
-  border-radius: 8px;
+  height: 52px;
+  border-radius: 12px;
   object-fit: contain;
-  object-position: center center;
-  background: #ffffff;
-  padding: 4px 8px;
+  object-position: left center;
+  padding: 3px 8px;
   box-sizing: border-box;
 }
 
@@ -49,6 +48,9 @@
   height: 38px;
   padding: 0;
   background: transparent;
+  border: 0;
+  box-shadow: none;
+  border-radius: 8px;
 }
 
 .nav {

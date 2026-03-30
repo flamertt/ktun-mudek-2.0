@@ -6,7 +6,7 @@ Email: admin@ktun.edu.tr
 Endpoint: POST /api/AdminAuth/login
 Teacher
 
-Email: selim.karahan@ktun.edu.tr
+Email: mesut.gunduz@ktun.edu.tr
 Endpoint: POST /api/TeacherAuth/login
 Student (örnek)
 
