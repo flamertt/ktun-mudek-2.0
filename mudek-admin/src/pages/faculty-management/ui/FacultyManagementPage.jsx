@@ -13,23 +13,19 @@ import {
 import { appConfig } from '../../../shared/config/appConfig'
 import { getAdminToken } from '../../../shared/lib/authToken'
 import formStyles from '../../../shared/ui/admin-form/AdminForm.module.css'
-import { AdminSection } from '../../../shared/ui/admin-section/AdminSection.jsx'
-import sectionStyles from '../../../shared/ui/admin-section/AdminSection.module.css'
+import { RefreshIconButton } from '../../../shared/ui/refresh-icon-button/RefreshIconButton.jsx'
+import { PageSection } from '@shared/ui/page-section/PageSection.jsx'
+import sectionStyles from '@shared/ui/page-section/PageSection.module.css'
 import { DataTable } from '../../../shared/ui/data-table/DataTable.jsx'
 import { AppDialog } from '../../../shared/ui/dialog/AppDialog.jsx'
+import { DEFAULT_TERM_TYPE, TERM_TYPE_OPTIONS, getTermTypeLabel } from '../../../shared/lib/texts/academicTermTypes.js'
 
 const columnHelper = createColumnHelper()
-
-const TERM_TYPES = [
-  { value: 'Guz', label: 'Güz' },
-  { value: 'Bahar', label: 'Bahar' },
-  { value: 'Yaz', label: 'Yaz' },
-]
 
 const emptyTerm = {
   startYear: new Date().getFullYear(),
   endYear: new Date().getFullYear() + 1,
-  termType: 'Guz',
+  termType: DEFAULT_TERM_TYPE,
   name: '',
 }
 
@@ -181,8 +177,7 @@ export function FacultyManagementPage() {
         header: 'Tür',
         cell: (info) => {
           const v = info.getValue()
-          const label = TERM_TYPES.find((t) => t.value === v)?.label ?? v
-          return label
+          return getTermTypeLabel(v)
         },
       }),
       columnHelper.accessor('isActive', {
@@ -233,7 +228,7 @@ export function FacultyManagementPage() {
   )
 
   return (
-    <AdminSection title={page.title} description={page.description} error={error}>
+    <PageSection title={page.title} description={page.description} error={error}>
       {actionError ? (
         <p className={sectionStyles.error} role="alert">
           {actionError}
@@ -255,10 +250,13 @@ export function FacultyManagementPage() {
         onGlobalFilterChange={setGlobalFilter}
         searchPlaceholder="Dönem adı veya yıl ara…"
         toolbarExtra={
-          <button type="button" className={`${formStyles.btn} ${formStyles.btnPrimary}`} onClick={openCreate}>
-            <Plus size={18} aria-hidden />
-            Yeni dönem
-          </button>
+          <>
+            <RefreshIconButton onClick={load} loading={loading} />
+            <button type="button" className={`${formStyles.btn} ${formStyles.btnPrimary}`} onClick={openCreate}>
+              <Plus size={18} aria-hidden />
+              Yeni dönem
+            </button>
+          </>
         }
         isLoading={loading}
       />
@@ -330,7 +328,7 @@ export function FacultyManagementPage() {
               value={form.termType}
               onChange={(e) => setForm((f) => ({ ...f, termType: e.target.value }))}
             >
-              {TERM_TYPES.map((o) => (
+              {TERM_TYPE_OPTIONS.map((o) => (
                 <option key={o.value} value={o.value}>
                   {o.label}
                 </option>
@@ -382,6 +380,6 @@ export function FacultyManagementPage() {
           reddedilebilir.
         </p>
       </AppDialog>
-    </AdminSection>
+    </PageSection>
   )
 }

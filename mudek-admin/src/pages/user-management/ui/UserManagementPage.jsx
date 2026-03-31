@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { ArrowRight, BookOpen, GraduationCap, LayoutGrid, UserRound, Users } from 'lucide-react'
 
 import {
   fetchCourses,
@@ -9,9 +10,16 @@ import {
 } from '../../../shared/api/adminApi'
 import { appConfig } from '../../../shared/config/appConfig'
 import { getAdminToken } from '../../../shared/lib/authToken'
-import { AdminSection } from '../../../shared/ui/admin-section/AdminSection.jsx'
-import sectionStyles from '../../../shared/ui/admin-section/AdminSection.module.css'
+import { PageSection } from '@shared/ui/page-section/PageSection.jsx'
+import { RefreshIconButton } from '../../../shared/ui/refresh-icon-button/RefreshIconButton.jsx'
 import styles from './UserManagementPage.module.css'
+
+const summaryCards = [
+  { key: 'programs', label: 'Program', icon: LayoutGrid },
+  { key: 'courses', label: 'Ders (katalog)', icon: BookOpen },
+  { key: 'teachers', label: 'Öğretmen', icon: GraduationCap },
+  { key: 'students', label: 'Öğrenci', icon: UserRound },
+]
 
 export function UserManagementPage() {
   const page = appConfig.pages.userManagement
@@ -19,11 +27,11 @@ export function UserManagementPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
+  const loadSummary = useCallback(() => {
     const token = getAdminToken()
     if (!token) return
-    let cancelled = false
     setLoading(true)
+    setError('')
     Promise.all([
       fetchPrograms(token),
       fetchCourses(token),
@@ -31,7 +39,6 @@ export function UserManagementPage() {
       fetchStudents(token),
     ])
       .then(([programs, courses, teachers, students]) => {
-        if (cancelled) return
         setCounts({
           programs: String(Array.isArray(programs) ? programs.length : 0),
           courses: String(Array.isArray(courses) ? courses.length : 0),
@@ -40,48 +47,66 @@ export function UserManagementPage() {
         })
       })
       .catch((e) => {
-        if (!cancelled) setError(e instanceof Error ? e.message : 'Veri alınamadı.')
+        setError(e instanceof Error ? e.message : 'Veri alınamadı.')
       })
       .finally(() => {
-        if (!cancelled) setLoading(false)
+        setLoading(false)
       })
-    return () => {
-      cancelled = true
-    }
   }, [])
 
-  return (
-    <AdminSection title={page.title} description={page.description} error={error} loading={loading}>
-      <p className={sectionStyles.muted}>
-        Backend’de merkezi “tüm kullanıcılar” listesi yok;{' '}
-        <code className={sectionStyles.code}>GET /api/Admin/teachers</code> ve{' '}
-        <code className={sectionStyles.code}>GET /api/Admin/students</code> ile rol bazlı yönetim yapılır.
-      </p>
+  useEffect(() => {
+    loadSummary()
+  }, [loadSummary])
 
-      <div className={styles.grid}>
-        <div className={styles.card}>
-          <p className={styles.cardLabel}>Program</p>
-          <p className={styles.cardValue}>{loading ? '…' : counts.programs}</p>
+  return (
+    <PageSection title={page.title} description={page.description} error={error} loading={loading}>
+      <div className={styles.layout}>
+        <div className={styles.toolbarRow}>
+          <RefreshIconButton onClick={loadSummary} loading={loading} />
         </div>
-        <div className={styles.card}>
-          <p className={styles.cardLabel}>Ders (katalog)</p>
-          <p className={styles.cardValue}>{loading ? '…' : counts.courses}</p>
+        <div className={styles.summary}>
+          {summaryCards.map(({ key, label, icon: Icon }) => (
+            <div key={key} className={styles.summaryCard}>
+              <div className={styles.summaryIcon} aria-hidden>
+                <Icon strokeWidth={1.75} size={20} />
+              </div>
+              <div>
+                <p className={styles.summaryLabel}>{label}</p>
+                <p className={styles.summaryValue}>{loading ? '…' : counts[key]}</p>
+              </div>
+            </div>
+          ))}
         </div>
-        <div className={styles.card}>
-          <p className={styles.cardLabel}>Öğretmen</p>
-          <p className={styles.cardValue}>{loading ? '…' : counts.teachers}</p>
-          <Link className={styles.link} to={appConfig.routes.teacherManagement}>
-            Öğretmen listesi →
+
+        <h2 className={styles.sectionTitle}>Kayıt yönetimi</h2>
+        <p className={styles.sectionLead}>
+          Öğretmen ve öğrenci listeleri ayrı ekranlarda tutulur; güncel kayıtlara buradan geçebilirsiniz.
+        </p>
+
+        <div className={styles.actions}>
+          <Link className={styles.actionCard} to={appConfig.routes.teacherManagement} state={{ openCreate: true }}>
+            <div className={styles.actionIconWrap}>
+              <GraduationCap className={styles.actionIcon} strokeWidth={1.75} size={26} aria-hidden />
+            </div>
+            <div className={styles.actionText}>
+              <span className={styles.actionTitle}>Öğretmen yönetimi</span>
+              <span className={styles.actionDesc}>Öğretmen kayıtları ve program atamaları</span>
+            </div>
+            <ArrowRight className={styles.actionArrow} strokeWidth={2} />
           </Link>
-        </div>
-        <div className={styles.card}>
-          <p className={styles.cardLabel}>Öğrenci</p>
-          <p className={styles.cardValue}>{loading ? '…' : counts.students}</p>
-          <Link className={styles.link} to={appConfig.routes.studentManagement}>
-            Öğrenci listesi →
+
+          <Link className={styles.actionCard} to={appConfig.routes.studentManagement} state={{ openCreate: true }}>
+            <div className={styles.actionIconWrap}>
+              <Users className={styles.actionIcon} strokeWidth={1.75} size={26} aria-hidden />
+            </div>
+            <div className={styles.actionText}>
+              <span className={styles.actionTitle}>Öğrenci yönetimi</span>
+              <span className={styles.actionDesc}>Öğrenci kayıtları ve program bilgileri</span>
+            </div>
+            <ArrowRight className={styles.actionArrow} strokeWidth={2} />
           </Link>
         </div>
       </div>
-    </AdminSection>
+    </PageSection>
   )
 }

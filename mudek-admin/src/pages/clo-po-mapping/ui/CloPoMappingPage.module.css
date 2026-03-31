@@ -1,0 +1,33 @@
+.filterRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 1.5rem;
+  align-items: flex-end;
+  justify-content: space-between;
+  max-width: 48rem;
+  margin-bottom: 1rem;
+}
+
+.filterRowFields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 1.5rem;
+  align-items: flex-end;
+}
+
+.filterRow label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--md-on-surface-variant);
+}
+
+.hint {
+  margin: 0 0 0.75rem;
+  color: var(--md-on-surface-variant);
+  font-size: 0.875rem;
+}

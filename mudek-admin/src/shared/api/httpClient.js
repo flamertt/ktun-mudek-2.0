@@ -65,3 +65,21 @@ export const postJsonWithAuth = (path, body, token) =>
 export const putJsonWithAuth = (path, body, token) =>
   requestJson('PUT', path, { body, token })
 export const deleteJsonWithAuth = (path, token) => requestJson('DELETE', path, { token })
+
+/**
+ * multipart/form-data (ör. Excel içe aktarma). Content-Type set edilmez; boundary tarayıcıda eklenir.
+ * @param {string} path
+ * @param {FormData} formData
+ * @param {string} token
+ */
+export async function postFormDataWithAuth(path, formData, token) {
+  const url = buildUrl(path, undefined)
+  const headers = {}
+  if (token) headers.Authorization = `Bearer ${token}`
+  const response = await fetch(url, { method: 'POST', headers, body: formData })
+  const data = await parseJsonSafely(response)
+  if (!response.ok) {
+    throw new Error(errorMessageFromResponse(data, response))
+  }
+  return data
+}

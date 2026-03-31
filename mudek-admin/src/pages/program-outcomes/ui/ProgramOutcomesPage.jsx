@@ -15,8 +15,9 @@ import {
 import { appConfig } from '../../../shared/config/appConfig'
 import { getAdminToken } from '../../../shared/lib/authToken'
 import formStyles from '../../../shared/ui/admin-form/AdminForm.module.css'
-import { AdminSection } from '../../../shared/ui/admin-section/AdminSection.jsx'
-import sectionStyles from '../../../shared/ui/admin-section/AdminSection.module.css'
+import { RefreshIconButton } from '../../../shared/ui/refresh-icon-button/RefreshIconButton.jsx'
+import { PageSection } from '@shared/ui/page-section/PageSection.jsx'
+import sectionStyles from '@shared/ui/page-section/PageSection.module.css'
 import { DataTable } from '../../../shared/ui/data-table/DataTable.jsx'
 import { AppDialog } from '../../../shared/ui/dialog/AppDialog.jsx'
 import poStyles from './ProgramOutcomesPage.module.css'
@@ -99,6 +100,14 @@ export function ProgramOutcomesPage() {
 
   useEffect(() => {
     loadOutcomes()
+  }, [loadOutcomes])
+
+  const handleRefreshPrograms = useCallback(() => {
+    void loadPrograms()
+  }, [loadPrograms])
+
+  const handleRefreshOutcomes = useCallback(() => {
+    void loadOutcomes()
   }, [loadOutcomes])
 
   const openCreateProgram = useCallback(() => {
@@ -314,28 +323,26 @@ export function ProgramOutcomesPage() {
     [openEditOutcome],
   )
 
-  const outcomeToolbar = (
-    <div className={poStyles.toolbarRow}>
-      <label>
-        Program
-        <select
-          className={sectionStyles.select}
-          value={programId}
-          onChange={(e) => setProgramId(e.target.value)}
-          disabled={!programs.length}
-        >
-          {programs.map((p) => (
-            <option key={p.id} value={p.id}>
-              {p.name}
-            </option>
-          ))}
-        </select>
-      </label>
-    </div>
+  const outcomeToolbarFilters = (
+    <label>
+      Program
+      <select
+        className={sectionStyles.select}
+        value={programId}
+        onChange={(e) => setProgramId(e.target.value)}
+        disabled={!programs.length}
+      >
+        {programs.map((p) => (
+          <option key={p.id} value={p.id}>
+            {p.name}
+          </option>
+        ))}
+      </select>
+    </label>
   )
 
   return (
-    <AdminSection title={page.title} description={page.description} error={error}>
+    <PageSection title={page.title} description={page.description} error={error}>
       <div className={poStyles.block}>
         <h3 className={poStyles.subTitle}>Programlar</h3>
         <DataTable
@@ -345,14 +352,17 @@ export function ProgramOutcomesPage() {
           onGlobalFilterChange={setFilterPrograms}
           searchPlaceholder="Program adında ara…"
           toolbarExtra={
-            <button
-              type="button"
-              className={`${formStyles.btn} ${formStyles.btnPrimary}`}
-              onClick={openCreateProgram}
-            >
-              <Plus size={18} aria-hidden />
-              Yeni program
-            </button>
+            <>
+              <RefreshIconButton onClick={handleRefreshPrograms} loading={loadingPrograms} />
+              <button
+                type="button"
+                className={`${formStyles.btn} ${formStyles.btnPrimary}`}
+                onClick={openCreateProgram}
+              >
+                <Plus size={18} aria-hidden />
+                Yeni program
+              </button>
+            </>
           }
           isLoading={loadingPrograms}
         />
@@ -363,15 +373,16 @@ export function ProgramOutcomesPage() {
         {!programs.length ? (
           <p className={sectionStyles.muted}>Önce yukarıdan bir program ekleyin.</p>
         ) : (
-          <>
-            {outcomeToolbar}
-            <DataTable
-              columns={outcomeColumns}
-              data={outcomeRows}
-              globalFilter={filterOutcomes}
-              onGlobalFilterChange={setFilterOutcomes}
-              searchPlaceholder="Kod, başlık veya açıklamada ara…"
-              toolbarExtra={
+          <DataTable
+            columns={outcomeColumns}
+            data={outcomeRows}
+            globalFilter={filterOutcomes}
+            onGlobalFilterChange={setFilterOutcomes}
+            searchPlaceholder="Kod, başlık veya açıklamada ara…"
+            toolbarFilters={outcomeToolbarFilters}
+            toolbarExtra={
+              <>
+                <RefreshIconButton onClick={handleRefreshOutcomes} loading={loadingOutcomes} />
                 <button
                   type="button"
                   className={`${formStyles.btn} ${formStyles.btnPrimary}`}
@@ -381,10 +392,10 @@ export function ProgramOutcomesPage() {
                   <Plus size={18} aria-hidden />
                   Yeni program çıktısı
                 </button>
-              }
-              isLoading={loadingOutcomes}
-            />
-          </>
+              </>
+            }
+            isLoading={loadingOutcomes}
+          />
         )}
       </div>
 
@@ -577,6 +588,6 @@ export function ProgramOutcomesPage() {
           <strong>{deleteOutcomeTarget?.code}</strong> — {deleteOutcomeTarget?.title} silinsin mi?
         </p>
       </AppDialog>
-    </AdminSection>
+    </PageSection>
   )
 }

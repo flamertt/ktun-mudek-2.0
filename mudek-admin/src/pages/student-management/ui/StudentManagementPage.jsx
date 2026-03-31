@@ -1,6 +1,7 @@
 import { createColumnHelper } from '@tanstack/react-table'
 import { Pencil, Plus, Trash2 } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 
 import {
   createStudent,
@@ -12,8 +13,10 @@ import {
 import { appConfig } from '../../../shared/config/appConfig'
 import { getAdminToken } from '../../../shared/lib/authToken'
 import formStyles from '../../../shared/ui/admin-form/AdminForm.module.css'
-import { AdminSection } from '../../../shared/ui/admin-section/AdminSection.jsx'
-import sectionStyles from '../../../shared/ui/admin-section/AdminSection.module.css'
+import { RefreshIconButton } from '../../../shared/ui/refresh-icon-button/RefreshIconButton.jsx'
+import { PageSection } from '@shared/ui/page-section/PageSection.jsx'
+import sectionStyles from '@shared/ui/page-section/PageSection.module.css'
+import { PersonNameCell } from '@shared/ui/entity-avatar/PersonNameCell.jsx'
 import { DataTable } from '../../../shared/ui/data-table/DataTable.jsx'
 import { AppDialog } from '../../../shared/ui/dialog/AppDialog.jsx'
 
@@ -30,6 +33,8 @@ const emptyCreate = {
 }
 
 export function StudentManagementPage() {
+  const location = useLocation()
+  const navigate = useNavigate()
   const page = appConfig.pages.studentManagement
   const [programs, setPrograms] = useState([])
   const [programId, setProgramId] = useState('')
@@ -71,6 +76,11 @@ export function StudentManagementPage() {
     loadStudents()
   }, [loadStudents])
 
+  const handleRefresh = useCallback(() => {
+    loadPrograms()
+    loadStudents()
+  }, [loadPrograms, loadStudents])
+
   const openCreate = useCallback(() => {
     setDialogMode('create')
     setEditingId(null)
@@ -81,6 +91,13 @@ export function StudentManagementPage() {
     setFormError('')
     setDialogOpen(true)
   }, [programId, programs])
+
+  useEffect(() => {
+    if (!location.state?.openCreate) return
+    if (!programs.length) return
+    openCreate()
+    navigate(location.pathname, { replace: true, state: {} })
+  }, [location.state?.openCreate, programs.length, location.pathname, navigate, openCreate])
 
   const openEdit = useCallback((row) => {
     setDialogMode('edit')
@@ -158,7 +175,13 @@ export function StudentManagementPage() {
 
   const columns = useMemo(
     () => [
-      columnHelper.accessor('fullName', { header: 'Ad Soyad' }),
+      columnHelper.display({
+        id: 'fullName',
+        header: 'Ad Soyad',
+        cell: ({ row }) => (
+          <PersonNameCell variant="student" name={row.original.fullName} seedKey={row.original.id} />
+        ),
+      }),
       columnHelper.accessor('studentNumber', {
         header: 'Öğrenci no',
         cell: (info) => info.getValue() ?? '—',
@@ -215,18 +238,22 @@ export function StudentManagementPage() {
   )
 
   return (
-    <AdminSection title={page.title} description={page.description} toolbar={toolbar} error={error}>
+    <PageSection title={page.title} description={page.description} error={error}>
       <DataTable
         columns={columns}
         data={rows}
         globalFilter={globalFilter}
         onGlobalFilterChange={setGlobalFilter}
         searchPlaceholder="Ad, numara veya e-posta ara…"
+        toolbarFilters={toolbar}
         toolbarExtra={
-          <button type="button" className={`${formStyles.btn} ${formStyles.btnPrimary}`} onClick={openCreate}>
-            <Plus size={18} aria-hidden />
-            Yeni öğrenci
-          </button>
+          <>
+            <RefreshIconButton onClick={handleRefresh} loading={loading} />
+            <button type="button" className={`${formStyles.btn} ${formStyles.btnPrimary}`} onClick={openCreate}>
+              <Plus size={18} aria-hidden />
+              Yeni öğrenci
+            </button>
+          </>
         }
         isLoading={loading}
       />
@@ -387,6 +414,6 @@ export function StudentManagementPage() {
           <strong>{deleteTarget?.fullName}</strong> kalıcı olarak silinsin mi?
         </p>
       </AppDialog>
-    </AdminSection>
+    </PageSection>
   )
 }

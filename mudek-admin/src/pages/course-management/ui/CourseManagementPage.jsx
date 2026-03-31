@@ -12,8 +12,9 @@ import {
 import { appConfig } from '../../../shared/config/appConfig'
 import { getAdminToken } from '../../../shared/lib/authToken'
 import formStyles from '../../../shared/ui/admin-form/AdminForm.module.css'
-import { AdminSection } from '../../../shared/ui/admin-section/AdminSection.jsx'
-import sectionStyles from '../../../shared/ui/admin-section/AdminSection.module.css'
+import { RefreshIconButton } from '../../../shared/ui/refresh-icon-button/RefreshIconButton.jsx'
+import { PageSection } from '@shared/ui/page-section/PageSection.jsx'
+import sectionStyles from '@shared/ui/page-section/PageSection.module.css'
 import { DataTable } from '../../../shared/ui/data-table/DataTable.jsx'
 import { AppDialog } from '../../../shared/ui/dialog/AppDialog.jsx'
 
@@ -69,6 +70,11 @@ export function CourseManagementPage() {
   useEffect(() => {
     loadCourses()
   }, [loadCourses])
+
+  const handleRefresh = useCallback(() => {
+    loadPrograms()
+    loadCourses()
+  }, [loadPrograms, loadCourses])
 
   const openCreate = useCallback(() => {
     setDialogMode('create')
@@ -212,18 +218,22 @@ export function CourseManagementPage() {
   )
 
   return (
-    <AdminSection title={page.title} description={page.description} toolbar={toolbar} error={error}>
+    <PageSection title={page.title} description={page.description} error={error}>
       <DataTable
         columns={columns}
         data={rows}
         globalFilter={globalFilter}
         onGlobalFilterChange={setGlobalFilter}
         searchPlaceholder="Kod, ad veya program ara…"
+        toolbarFilters={toolbar}
         toolbarExtra={
-          <button type="button" className={`${formStyles.btn} ${formStyles.btnPrimary}`} onClick={openCreate}>
-            <Plus size={18} aria-hidden />
-            Yeni ders
-          </button>
+          <>
+            <RefreshIconButton onClick={handleRefresh} loading={loading} />
+            <button type="button" className={`${formStyles.btn} ${formStyles.btnPrimary}`} onClick={openCreate}>
+              <Plus size={18} aria-hidden />
+              Yeni ders
+            </button>
+          </>
         }
         isLoading={loading}
       />
@@ -372,6 +382,6 @@ export function CourseManagementPage() {
           <strong>{deleteTarget?.code}</strong> — {deleteTarget?.name} silinsin mi?
         </p>
       </AppDialog>
-    </AdminSection>
+    </PageSection>
   )
 }

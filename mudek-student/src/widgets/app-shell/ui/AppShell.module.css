@@ -269,9 +269,12 @@
   position: absolute;
   left: 10px;
   top: 50%;
-  transform: translateY(-50%);
+  z-index: 1;
   width: 18px;
   height: 18px;
+  transform: translateY(-50%);
+  display: block;
+  flex-shrink: 0;
   color: var(--navbar-search-placeholder);
   pointer-events: none;
 }
@@ -279,14 +282,22 @@
 .searchInput {
   width: 100%;
   box-sizing: border-box;
-  padding: 8px 12px 8px 38px;
+  min-height: 2.375rem;
+  padding: 0.5rem 0.75rem 0.5rem 2.375rem;
   border-radius: 10px;
   border: 0.0625rem solid var(--navbar-search-border);
   background: var(--navbar-search-bg);
   color: var(--navbar-search-fg);
-  font: 500 13px var(--sans);
+  font: 500 0.8125rem/1.25 var(--sans);
   outline: none;
+  appearance: none;
   transition: box-shadow 120ms ease;
+}
+
+.searchInput::-webkit-search-cancel-button,
+.searchInput::-webkit-search-decoration {
+  -webkit-appearance: none;
+  appearance: none;
 }
 
 .searchInput::placeholder {

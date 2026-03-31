@@ -1,10 +1,15 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 
+import { CloManagementPage } from './pages/clo-management/ui/CloManagementPage.jsx'
+import { CloPoMappingPage } from './pages/clo-po-mapping/ui/CloPoMappingPage.jsx'
+import { CourseEvaluationsPage } from './pages/course-evaluations/ui/CourseEvaluationsPage.jsx'
 import { CourseManagementPage } from './pages/course-management/ui/CourseManagementPage.jsx'
 import { CourseStudentsPage } from './pages/course-students/ui/CourseStudentsPage.jsx'
+import { EnrollmentBulkPage } from './pages/enrollment-bulk/ui/EnrollmentBulkPage.jsx'
 import { FacultyManagementPage } from './pages/faculty-management/ui/FacultyManagementPage.jsx'
 import { HomePage } from './pages/home/ui/HomePage.jsx'
 import { LoginPage } from './pages/login/ui/LoginPage.jsx'
+import { OfferingManagementPage } from './pages/offering-management/ui/OfferingManagementPage.jsx'
 import { ProgramOutcomesPage } from './pages/program-outcomes/ui/ProgramOutcomesPage.jsx'
 import { StudentManagementPage } from './pages/student-management/ui/StudentManagementPage.jsx'
 import { SurveyManagementPage } from './pages/survey-management/ui/SurveyManagementPage.jsx'
@@ -20,8 +25,13 @@ const PAGE_BY_KEY = {
   facultyManagement: FacultyManagementPage,
   programOutcomes: ProgramOutcomesPage,
   courseManagement: CourseManagementPage,
+  cloManagement: CloManagementPage,
+  cloPoMapping: CloPoMappingPage,
+  offeringManagement: OfferingManagementPage,
   studentManagement: StudentManagementPage,
   courseStudents: CourseStudentsPage,
+  enrollmentBulk: EnrollmentBulkPage,
+  courseEvaluations: CourseEvaluationsPage,
   surveyManagement: SurveyManagementPage,
 }
 

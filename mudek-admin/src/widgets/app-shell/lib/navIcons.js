@@ -2,13 +2,17 @@ import {
   BarChart3,
   BookOpen,
   Building2,
+  CalendarRange,
   ClipboardCheck,
   ClipboardList,
   GraduationCap,
   Home,
+  Layers,
+  Link2,
   Settings,
   SquarePen,
   Target,
+  Upload,
   UserRound,
   Users,
   UsersRound,
@@ -29,6 +33,10 @@ const NAV_ICON_BY_NAME = {
   'user-round': UserRound,
   'users-round': UsersRound,
   settings: Settings,
+  layers: Layers,
+  'link-2': Link2,
+  'calendar-range': CalendarRange,
+  upload: Upload,
 }
 
 /**

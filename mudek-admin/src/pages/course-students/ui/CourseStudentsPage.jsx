@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import {
   enrollStudentInOffering,
-  fetchCourseOffering,
+  fetchCourseById,
   fetchCourseOfferingsActiveTerm,
   fetchEnrolledStudents,
   fetchStudents,
@@ -14,25 +14,15 @@ import {
 import { appConfig } from '../../../shared/config/appConfig'
 import { getAdminToken } from '../../../shared/lib/authToken'
 import formStyles from '../../../shared/ui/admin-form/AdminForm.module.css'
-import { AdminSection } from '../../../shared/ui/admin-section/AdminSection.jsx'
-import sectionStyles from '../../../shared/ui/admin-section/AdminSection.module.css'
+import { RefreshIconButton } from '../../../shared/ui/refresh-icon-button/RefreshIconButton.jsx'
+import { PageSection } from '@shared/ui/page-section/PageSection.jsx'
+import sectionStyles from '@shared/ui/page-section/PageSection.module.css'
+import { PersonNameCell } from '@shared/ui/entity-avatar/PersonNameCell.jsx'
 import { DataTable } from '../../../shared/ui/data-table/DataTable.jsx'
 import { AppDialog } from '../../../shared/ui/dialog/AppDialog.jsx'
+import { DEFAULT_ENROLLMENT_STATUS, ENROLLMENT_STATUS_OPTIONS, getEnrollmentStatusLabel } from '../../../shared/lib/texts/enrollmentStatus.js'
 
 const columnHelper = createColumnHelper()
-
-/** Backend `EnrollmentStatus` sabitleri */
-const STATUS_OPTIONS = [
-  { value: 'Enrolled', label: 'Kayıtlı' },
-  { value: 'Passed', label: 'Geçti' },
-  { value: 'Failed', label: 'Kaldı' },
-  { value: 'Withdrawn', label: 'Çekildi' },
-  { value: 'Repeat', label: 'Tekrar' },
-]
-
-function statusLabel(code) {
-  return STATUS_OPTIONS.find((o) => o.value === code)?.label ?? code
-}
 
 export function CourseStudentsPage() {
   const page = appConfig.pages.courseStudents
@@ -53,7 +43,7 @@ export function CourseStudentsPage() {
   const [saving, setSaving] = useState(false)
 
   const [statusRow, setStatusRow] = useState(null)
-  const [statusValue, setStatusValue] = useState('Enrolled')
+  const [statusValue, setStatusValue] = useState(DEFAULT_ENROLLMENT_STATUS)
   const [statusError, setStatusError] = useState('')
 
   const [deleteTarget, setDeleteTarget] = useState(null)
@@ -87,14 +77,24 @@ export function CourseStudentsPage() {
       setLoadingTable(false)
       return
     }
+
+    const selected = offerings.find((o) => String(o.id) === String(offeringId))
+    if (!selected?.courseId) {
+      setError('Seçilen ders açılışında ders bilgisi yok; listeyi yenileyin.')
+      setRows([])
+      setProgramEntityId('')
+      setLoadingTable(false)
+      return
+    }
+
     setLoadingTable(true)
     setError('')
     try {
-      const [detail, enrolled] = await Promise.all([
-        fetchCourseOffering(token, offeringId),
+      const [enrolled, course] = await Promise.all([
         fetchEnrolledStudents(token, offeringId),
+        fetchCourseById(token, selected.courseId),
       ])
-      setProgramEntityId(detail?.programEntityId ?? '')
+      setProgramEntityId(course?.programEntityId ? String(course.programEntityId) : '')
       setRows(Array.isArray(enrolled) ? enrolled : [])
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Veriler alınamadı.')
@@ -103,7 +103,7 @@ export function CourseStudentsPage() {
     } finally {
       setLoadingTable(false)
     }
-  }, [offeringId])
+  }, [offeringId, offerings])
 
   useEffect(() => {
     loadOfferings()
@@ -113,28 +113,56 @@ export function CourseStudentsPage() {
     loadOfferingAndStudents()
   }, [loadOfferingAndStudents])
 
+  const handleRefresh = useCallback(() => {
+    void loadOfferings()
+    void loadOfferingAndStudents()
+  }, [loadOfferings, loadOfferingAndStudents])
+
   const openAdd = useCallback(async () => {
     const token = getAdminToken()
-    if (!token || !offeringId || !programEntityId) {
+    if (!token || !offeringId) {
       setAddError('Önce ders açılışı seçin.')
       return
     }
+
     setAddError('')
     setAddStudentId('')
     setAddOpen(true)
     setLoadingAddList(true)
+
+    let pid = programEntityId
+    if (!pid) {
+      const selected = offerings.find((o) => String(o.id) === String(offeringId))
+      if (selected?.courseId) {
+        try {
+          const course = await fetchCourseById(token, selected.courseId)
+          pid = course?.programEntityId ? String(course.programEntityId) : ''
+          if (pid) setProgramEntityId(pid)
+        } catch {
+          pid = ''
+        }
+      }
+    }
+
+    if (!pid) {
+      setAddError('Program bilgisi alınamadı. Ders açılışını tekrar seçin.')
+      setAvailableStudents([])
+      setLoadingAddList(false)
+      return
+    }
+
     try {
-      const list = await fetchStudents(token, programEntityId)
-      const enrolledIds = new Set(rows.map((r) => r.studentId))
+      const list = await fetchStudents(token, pid)
+      const enrolledIds = new Set(rows.map((r) => String(r.studentId)))
       const all = Array.isArray(list) ? list : []
-      setAvailableStudents(all.filter((s) => s.id && !enrolledIds.has(s.id)))
+      setAvailableStudents(all.filter((s) => s.id && !enrolledIds.has(String(s.id))))
     } catch (e) {
       setAddError(e instanceof Error ? e.message : 'Öğrenci listesi alınamadı.')
       setAvailableStudents([])
     } finally {
       setLoadingAddList(false)
     }
-  }, [offeringId, programEntityId, rows])
+  }, [offeringId, programEntityId, offerings, rows])
 
   const submitAdd = async (e) => {
     e.preventDefault()
@@ -196,14 +224,24 @@ export function CourseStudentsPage() {
 
   const columns = useMemo(
     () => [
-      columnHelper.accessor('studentFullName', { header: 'Öğrenci' }),
+      columnHelper.display({
+        id: 'studentFullName',
+        header: 'Öğrenci',
+        cell: ({ row }) => (
+          <PersonNameCell
+            variant="student"
+            name={row.original.studentFullName}
+            seedKey={row.original.studentId}
+          />
+        ),
+      }),
       columnHelper.accessor('studentNumber', {
         header: 'Numara',
         cell: (info) => info.getValue() ?? '—',
       }),
       columnHelper.accessor('status', {
         header: 'Durum',
-        cell: (info) => statusLabel(info.getValue()),
+        cell: (info) => getEnrollmentStatusLabel(info.getValue()),
       }),
       columnHelper.accessor('enrolledAt', {
         header: 'Kayıt tarihi',
@@ -261,13 +299,7 @@ export function CourseStudentsPage() {
   const sectionLoading = loadingOfferings
 
   return (
-    <AdminSection
-      title={page.title}
-      description={page.description}
-      toolbar={toolbar}
-      error={error}
-      loading={sectionLoading}
-    >
+    <PageSection title={page.title} description={page.description} error={error} loading={sectionLoading}>
       {!loadingOfferings && !offerings.length ? (
         <p className={sectionStyles.muted}>
           Aktif dönemde açılmış ders bulunamadı. Önce akademik dönem ve ders açılışı oluşturun.
@@ -281,16 +313,20 @@ export function CourseStudentsPage() {
           globalFilter={globalFilter}
           onGlobalFilterChange={setGlobalFilter}
           searchPlaceholder="Ad, numara veya durum ara…"
+          toolbarFilters={toolbar}
           toolbarExtra={
-            <button
-              type="button"
-              className={`${formStyles.btn} ${formStyles.btnPrimary}`}
-              onClick={openAdd}
-              disabled={!programEntityId}
-            >
-              <Plus size={18} aria-hidden />
-              Öğrenci kaydet
-            </button>
+            <>
+              <RefreshIconButton onClick={handleRefresh} loading={loadingTable || loadingOfferings} />
+              <button
+                type="button"
+                className={`${formStyles.btn} ${formStyles.btnPrimary}`}
+                onClick={openAdd}
+                disabled={!programEntityId}
+              >
+                <Plus size={18} aria-hidden />
+                Öğrenci kaydet
+              </button>
+            </>
           }
           isLoading={loadingTable}
         />
@@ -403,7 +439,7 @@ export function CourseStudentsPage() {
               value={statusValue}
               onChange={(e) => setStatusValue(e.target.value)}
             >
-              {STATUS_OPTIONS.map((o) => (
+              {ENROLLMENT_STATUS_OPTIONS.map((o) => (
                 <option key={o.value} value={o.value}>
                   {o.label}
                 </option>
@@ -443,6 +479,6 @@ export function CourseStudentsPage() {
           kaydı varsa API işlemi reddedebilir; o durumda durumu &quot;Çekildi&quot; yapın.
         </p>
       </AppDialog>
-    </AdminSection>
+    </PageSection>
   )
 }

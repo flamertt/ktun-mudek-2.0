@@ -14,8 +14,13 @@ export const appConfig = {
     facultyManagement: '/faculty-management',
     programOutcomes: '/program-outcomes',
     courseManagement: '/course-management',
+    cloManagement: '/clo-management',
+    cloPoMapping: '/clo-po-mapping',
+    offeringManagement: '/offerings',
     studentManagement: '/student-management',
     courseStudents: '/course-students',
+    enrollmentBulk: '/enrollment-bulk',
+    courseEvaluations: '/course-evaluations',
     surveyManagement: '/survey-management',
   },
   navSections: [
@@ -58,6 +63,18 @@ export const appConfig = {
           path: '/program-outcomes',
           icon: 'target',
         },
+        {
+          key: 'cloManagement',
+          label: 'Ders öğrenim çıktıları (CLO)',
+          path: '/clo-management',
+          icon: 'layers',
+        },
+        {
+          key: 'cloPoMapping',
+          label: 'CLO ↔ PÇ eşlemesi',
+          path: '/clo-po-mapping',
+          icon: 'link-2',
+        },
       ],
     },
     {
@@ -71,6 +88,12 @@ export const appConfig = {
           icon: 'book-open',
         },
         {
+          key: 'offeringManagement',
+          label: 'Ders açılışları',
+          path: '/offerings',
+          icon: 'calendar-range',
+        },
+        {
           key: 'studentManagement',
           label: 'Öğrenci Yönetimi',
           path: '/student-management',
@@ -81,6 +104,18 @@ export const appConfig = {
           label: 'Ders Öğrencileri',
           path: '/course-students',
           icon: 'users-round',
+        },
+        {
+          key: 'enrollmentBulk',
+          label: 'Toplu kayıt / Excel',
+          path: '/enrollment-bulk',
+          icon: 'upload',
+        },
+        {
+          key: 'courseEvaluations',
+          label: 'Ders değerlendirmeleri',
+          path: '/course-evaluations',
+          icon: 'clipboard-check',
         },
       ],
     },
@@ -106,17 +141,11 @@ export const appConfig = {
       { label: 'Öğretmen', value: '42' },
       { label: 'Öğrenci', value: '1200' },
     ],
-    highlights: [
-      'GET /api/Admin/programs, program-outcomes, courses',
-      'GET /api/Admin/academic-terms, course-offerings',
-      'GET /api/Admin/teachers, students',
-    ],
   },
   pages: {
     userManagement: {
       title: 'Kullanıcı Yönetimi',
-      description:
-        'API’de merkezi kullanıcı listesi yok; öğretmen ve öğrenci uçları üzerinden özet ve bağlantılar.',
+      description: 'Öğretmen ve öğrenci kayıtlarına özet bakın; listeler için ilgili yönetim ekranlarına geçin.',
     },
     teacherManagement: {
       title: 'Öğretmen Yönetimi',
@@ -124,7 +153,7 @@ export const appConfig = {
     },
     facultyManagement: {
       title: 'Akademik Dönem',
-      description: 'Akademik dönem listesi ve aktif dönem (GET/PUT /api/Admin/academic-terms).',
+      description: 'Akademik dönem listesi ve aktif dönem ataması.',
     },
     programOutcomes: {
       title: 'Program Çıktıları',
@@ -145,6 +174,26 @@ export const appConfig = {
     surveyManagement: {
       title: 'Anket Yönetimi',
       description: 'Anket oluşturma, düzenleme ve yayınlama işlemleri burada yönetilecek.',
+    },
+    cloManagement: {
+      title: 'Ders öğrenim çıktıları (CLO)',
+      description: 'Katalog dersine bağlı CLO kayıtlarını oluşturun, düzenleyin veya silin.',
+    },
+    cloPoMapping: {
+      title: 'CLO ↔ program çıktısı eşlemesi',
+      description: 'Seçilen derse ait CLO ile program çıktıları arasındaki eşleme ve ağırlıkları yönetin.',
+    },
+    offeringManagement: {
+      title: 'Ders açılışları',
+      description: 'Dönem bazlı ders açılışı oluşturma, öğretmen atama ve güncelleme.',
+    },
+    enrollmentBulk: {
+      title: 'Toplu öğrenci kaydı',
+      description: 'Öğrenci kimlik listesi ile toplu kayıt veya Excel dosyası ile içe aktarma.',
+    },
+    courseEvaluations: {
+      title: 'Ders değerlendirmeleri',
+      description: 'Sistemdeki ders değerlendirme kayıtları (salt okunur).',
     },
   },
   ui: {
@@ -170,7 +219,7 @@ export const appConfig = {
     profileRole: 'Yönetici',
     logoutLabel: 'Güvenli Çıkış',
     logoutError: 'Çıkış yapılırken bir hata oluştu.',
-    homeFocusTitle: 'Bağlı API uçları',
+    homeFocusTitle: 'Öne çıkanlar',
   },
 }
 

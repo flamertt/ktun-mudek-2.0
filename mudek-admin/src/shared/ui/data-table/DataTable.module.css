@@ -1,4 +1,5 @@
 .wrap {
+  --toolbar-control-h: 2.5rem;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
@@ -9,8 +10,51 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.65rem 0.75rem;
   justify-content: space-between;
+  min-height: var(--toolbar-control-h);
+}
+
+.toolbarMain {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem 0.85rem;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.toolbarMain label {
+  display: inline-flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--md-on-surface-variant);
+}
+
+.toolbarMain select {
+  box-sizing: border-box;
+  min-width: 10rem;
+  height: var(--toolbar-control-h);
+  min-height: var(--toolbar-control-h);
+  padding: 0 0.65rem;
+  border-radius: 0.5rem;
+  border: 1px solid color-mix(in srgb, var(--md-outline-variant) 55%, transparent);
+  background: var(--md-surface-container-lowest);
+  color: var(--md-on-surface);
+  font: 500 0.875rem var(--sans);
+  cursor: pointer;
+  outline: none;
+}
+
+.toolbarMain select:focus {
+  border-color: var(--md-primary-container);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--md-primary-container) 22%, transparent);
 }
 
 .searchLabel {
@@ -20,31 +64,45 @@
   flex: 1 1 14rem;
   min-width: 0;
   max-width: 22rem;
+  min-height: var(--toolbar-control-h);
 }
 
 .searchIcon {
   position: absolute;
   left: 0.65rem;
-  width: 1.1rem;
-  height: 1.1rem;
+  top: 50%;
+  z-index: 1;
+  width: 1.125rem;
+  height: 1.125rem;
+  transform: translateY(-50%);
+  display: block;
+  flex-shrink: 0;
   color: var(--md-on-surface-variant);
-  opacity: 0.75;
+  opacity: 0.8;
   pointer-events: none;
 }
 
 .searchInput {
   width: 100%;
   box-sizing: border-box;
-  padding: 0.5rem 0.65rem 0.5rem 2.25rem;
+  min-height: var(--toolbar-control-h);
+  padding: 0.35rem 0.65rem 0.35rem 2.375rem;
   border-radius: 0.5rem;
   border: 1px solid color-mix(in srgb, var(--md-tertiary) 16%, var(--md-outline-variant) 84%);
   background: var(--md-surface-container-lowest);
   color: var(--md-on-surface);
-  font: 500 0.875rem var(--sans);
+  font: 500 0.875rem/1.25 var(--sans);
   outline: none;
+  appearance: none;
   transition:
     border-color 0.15s ease,
     box-shadow 0.15s ease;
+}
+
+.searchInput::-webkit-search-cancel-button,
+.searchInput::-webkit-search-decoration {
+  -webkit-appearance: none;
+  appearance: none;
 }
 
 .searchInput:focus {
@@ -57,10 +115,16 @@
 }
 
 .toolbarExtra {
-  display: flex;
+  display: inline-flex;
   flex-wrap: wrap;
   gap: 0.5rem;
   align-items: center;
+  align-self: center;
+}
+
+.toolbarExtra button {
+  box-sizing: border-box;
+  min-height: var(--toolbar-control-h);
 }
 
 .tableScroll {
