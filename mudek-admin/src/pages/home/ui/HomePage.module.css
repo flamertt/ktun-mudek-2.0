@@ -29,6 +29,24 @@
   font-size: 14px;
 }
 
+.apiError {
+  margin: 0;
+  padding: 0.65rem 0.85rem;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--md-error) 12%, transparent);
+  color: var(--md-error);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.code {
+  font-family: var(--mono);
+  font-size: 0.8em;
+  padding: 0.1rem 0.35rem;
+  border-radius: 0.25rem;
+  background: color-mix(in srgb, var(--md-on-surface) 6%, transparent);
+}
+
 .stats {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));

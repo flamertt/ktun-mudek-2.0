@@ -48,7 +48,7 @@ export const appConfig = {
       items: [
         {
           key: 'facultyManagement',
-          label: 'Fakülte Yönetimi',
+          label: 'Akademik Dönem',
           path: '/faculty-management',
           icon: 'building',
         },
@@ -107,24 +107,24 @@ export const appConfig = {
       { label: 'Öğrenci', value: '1200' },
     ],
     highlights: [
-      'programs / program-outcomes',
-      'courses / clos',
-      'academic-terms / course-offerings',
-      'teachers / students',
+      'GET /api/Admin/programs, program-outcomes, courses',
+      'GET /api/Admin/academic-terms, course-offerings',
+      'GET /api/Admin/teachers, students',
     ],
   },
   pages: {
     userManagement: {
       title: 'Kullanıcı Yönetimi',
-      description: 'Genel kullanıcı listeleme, filtreleme ve yönetimi bu ekranda olacak.',
+      description:
+        'API’de merkezi kullanıcı listesi yok; öğretmen ve öğrenci uçları üzerinden özet ve bağlantılar.',
     },
     teacherManagement: {
       title: 'Öğretmen Yönetimi',
       description: 'Öğretmen kayıtları ve öğretmen atama işlemleri burada yönetilecek.',
     },
     facultyManagement: {
-      title: 'Fakülte Yönetimi',
-      description: 'Fakülte, dönem ve akademik yapı ayarları bu bölümde yer alacak.',
+      title: 'Akademik Dönem',
+      description: 'Akademik dönem listesi ve aktif dönem (GET/PUT /api/Admin/academic-terms).',
     },
     programOutcomes: {
       title: 'Program Çıktıları',
@@ -165,11 +165,12 @@ export const appConfig = {
     breadcrumbAriaLabel: 'Sayfa konumu',
     breadcrumbRoot: 'MUDEK',
     profileLabel: 'Profil',
+    profileMenuAriaLabel: 'Hesap menüsü',
     profileName: 'Admin Kullanıcı',
     profileRole: 'Yönetici',
     logoutLabel: 'Güvenli Çıkış',
     logoutError: 'Çıkış yapılırken bir hata oluştu.',
-    homeFocusTitle: 'API tabanlı mock odak alanları',
+    homeFocusTitle: 'Bağlı API uçları',
   },
 }
 

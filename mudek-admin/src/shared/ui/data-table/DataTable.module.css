@@ -1,0 +1,170 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  justify-content: space-between;
+}
+
+.searchLabel {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1 1 14rem;
+  min-width: 0;
+  max-width: 22rem;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 0.65rem;
+  width: 1.1rem;
+  height: 1.1rem;
+  color: var(--md-on-surface-variant);
+  opacity: 0.75;
+  pointer-events: none;
+}
+
+.searchInput {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.5rem 0.65rem 0.5rem 2.25rem;
+  border-radius: 0.5rem;
+  border: 1px solid color-mix(in srgb, var(--md-tertiary) 16%, var(--md-outline-variant) 84%);
+  background: var(--md-surface-container-lowest);
+  color: var(--md-on-surface);
+  font: 500 0.875rem var(--sans);
+  outline: none;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.searchInput:focus {
+  border-color: var(--md-primary-container);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--md-primary-container) 22%, transparent);
+}
+
+.searchInput::placeholder {
+  color: color-mix(in srgb, var(--md-on-surface-variant) 45%, transparent);
+}
+
+.toolbarExtra {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.tableScroll {
+  overflow: auto;
+  border-radius: 0.5rem;
+  border: 1px solid color-mix(in srgb, var(--md-outline-variant) 45%, transparent);
+  background: var(--md-surface-container-lowest);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.th {
+  text-align: left;
+  padding: 0.65rem 0.85rem;
+  font-weight: 700;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--md-on-surface-variant);
+  background: color-mix(in srgb, var(--md-surface-container-high) 35%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--md-outline-variant) 35%, transparent);
+  white-space: nowrap;
+}
+
+.td {
+  padding: 0.55rem 0.85rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--md-outline-variant) 22%, transparent);
+  color: var(--md-on-surface);
+  vertical-align: middle;
+}
+
+.tr:last-child .td {
+  border-bottom: none;
+}
+
+.tr:hover .td {
+  background: color-mix(in srgb, var(--md-surface-container-high) 28%, transparent);
+}
+
+.empty {
+  margin: 0;
+  padding: 0.5rem 0;
+  font-size: 0.875rem;
+  color: var(--md-on-surface-variant);
+}
+
+.loading {
+  margin: 0;
+  color: var(--md-on-surface-variant);
+  font-size: 0.9rem;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding-top: 0.25rem;
+}
+
+.pageBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.5rem;
+  border: 1px solid color-mix(in srgb, var(--md-outline-variant) 50%, transparent);
+  background: var(--md-surface-container-lowest);
+  color: var(--md-on-surface);
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.pageBtn:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--md-surface-container-high) 50%, transparent);
+  border-color: var(--md-primary-container);
+}
+
+.pageBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pageInfo {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--md-on-surface-variant);
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

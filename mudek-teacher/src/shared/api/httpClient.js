@@ -1,4 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:5010'
+import { API_BASE_URL } from '@shared/config/env.js'
 
 async function parseJsonSafely(response) {
   const text = await response.text()

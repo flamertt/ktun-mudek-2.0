@@ -111,7 +111,7 @@ export function LoginCard() {
 
           <button className={styles.button} type="submit" disabled={isSubmitting}>
             <span>{isSubmitting ? authTexts.submitting : authTexts.submit}</span>
-            <span className={styles.buttonArrow} aria-hidden>
+            <span className={styles.buttonArrow} aria-hidden="true">
               →
             </span>
           </button>

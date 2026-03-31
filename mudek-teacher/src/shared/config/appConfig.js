@@ -95,6 +95,7 @@ export const appConfig = {
     breadcrumbAriaLabel: 'Sayfa konumu',
     breadcrumbRoot: 'MUDEK',
     profileLabel: 'Profil',
+    profileMenuAriaLabel: 'Hesap menüsü',
     profileName: 'Öğretmen Kullanıcı',
     profileRole: 'Öğretmen',
     logoutLabel: 'Güvenli Çıkış',

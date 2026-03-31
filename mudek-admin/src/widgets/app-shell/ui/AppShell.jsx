@@ -1,47 +1,21 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { NavLink, Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import {
-  BarChart3,
   Bell,
-  BookOpen,
-  Building2,
   ChevronRight,
-  ClipboardCheck,
-  ClipboardList,
-  GraduationCap,
-  Home,
   Maximize2,
   Menu,
   MessageSquareMore,
   Minimize2,
   Search,
   Settings,
-  SquarePen,
-  Target,
-  UserRound,
-  Users,
-  UsersRound,
 } from 'lucide-react'
 
 import { logoutCurrentUser } from '../../../shared/api/authApi'
 import { appConfig } from '../../../shared/config/appConfig'
-import styles from './AppShell.module.css'
 
-const ICON_BY_NAME = {
-  home: Home,
-  'book-open': BookOpen,
-  'clipboard-list': ClipboardList,
-  'clipboard-check': ClipboardCheck,
-  'square-pen': SquarePen,
-  target: Target,
-  'bar-chart': BarChart3,
-  users: Users,
-  'graduation-cap': GraduationCap,
-  building: Building2,
-  'user-round': UserRound,
-  'users-round': UsersRound,
-  settings: Settings,
-}
+import { getNavIcon } from '../lib/navIcons.js'
+import styles from './AppShell.module.css'
 
 export function AppShell() {
   const navigate = useNavigate()
@@ -84,6 +58,15 @@ export function AppShell() {
     return () => document.removeEventListener('pointerdown', handlePointerDown)
   }, [])
 
+  useEffect(() => {
+    if (!isProfileOpen) return
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') setIsProfileOpen(false)
+    }
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [isProfileOpen])
+
   const pageTitle = useMemo(() => {
     const matched = navItems.find((item) => item.path === location.pathname)
     return matched?.label ?? appConfig.sidebarTitle
@@ -104,6 +87,11 @@ export function AppShell() {
       return appConfig.ui.profileName
     }
   }, [])
+
+  const token = localStorage.getItem(appConfig.storage.tokenKey)
+  if (!token) {
+    return <Navigate to="/login" replace state={{ from: location }} />
+  }
 
   const toggleFullscreen = async () => {
     if (!document.fullscreenElement) {
@@ -130,7 +118,7 @@ export function AppShell() {
   }
 
   const renderItemIcon = (iconName) => {
-    const Icon = ICON_BY_NAME[iconName] ?? Home
+    const Icon = getNavIcon(iconName)
     return <Icon className={styles.itemIcon} aria-hidden="true" />
   }
 
@@ -183,6 +171,7 @@ export function AppShell() {
             className={styles.iconButton}
             type="button"
             aria-label={appConfig.ui.notificationsLabel}
+            disabled
           >
             <Bell className={styles.navIcon} aria-hidden="true" />
           </button>
@@ -191,11 +180,17 @@ export function AppShell() {
             className={styles.iconButton}
             type="button"
             aria-label={appConfig.ui.messagesLabel}
+            disabled
           >
             <MessageSquareMore className={styles.navIcon} aria-hidden="true" />
           </button>
 
-          <button className={styles.iconButton} type="button" aria-label={appConfig.ui.settingsLabel}>
+          <button
+            className={styles.iconButton}
+            type="button"
+            aria-label={appConfig.ui.settingsLabel}
+            disabled
+          >
             <Settings className={styles.navIcon} aria-hidden="true" />
           </button>
 
@@ -219,6 +214,9 @@ export function AppShell() {
               className={styles.profileButton}
               type="button"
               aria-label={appConfig.ui.profileLabel}
+              aria-expanded={isProfileOpen}
+              aria-haspopup="menu"
+              aria-controls={isProfileOpen ? 'profile-menu-panel' : undefined}
               onClick={() => setIsProfileOpen((prev) => !prev)}
             >
               <span className={styles.profileAvatar} aria-hidden="true">
@@ -231,7 +229,12 @@ export function AppShell() {
             </button>
 
             {isProfileOpen ? (
-              <div className={styles.profileDropdown}>
+              <div
+                id="profile-menu-panel"
+                className={styles.profileDropdown}
+                role="region"
+                aria-label={appConfig.ui.profileMenuAriaLabel}
+              >
                 <button
                   className={styles.dropdownItem}
                   type="button"
@@ -261,6 +264,7 @@ export function AppShell() {
                       key={item.key}
                       to={item.path}
                       title={item.label}
+                      aria-label={isCollapsed ? item.label : undefined}
                       className={({ isActive }) =>
                         `${styles.navLink} ${isActive ? styles.navLinkActive : ''}`
                       }
