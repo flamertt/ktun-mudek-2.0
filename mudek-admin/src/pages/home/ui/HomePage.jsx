@@ -39,19 +39,73 @@ export function HomePage() {
         icon: UsersRound,
         title: 'Kayıtlar güncellendi',
         time: '10 dk önce',
-        desc: 'Yeni toplu kayıt akışları hazırlandığında burada görünecek.',
+        desc: 'Öğrenci kayıt sayıları aktif dönem için yeniden hesaplandı.',
       },
       {
         icon: GraduationCap,
         title: 'Öğretmen profili oluşturuldu',
         time: '2 saat önce',
-        desc: 'Öğretmen atama işlemleri devam ettiğinde bu kısım otomatik dolacak.',
+        desc: 'Yeni öğretmen hesabı ve birim bilgileri sisteme eklendi.',
       },
       {
         icon: Upload,
         title: 'Excel içe aktarma çalıştı',
         time: 'Dün',
-        desc: 'Toplu öğrenci içe aktarma sonuçları burada listelenecek.',
+        desc: 'Toplu öğrenci aktarımında 128 yeni kayıt doğrulandı.',
+      },
+      {
+        icon: CalendarRange,
+        title: 'Ders açılışı onaylandı',
+        time: 'Dün',
+        desc: '2026 Bahar dönemi için 6 yeni ders açılışı aktif edildi.',
+      },
+      {
+        icon: Sparkles,
+        title: 'Program çıktısı seti güncellendi',
+        time: '3 gün önce',
+        desc: 'Mühendislik programı PÇ setinde sürüm yükseltmesi yapıldı.',
+      },
+      {
+        icon: UsersRound,
+        title: 'Ders-öğrenci eşlemesi tamamlandı',
+        time: '4 gün önce',
+        desc: 'Toplu kayıt ekranından ders atama işlemleri başarıyla bitti.',
+      },
+      {
+        icon: GraduationCap,
+        title: 'Öğretmen ataması revize edildi',
+        time: '5 gün önce',
+        desc: 'Aktif dönem için 3 ders açılışında öğretmen değişikliği yapıldı.',
+      },
+      {
+        icon: Upload,
+        title: 'Toplu kayıt doğrulaması tamamlandı',
+        time: '6 gün önce',
+        desc: 'Hatalı satırlar ayıklanarak öğrenci listesi temizlendi.',
+      },
+      {
+        icon: CalendarRange,
+        title: 'Akademik dönem tarihleri güncellendi',
+        time: '1 hafta önce',
+        desc: 'Dönem başlangıç ve bitiş tarihleri yönetimce onaylandı.',
+      },
+      {
+        icon: Sparkles,
+        title: 'Program çıktısı eşleme raporu üretildi',
+        time: '1 hafta önce',
+        desc: 'CLO ↔ PÇ kapsama oranları rapor tablosuna eklendi.',
+      },
+      {
+        icon: UsersRound,
+        title: 'Yeni öğrenci grubu oluşturuldu',
+        time: '9 gün önce',
+        desc: 'Yatay geçiş öğrencileri için ayrı kayıt grubu tanımlandı.',
+      },
+      {
+        icon: GraduationCap,
+        title: 'Danışmanlık rolü atandı',
+        time: '10 gün önce',
+        desc: 'Bölüm bazlı danışman öğretmen rolleri aktifleştirildi.',
       },
     ],
     [],
@@ -186,7 +240,7 @@ export function HomePage() {
                     Akademik takvim
                   </h3>
                 </div>
-                <span className={styles.smallBadge}>{termShort} / Şu an</span>
+                <span className={styles.smallBadge}>{termShort}</span>
               </div>
 
               <div className={styles.calendarList}>

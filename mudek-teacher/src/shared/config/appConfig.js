@@ -52,13 +52,12 @@ export const appConfig = {
       'my-courses',
       'evaluations',
       'exams',
-      'mudek-evaluation/results',
     ],
   },
   pages: {
     courses: {
       title: 'Derslerim',
-      description: 'my-courses, students, exams ve CLO ilişkileri burada yönetilecek.',
+      description: 'Ders listeni ve bu derslere kayıtlı öğrencileri bu bölümden görüntüleyebilirsin.',
     },
     evaluations: {
       title: 'Ders Değerlendirmelerim',

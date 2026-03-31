@@ -1,0 +1,168 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.search {
+  flex: 1 1 20rem;
+  max-width: 28rem;
+}
+
+.searchLabel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--md-on-surface-variant);
+}
+
+.searchInput {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.55rem 0.75rem;
+  border-radius: 999px;
+  border: 0;
+  background: color-mix(in srgb, var(--md-surface-container-high) 35%, transparent);
+  color: var(--md-on-surface);
+  font: 500 0.875rem var(--sans);
+  outline: none;
+}
+
+.searchInput:focus {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--md-primary-container) 22%, transparent);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.25rem;
+}
+
+@media (max-width: 1100px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.card {
+  border-radius: 0.95rem;
+  background: var(--md-surface-container-lowest);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--md-on-surface) 6%, transparent);
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  height: 20rem;
+  outline: 1px solid color-mix(in srgb, var(--md-outline-variant) 10%, transparent);
+}
+
+.cardHeaderRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.25rem;
+}
+
+.codeBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.6rem;
+  border-radius: 0.35rem;
+  background: color-mix(in srgb, var(--md-primary-container) 10%, transparent);
+  color: var(--md-primary-container);
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-family: var(--heading);
+}
+
+.cardTitle {
+  margin: 0;
+  font-family: var(--heading);
+  font-weight: 900;
+  letter-spacing: -0.015em;
+  color: var(--md-on-surface);
+  line-height: 1.25;
+  font-size: 1.35rem;
+}
+
+.cardSub {
+  margin: 0;
+  color: var(--md-on-surface-variant);
+  font-size: 0.88rem;
+}
+
+.cardBottom {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: auto;
+}
+
+.metric {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.metricValue {
+  font-family: var(--heading);
+  font-weight: 950;
+  font-size: 2.1rem;
+  line-height: 1;
+  color: var(--md-on-surface);
+  letter-spacing: -0.02em;
+}
+
+.metricLabel {
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--md-on-surface-variant) 75%, transparent);
+}
+
+.openBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0.6rem 0.95rem;
+  border-radius: 0.6rem;
+  border: 0;
+  cursor: pointer;
+  font-family: var(--heading);
+  font-weight: 900;
+  background: var(--md-primary-container);
+  color: var(--md-on-primary);
+  box-shadow: 0 10px 30px color-mix(in srgb, var(--md-primary-container) 20%, transparent);
+}
+
+.empty {
+  padding: 1rem;
+  border-radius: 0.75rem;
+  border: 1px dashed color-mix(in srgb, var(--md-outline-variant) 55%, transparent);
+  color: var(--md-on-surface-variant);
+}
+
