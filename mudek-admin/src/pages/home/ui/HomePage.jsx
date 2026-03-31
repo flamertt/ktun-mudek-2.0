@@ -1,22 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
 import {
-  ArrowUpRight,
-  BookOpen,
-  Building2,
-  CalendarRange,
-  ClipboardCheck,
-  ClipboardList,
-  GraduationCap,
-  Layers,
-  LayoutGrid,
-  Link2,
   Sparkles,
-  Target,
+  CalendarRange,
   Upload,
-  UserRound,
-  Users,
   UsersRound,
+  GraduationCap,
 } from 'lucide-react'
 
 import {
@@ -33,30 +21,6 @@ import { PageSection } from '@shared/ui/page-section/PageSection.jsx'
 import { RefreshIconButton } from '../../../shared/ui/refresh-icon-button/RefreshIconButton.jsx'
 import styles from './HomePage.module.css'
 
-const statConfig = [
-  { key: 'programs', label: 'Program', icon: LayoutGrid },
-  { key: 'courses', label: 'Ders', icon: BookOpen },
-  { key: 'teachers', label: 'Öğretmen', icon: GraduationCap },
-  { key: 'students', label: 'Öğrenci', icon: Users },
-]
-
-const navIconByKey = {
-  home: LayoutGrid,
-  users: Users,
-  'graduation-cap': GraduationCap,
-  building: Building2,
-  target: Target,
-  layers: Layers,
-  'link-2': Link2,
-  'calendar-range': CalendarRange,
-  upload: Upload,
-  'clipboard-check': ClipboardCheck,
-  'book-open': BookOpen,
-  'user-round': UserRound,
-  'users-round': UsersRound,
-  'clipboard-list': ClipboardList,
-}
-
 export function HomePage() {
   const [stats, setStats] = useState({
     programs: '—',
@@ -69,10 +33,31 @@ export function HomePage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
 
-  const quickLinks = useMemo(
-    () => appConfig.navSections.flatMap((s) => s.items).filter((i) => i.path !== '/home'),
+  const activityItems = useMemo(
+    () => [
+      {
+        icon: UsersRound,
+        title: 'Kayıtlar güncellendi',
+        time: '10 dk önce',
+        desc: 'Yeni toplu kayıt akışları hazırlandığında burada görünecek.',
+      },
+      {
+        icon: GraduationCap,
+        title: 'Öğretmen profili oluşturuldu',
+        time: '2 saat önce',
+        desc: 'Öğretmen atama işlemleri devam ettiğinde bu kısım otomatik dolacak.',
+      },
+      {
+        icon: Upload,
+        title: 'Excel içe aktarma çalıştı',
+        time: 'Dün',
+        desc: 'Toplu öğrenci içe aktarma sonuçları burada listelenecek.',
+      },
+    ],
     [],
   )
+
+  const termShort = activeTermName ? activeTermName.split(' ')[0] : 'Aktif'
 
   const refreshDashboard = useCallback(async () => {
     const token = getAdminToken()
@@ -118,80 +103,174 @@ export function HomePage() {
       loading={false}
     >
       <div className={styles.layout}>
-        <section className={styles.hero} aria-labelledby="home-hero-title">
-          <div className={styles.heroInner}>
-            <div className={styles.heroTop}>
-              <span className={styles.heroBadge}>
-                <Sparkles size={14} strokeWidth={2} aria-hidden />
-                Özet
-              </span>
-              {activeTermName ? (
-                <span className={styles.termPill}>{activeTermName}</span>
-              ) : (
-                <span className={styles.termPillMuted}>Aktif dönem bilgisi yok</span>
-              )}
-              <span className={styles.heroTopEnd}>
-                <RefreshIconButton onClick={() => void refreshDashboard()} loading={loading} />
-              </span>
-            </div>
-            <h2 id="home-hero-title" className={styles.heroTitle}>
-              Panele hoş geldiniz
-            </h2>
-            <p className={styles.heroLead}>
-              Kayıtlar ve açılışlar canlı veriden gelir. Sol menüden modüllere geçebilir veya aşağıdaki
-              kısayolları kullanabilirsiniz.
-            </p>
-            <div className={styles.heroMetrics}>
-              <div className={styles.heroMetric}>
-                <span className={styles.heroMetricLabel}>Aktif dönem açılışı</span>
-                <span className={styles.heroMetricValue}>
-                  {loading ? '…' : offeringsCount != null ? String(offeringsCount) : '—'}
-                </span>
-              </div>
-              <div className={styles.heroMetric}>
-                <span className={styles.heroMetricLabel}>Toplam öğrenci</span>
-                <span className={styles.heroMetricValue}>{loading ? '…' : stats.students}</span>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <div className={styles.stats}>
-          {statConfig.map(({ key, label, icon: Icon }) => (
-            <article key={key} className={styles.statCard}>
-              <div className={styles.statIcon} aria-hidden>
-                <Icon strokeWidth={1.75} size={22} />
-              </div>
-              <div className={styles.statBody}>
-                <p className={styles.statLabel}>{label}</p>
-                <p className={styles.statValue}>{loading ? '…' : stats[key]}</p>
-              </div>
-            </article>
-          ))}
-        </div>
-
-        <section className={styles.quickSection} aria-labelledby="quick-heading">
-          <div className={styles.quickHead}>
-            <h2 id="quick-heading" className={styles.quickTitle}>
-              Hızlı erişim
-            </h2>
-            <p className={styles.quickSubtitle}>Sık kullanılan yönetim ekranları</p>
-          </div>
-          <div className={styles.quickGrid}>
-            {quickLinks.map((item) => {
-              const Icon = navIconByKey[item.icon] ?? LayoutGrid
-              return (
-                <Link key={item.path} className={styles.quickCard} to={item.path}>
-                  <span className={styles.quickIconWrap} aria-hidden>
-                    <Icon strokeWidth={1.75} size={20} />
+        <div className={styles.dashboardGrid}>
+          <div className={styles.leftCol}>
+            <section className={styles.hero} aria-labelledby="home-hero-title">
+              <div className={styles.heroInner}>
+                <div className={styles.heroTop}>
+               
+                  {activeTermName ? (
+                    <span className={styles.termPill}>{activeTermName}</span>
+                  ) : (
+                    <span className={styles.termPillMuted}>Aktif dönem bilgisi yok</span>
+                  )}
+                  <span className={styles.heroTopEnd}>
+                    <RefreshIconButton onClick={() => void refreshDashboard()} loading={loading} />
                   </span>
-                  <span className={styles.quickLabel}>{item.label}</span>
-                  <ArrowUpRight className={styles.quickArrow} strokeWidth={2} size={18} aria-hidden />
-                </Link>
-              )
-            })}
+                </div>
+                <h2 id="home-hero-title" className={styles.heroTitle}>
+                  Hoş geldiniz
+                </h2>
+                <p className={styles.heroLead}>
+                  {termShort} dönemi için canlı özet ve hızlı erişim.
+                  Sol menüden modüllere geçebilir veya aşağıdaki kısayolları kullanabilirsiniz.
+                </p>
+                <div className={styles.heroMetrics}>
+                  <div className={styles.heroMetric}>
+                    <span className={styles.heroMetricLabel}>Aktif dönem açılışı</span>
+                    <span className={styles.heroMetricValue}>
+                      {loading ? '…' : offeringsCount != null ? String(offeringsCount) : '—'}
+                    </span>
+                  </div>
+                  <div className={styles.heroMetric}>
+                    <span className={styles.heroMetricLabel}>Toplam öğrenci</span>
+                    <span className={styles.heroMetricValue}>{loading ? '…' : stats.students}</span>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section className={styles.sideCard} aria-labelledby="activity-heading">
+              <div className={styles.sideHeader}>
+                <div className={styles.sideHeaderLeft}>
+                  <span className={styles.sideHeaderIcon} aria-hidden>
+                    <UsersRound strokeWidth={1.75} size={18} />
+                  </span>
+                  <h3 id="activity-heading" className={styles.sideTitle}>
+                    Son aktiviteler
+                  </h3>
+                </div>
+                <span className={styles.sideLink}>Tümünü gör</span>
+              </div>
+
+              <div className={styles.activityList}>
+                {activityItems.map((item) => {
+                  const Icon = item.icon
+                  return (
+                    <div key={item.title} className={styles.activityItem}>
+                      <div className={styles.activityIcon} aria-hidden>
+                        <Icon strokeWidth={1.75} size={18} />
+                      </div>
+                      <div className={styles.activityBody}>
+                        <div className={styles.activityTopLine}>
+                          <span className={styles.activityTitle}>{item.title}</span>
+                          <span className={styles.activityTime}>{item.time}</span>
+                        </div>
+                        <p className={styles.activityDesc}>{item.desc}</p>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </section>
           </div>
-        </section>
+
+          <div className={styles.rightCol}>
+            <section className={styles.sideCard} aria-labelledby="calendar-heading">
+              <div className={styles.sideHeader}>
+                <div className={styles.sideHeaderLeft}>
+                  <span className={styles.sideHeaderIconPrimary} aria-hidden>
+                    <CalendarRange strokeWidth={1.75} size={18} />
+                  </span>
+                  <h3 id="calendar-heading" className={styles.sideTitle}>
+                    Akademik takvim
+                  </h3>
+                </div>
+                <span className={styles.smallBadge}>{termShort} / Şu an</span>
+              </div>
+
+              <div className={styles.calendarList}>
+                <div className={styles.calendarItem}>
+                  <div className={styles.calendarDate}>
+                    <span className={styles.calendarMonth}>Eki</span>
+                    <span className={styles.calendarDay}>18</span>
+                  </div>
+                  <div>
+                    <p className={styles.calendarTitle}>Ara sınavlar başlıyor</p>
+                    <p className={styles.calendarSub}>Tüm bölümler</p>
+                  </div>
+                </div>
+                <div className={styles.calendarItem}>
+                  <div className={styles.calendarDate}>
+                    <span className={styles.calendarMonth}>Eki</span>
+                    <span className={styles.calendarDay}>25</span>
+                  </div>
+                  <div>
+                    <p className={styles.calendarTitle}>Kayıt son tarihi</p>
+                    <p className={styles.calendarSub}>Geç başvurular</p>
+                  </div>
+                </div>
+                <div className={styles.calendarItem}>
+                  <div className={styles.calendarDate}>
+                    <span className={styles.calendarMonth}>Kas</span>
+                    <span className={styles.calendarDay}>02</span>
+                  </div>
+                  <div>
+                    <p className={styles.calendarTitle}>Fakülte toplantısı</p>
+                    <p className={styles.calendarSub}>Ana salon</p>
+                  </div>
+                </div>
+              </div>
+
+              <button type="button" className={styles.sideButton} aria-label="Takvimi görüntüle">
+                Takvimi görüntüle
+              </button>
+            </section>
+
+            <section className={styles.sideCard} aria-labelledby="ann-heading">
+              <div className={styles.sideHeader}>
+                <h3 id="ann-heading" className={styles.sideTitle}>
+                  Duyurular
+                </h3>
+                <span className={styles.latestBadge}>LATEST</span>
+              </div>
+
+              <div className={styles.annList}>
+                <div className={styles.annItem}>
+                  <div className={styles.annDot} aria-hidden />
+                  <div>
+                    <p className={styles.annTime}>Bugün · 09:15</p>
+                    <p className={styles.annTitle}>Kampus Wi-Fi bakım planı</p>
+                    <p className={styles.annDesc}>2:00 - 4:00 arasında kesinti bekleniyor.</p>
+                  </div>
+                </div>
+                <div className={styles.annItem}>
+                  <div className={styles.annDotMuted} aria-hidden />
+                  <div>
+                    <p className={styles.annTimeMuted}>Dün</p>
+                    <p className={styles.annTitle}>Araştırma destek duyurusu</p>
+                    <p className={styles.annDesc}>2023 sonuç listesi yayınlandı.</p>
+                  </div>
+                </div>
+                <div className={styles.annItem}>
+                  <div className={styles.annDotMuted} aria-hidden />
+                  <div>
+                    <p className={styles.annTimeMuted}>12 Eki 2023</p>
+                    <p className={styles.annTitle}>Kütüphane çalışma saatleri</p>
+                    <p className={styles.annDesc}>Güncel açılış saatleri aktif oldu.</p>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section className={styles.quoteCard} aria-label="Alıntı">
+              <p className={styles.quoteText}>
+                “Eğitimin kökleri acıdır, ama meyvesi tatlıdır.”
+              </p>
+              <p className={styles.quoteAuthor}>— Aristoteles</p>
+            </section>
+          </div>
+        </div>
       </div>
     </PageSection>
   )
