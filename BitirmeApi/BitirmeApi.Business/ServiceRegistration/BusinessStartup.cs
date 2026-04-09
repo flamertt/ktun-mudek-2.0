@@ -98,6 +98,13 @@ namespace BitirmeApi.Business.ServiceRegistration
 
             services.AddScoped<IAnswerDal, AnswerDal>();
             services.AddScoped<IAnswerService, AnswerService>();
+
+            // Anket sonuç hesaplaması için yardımcı DAL'lar
+            services.AddScoped<ICloEvaluationResultDal, CloEvaluationResultDal>();
+            services.AddScoped<IStudentEvaluationResultDal, StudentEvaluationResultDal>();
+
+            // ── Öğrenci Anket Servisi ──────────────────────────────────────────────
+            services.AddScoped<IStudentSurveyService, StudentSurveyService>();
         }
     }
 }

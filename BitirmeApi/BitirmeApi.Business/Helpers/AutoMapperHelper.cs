@@ -189,6 +189,24 @@ namespace BitirmeApi.Business.Helpers
                 .ForMember(d => d.PoCode, o => o.MapFrom(s =>
                     s.PO != null ? s.PO.Code : null));
             CreateMap<CreateCloPoMapDto, CloPoMap>();
+
+            // ── Anket (Survey) ─────────────────────────────────────────────────────
+            CreateMap<Survey, SurveyListDto>()
+                .ForMember(d => d.QuestionCount, o => o.MapFrom(s =>
+                    s.Questions != null ? s.Questions.Count : 0))
+                .ForMember(d => d.SubmissionCount, o => o.MapFrom(s =>
+                    s.Submissions != null ? s.Submissions.Count : 0));
+
+            CreateMap<Survey, SurveyDetailDto>()
+                .ForMember(d => d.SubmissionCount, o => o.MapFrom(s =>
+                    s.Submissions != null ? s.Submissions.Count : 0))
+                .ForMember(d => d.Questions, o => o.MapFrom(s => s.Questions));
+
+            CreateMap<Question, SurveyQuestionDto>()
+                .ForMember(d => d.CloCode, o => o.MapFrom(s =>
+                    s.CourseLearningOutcome != null ? s.CourseLearningOutcome.Code : null))
+                .ForMember(d => d.CloDescription, o => o.MapFrom(s =>
+                    s.CourseLearningOutcome != null ? s.CourseLearningOutcome.Description : null));
         }
     }
 }

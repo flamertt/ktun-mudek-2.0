@@ -25,7 +25,7 @@ namespace BitirmeApi.Entity.Entities
         public int OrderIndex { get; set; } = 1;
         public bool IsRequired { get; set; } = true;
         
-        public int ScaleMin { get; set; } = 1;
+        public int ScaleMin { get; set; } = 0;
         public int ScaleMax { get; set; } = 5;
 
         [MaxLength(2000)]
@@ -33,6 +33,14 @@ namespace BitirmeApi.Entity.Entities
         
         [MaxLength(2000)]
         public string? McqOptionsCsv { get; set; }
+
+        /// <summary>
+        /// İsteğe bağlı DÖÇ eşlemesi. Null ise soru herhangi bir DÖÇ ile ilişkilendirilmemiştir.
+        /// </summary>
+        public Guid? CourseLearningOutcomeId { get; set; }
+
+        [ForeignKey("CourseLearningOutcomeId")]
+        public CourseLearningOutcome? CourseLearningOutcome { get; set; }
 
         public ICollection<Answer> Answers { get; set; } = new List<Answer>();
     }

@@ -2,19 +2,28 @@
 using BitirmeApi.DataAccess.Abstract;
 using BitirmeApi.DataAccess.Concrete.EntityFramework.Context;
 using BitirmeApi.Entity.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace BitirmeApi.DataAccess.Concrete.EntityFramework
 {
-    public class QuestionDal:EfRepository<Question,ProjectDbContext>,IQuestionDal
+    public class QuestionDal : EfRepository<Question, ProjectDbContext>, IQuestionDal
     {
-        public QuestionDal(ProjectDbContext context):base(context)
-        {
-                
-        }
+        public QuestionDal(ProjectDbContext context) : base(context) { }
+
+        public async Task<List<Question>> GetBySurveyIdAsync(Guid surveyId) =>
+            await _context.Questions
+                .Where(q => q.SurveyId == surveyId)
+                .OrderBy(q => q.OrderIndex)
+                .AsNoTracking()
+                .ToListAsync();
+
+        public async Task<Question?> GetByIdWithSurveyAsync(Guid id) =>
+            await _context.Questions
+                .Where(q => q.Id == id)
+                .Include(q => q.Survey)
+                    .ThenInclude(s => s.CourseOffering)
+                .Include(q => q.CourseLearningOutcome)
+                .AsNoTracking()
+                .FirstOrDefaultAsync();
     }
 }

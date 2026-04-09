@@ -24,6 +24,7 @@ namespace BitirmeApi.Presentation.Controllers
         private readonly ICourseEvaluationLetterGradeRuleService _letterRuleService;
         private readonly ICourseLearningOutcomeService _cloService;
         private readonly IMudekEvaluationCalculatorService _mudekCalculator;
+        private readonly ISurveyService _surveyService;
 
         public TeacherController(
             ICourseOfferingService offeringService,
@@ -38,7 +39,8 @@ namespace BitirmeApi.Presentation.Controllers
             IStudentAssessmentComponentScoreService componentScoreService,
             ICourseEvaluationLetterGradeRuleService letterRuleService,
             ICourseLearningOutcomeService cloService,
-            IMudekEvaluationCalculatorService mudekCalculator)
+            IMudekEvaluationCalculatorService mudekCalculator,
+            ISurveyService surveyService)
         {
             _offeringService = offeringService;
             _enrollmentService = enrollmentService;
@@ -53,6 +55,7 @@ namespace BitirmeApi.Presentation.Controllers
             _letterRuleService = letterRuleService;
             _cloService = cloService;
             _mudekCalculator = mudekCalculator;
+            _surveyService = surveyService;
         }
 
         private Guid GetTeacherId()
@@ -533,6 +536,10 @@ namespace BitirmeApi.Presentation.Controllers
             catch (UnauthorizedAccessException) { return Forbid(); }
         }
 
+        /// <summary>
+        /// Belirtilen ders açılışına ait DÖÇ (CLO) listesini getirir.
+        /// Anket sorusu eklerken DÖÇ seçimi için yardımcı endpoint.
+        /// </summary>
         [HttpGet("my-courses/{offeringId}/clos")]
         public async Task<IActionResult> GetClosByOffering(Guid offeringId)
         {
@@ -605,6 +612,156 @@ namespace BitirmeApi.Presentation.Controllers
                 }
                 return Ok(new { evaluationId, exams, componentsByExam });
             }
+            catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
+            catch (UnauthorizedAccessException) { return Forbid(); }
+        }
+
+        // ════════════════════════════════════════════════════════════════════════
+        // ANKET (SURVEY) — Likert (0-5)
+        // ════════════════════════════════════════════════════════════════════════
+
+        /// <summary>
+        /// Belirtilen ders açılışına ait anketleri listeler.
+        /// </summary>
+        [HttpGet("my-courses/{offeringId}/surveys")]
+        public async Task<IActionResult> GetSurveys(Guid offeringId)
+        {
+            try { return Ok(await _surveyService.GetByOfferingIdAsync(offeringId, GetTeacherId())); }
+            catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
+            catch (UnauthorizedAccessException) { return Forbid(); }
+        }
+
+        /// <summary>
+        /// Anket detayını sorularıyla birlikte getirir.
+        /// </summary>
+        [HttpGet("surveys/{surveyId}")]
+        public async Task<IActionResult> GetSurvey(Guid surveyId)
+        {
+            try
+            {
+                var result = await _surveyService.GetByIdAsync(surveyId, GetTeacherId());
+                return result == null
+                    ? NotFound(new { message = "Anket bulunamadı." })
+                    : Ok(result);
+            }
+            catch (UnauthorizedAccessException) { return Forbid(); }
+        }
+
+        /// <summary>
+        /// Yeni anket oluşturur. Body: { courseOfferingId, title, description?, isActive }
+        /// </summary>
+        [HttpPost("surveys")]
+        public async Task<IActionResult> CreateSurvey([FromBody] CreateSurveyDto dto)
+        {
+            try
+            {
+                var result = await _surveyService.CreateAsync(dto, GetTeacherId());
+                return CreatedAtAction(nameof(GetSurvey), new { surveyId = result.Id }, result);
+            }
+            catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
+            catch (UnauthorizedAccessException) { return Forbid(); }
+        }
+
+        /// <summary>
+        /// Anketi günceller (başlık, açıklama, aktif/pasif).
+        /// </summary>
+        [HttpPut("surveys/{surveyId}")]
+        public async Task<IActionResult> UpdateSurvey(Guid surveyId, [FromBody] UpdateSurveyDto dto)
+        {
+            if (dto.Id != surveyId)
+                return BadRequest(new { message = "URL ile body Id uyuşmuyor." });
+            try { return Ok(await _surveyService.UpdateAsync(dto, GetTeacherId())); }
+            catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
+            catch (UnauthorizedAccessException) { return Forbid(); }
+        }
+
+        /// <summary>
+        /// Anketi siler. Gönderim varsa hata döner.
+        /// </summary>
+        [HttpDelete("surveys/{surveyId}")]
+        public async Task<IActionResult> DeleteSurvey(Guid surveyId)
+        {
+            try
+            {
+                await _surveyService.DeleteAsync(surveyId, GetTeacherId());
+                return NoContent();
+            }
+            catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
+            catch (InvalidOperationException ex) { return BadRequest(new { message = ex.Message }); }
+            catch (UnauthorizedAccessException) { return Forbid(); }
+        }
+
+        /// <summary>
+        /// Anketin aktif/pasif durumunu tersine çevirir.
+        /// </summary>
+        [HttpPatch("surveys/{surveyId}/toggle-active")]
+        public async Task<IActionResult> ToggleSurveyActive(Guid surveyId)
+        {
+            try
+            {
+                await _surveyService.ToggleActiveAsync(surveyId, GetTeacherId());
+                return NoContent();
+            }
+            catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
+            catch (UnauthorizedAccessException) { return Forbid(); }
+        }
+
+        // ── Anket Soruları ────────────────────────────────────────────────────────
+
+        /// <summary>
+        /// Ankete yeni Likert sorusu ekler.
+        /// Body: { surveyId, text, orderIndex, isRequired, scaleMin (0), scaleMax (5) }
+        /// </summary>
+        [HttpPost("surveys/{surveyId}/questions")]
+        public async Task<IActionResult> AddSurveyQuestion(Guid surveyId, [FromBody] CreateSurveyQuestionDto dto)
+        {
+            if (dto.SurveyId != surveyId)
+                return BadRequest(new { message = "URL ile body surveyId uyuşmuyor." });
+            try { return Ok(await _surveyService.AddQuestionAsync(dto, GetTeacherId())); }
+            catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
+            catch (InvalidOperationException ex) { return BadRequest(new { message = ex.Message }); }
+            catch (UnauthorizedAccessException) { return Forbid(); }
+        }
+
+        /// <summary>
+        /// Mevcut soruyu günceller (metin, sıra, zorunlu, ölçek).
+        /// </summary>
+        [HttpPut("surveys/{surveyId}/questions/{questionId}")]
+        public async Task<IActionResult> UpdateSurveyQuestion(Guid surveyId, Guid questionId, [FromBody] UpdateSurveyQuestionDto dto)
+        {
+            if (dto.Id != questionId)
+                return BadRequest(new { message = "URL ile body Id uyuşmuyor." });
+            try { return Ok(await _surveyService.UpdateQuestionAsync(dto, GetTeacherId())); }
+            catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
+            catch (InvalidOperationException ex) { return BadRequest(new { message = ex.Message }); }
+            catch (UnauthorizedAccessException) { return Forbid(); }
+        }
+
+        /// <summary>
+        /// Soruyu siler.
+        /// </summary>
+        [HttpDelete("surveys/{surveyId}/questions/{questionId}")]
+        public async Task<IActionResult> DeleteSurveyQuestion(Guid surveyId, Guid questionId)
+        {
+            try
+            {
+                await _surveyService.DeleteQuestionAsync(questionId, GetTeacherId());
+                return NoContent();
+            }
+            catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
+            catch (UnauthorizedAccessException) { return Forbid(); }
+        }
+
+        // ── Anket Sonuçları ───────────────────────────────────────────────────────
+
+        /// <summary>
+        /// Anketin soru bazlı Likert sonuçlarını döner:
+        /// ortalama puan, yanıt sayısı ve puan dağılımı (0→n, 1→n, …, 5→n).
+        /// </summary>
+        [HttpGet("surveys/{surveyId}/results")]
+        public async Task<IActionResult> GetSurveyResults(Guid surveyId)
+        {
+            try { return Ok(await _surveyService.GetResultsAsync(surveyId, GetTeacherId())); }
             catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
             catch (UnauthorizedAccessException) { return Forbid(); }
         }

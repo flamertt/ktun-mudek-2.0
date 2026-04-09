@@ -17,6 +17,7 @@ namespace BitirmeApi.Entity.Entities
             Maps = new List<CloPoMap>();
             ExamQuestionMappings = new List<ExamQuestionOutcomeMapping>();
             AssessmentComponentMappings = new List<AssessmentComponentOutcomeMapping>();
+            SurveyQuestions = new List<Question>();
         }
 
         [Required, Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -41,5 +42,8 @@ namespace BitirmeApi.Entity.Entities
         // Dönemsel ölçme eşlemeleri (tek CLO kaynağı)
         public ICollection<ExamQuestionOutcomeMapping> ExamQuestionMappings { get; set; }
         public ICollection<AssessmentComponentOutcomeMapping> AssessmentComponentMappings { get; set; }
+
+        /// <summary>Bu DÖÇ'e eşlenmiş anket soruları (opsiyonel, geri navigasyon).</summary>
+        public ICollection<Question> SurveyQuestions { get; set; }
     }
 }

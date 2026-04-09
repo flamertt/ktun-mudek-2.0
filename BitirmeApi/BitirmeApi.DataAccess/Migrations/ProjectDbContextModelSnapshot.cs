@@ -900,6 +900,9 @@ namespace BitirmeApi.DataAccess.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("CourseLearningOutcomeId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<bool>("IsRequired")
                         .HasColumnType("bit");
 
@@ -934,6 +937,8 @@ namespace BitirmeApi.DataAccess.Migrations
                         .HasColumnType("nvarchar(16)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CourseLearningOutcomeId");
 
                     b.HasIndex("SurveyId");
 
@@ -1462,11 +1467,18 @@ namespace BitirmeApi.DataAccess.Migrations
 
             modelBuilder.Entity("BitirmeApi.Entity.Entities.Question", b =>
                 {
+                    b.HasOne("BitirmeApi.Entity.Entities.CourseLearningOutcome", "CourseLearningOutcome")
+                        .WithMany("SurveyQuestions")
+                        .HasForeignKey("CourseLearningOutcomeId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("BitirmeApi.Entity.Entities.Survey", "Survey")
                         .WithMany("Questions")
                         .HasForeignKey("SurveyId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("CourseLearningOutcome");
 
                     b.Navigation("Survey");
                 });
@@ -1593,6 +1605,8 @@ namespace BitirmeApi.DataAccess.Migrations
                     b.Navigation("ExamQuestionMappings");
 
                     b.Navigation("Maps");
+
+                    b.Navigation("SurveyQuestions");
                 });
 
             modelBuilder.Entity("BitirmeApi.Entity.Entities.CourseOffering", b =>

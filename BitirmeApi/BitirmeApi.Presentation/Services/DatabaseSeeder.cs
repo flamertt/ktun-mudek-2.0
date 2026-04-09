@@ -365,7 +365,12 @@ namespace BitirmeApi.Presentation.Services
                 await EnsureStudentAnswersAsync(context, enrollments, makeupQuestions, 25, 95, rng, makeupOnlyForBottomHalf: true);
                 await EnsureQuizScoresAsync(context, enrollments, quiz, rng);
 
-                Console.WriteLine("✓ Seed tamamlandı: Program, kullanıcılar, ders, DÖÇ/PÇ, offering, sınavlar, sorular ve öğrenci notları eklendi.");
+                // 16) Anket + Likert sorular + öğrenci cevapları
+                var survey = await EnsureSurveyAsync(context, offering.Id, now);
+                var surveyQuestions = await EnsureSurveyQuestionsAsync(context, survey.Id, clos);
+                await EnsureSurveySubmissionsAsync(context, students, survey, surveyQuestions, rng);
+
+                Console.WriteLine("✓ Seed tamamlandı: Program, kullanıcılar, ders, DÖÇ/PÇ, offering, sınavlar, sorular, öğrenci notları, anket ve öğrenci cevapları eklendi.");
             }
             catch (Exception ex)
             {
@@ -606,5 +611,161 @@ namespace BitirmeApi.Presentation.Services
                 Description = $"{letter} seviye aralığı",
                 CreatedAt = DateTime.UtcNow
             };
+
+        // ════════════════════════════════════════════════════════════════════════
+        // ANKET SEED METODLARI
+        // ════════════════════════════════════════════════════════════════════════
+
+        private static async Task<Survey> EnsureSurveyAsync(
+            ProjectDbContext context, Guid offeringId, DateTime now)
+        {
+            var survey = await context.Surveys.FirstOrDefaultAsync(s => s.CourseOfferingId == offeringId);
+            if (survey != null) return survey;
+
+            survey = new Survey
+            {
+                Id = Guid.NewGuid(),
+                CourseOfferingId = offeringId,
+                Title = "Yazılım Mühendisliği Dersi Öğrenci Geri Bildirim Anketi",
+                Description = "Bu anket, dersin kalitesini ve öğrenme çıktılarına katkısını değerlendirmek amacıyla hazırlanmıştır. " +
+                              "Yanıtlarınız anonim olarak işlenecek ve yalnızca ders iyileştirme çalışmalarında kullanılacaktır. " +
+                              "Her soruyu 0 (Bilgim yok) / 1(hiç katılmıyorum) ile 5 (tamamen katılıyorum) arasında değerlendirin.",
+                IsActive = true,
+                CreatedAt = now
+            };
+            context.Surveys.Add(survey);
+            await context.SaveChangesAsync();
+            return survey;
+        }
+
+        /// <summary>
+        /// 9 Likert sorusu oluşturur.
+        /// Kural: her soru en fazla 1 DÖÇ ile eşleşebilir; DÖÇ1 ise birden fazla soruyla eşleşir.
+        ///
+        /// DÖÇ dağılımı:
+        ///   DÖÇ1 → Soru 1 + Soru 7  (gereksinim — 2 soru)
+        ///   DÖÇ2 → Soru 2            (OOP tasarım)
+        ///   DÖÇ3 → Soru 3            (test/doğrulama)
+        ///   DÖÇ4 → Soru 4            (sürüm kontrolü)
+        ///   DÖÇ5 → Soru 5            (kalite metrikleri)
+        ///   DÖÇ6 → Soru 6            (mimari)
+        ///   null → Soru 8 + Soru 9   (genel geri bildirim, DÖÇ'süz)
+        /// </summary>
+        private static async Task<List<Question>> EnsureSurveyQuestionsAsync(
+            ProjectDbContext context, Guid surveyId, List<CourseLearningOutcome> clos)
+        {
+            // (sıra, metin, cloIndex veya null)
+            var defs = new List<(int Order, string Text, int? CloIdx)>
+            {
+                (1, "Ders kapsamında yazılım gereksinim analizini kavradım.",               0), // DÖÇ1
+                (2, "Nesne yönelimli tasarım ilkeleri açık biçimde aktarıldı.",             1), // DÖÇ2
+                (3, "Test senaryosu yazma ve doğrulama konularında yetkinlik kazandım.",    2), // DÖÇ3
+                (4, "Sürüm kontrolü araçları ve takım süreçleri pratikte öğretildi.",      3), // DÖÇ4
+                (5, "Yazılım kalite metriklerini proje sürecinde yorumlayabildim.",         4), // DÖÇ5
+                (6, "Mimari alternatifleri teknik açıdan karşılaştırma yetkinliği edindim.", 5), // DÖÇ6
+                (7, "Ders içerikleri gereksinim analizi konularını pekiştirdi.",            0), // DÖÇ1 (ikinci soru)
+                (8, "Öğretim yöntemi ve ders materyalleri öğrenmeyi destekledi.",         null), // DÖÇ yok
+                (9, "Değerlendirme yöntemi (sınavlar/ödevler) adil ve şeffaftı.",         null)  // DÖÇ yok
+            };
+
+            var result = new List<Question>();
+            foreach (var def in defs)
+            {
+                var q = await context.Questions.FirstOrDefaultAsync(
+                    x => x.SurveyId == surveyId && x.OrderIndex == def.Order);
+
+                if (q == null)
+                {
+                    q = new Question
+                    {
+                        Id = Guid.NewGuid(),
+                        SurveyId = surveyId,
+                        Text = def.Text,
+                        Type = QuestionType.Likert,
+                        OrderIndex = def.Order,
+                        IsRequired = true,
+                        ScaleMin = 0,
+                        ScaleMax = 5,
+                        CourseLearningOutcomeId = def.CloIdx.HasValue ? clos[def.CloIdx.Value].Id : null
+                    };
+                    context.Questions.Add(q);
+                }
+                result.Add(q);
+            }
+            await context.SaveChangesAsync();
+            return result.OrderBy(q => q.OrderIndex).ToList();
+        }
+
+        /// <summary>
+        /// 40 öğrencinin 35'i anketi doldurur; 5'i katılmaz.
+        /// Her öğrencinin akademik seviyesine göre (iyi/orta/zayıf) gerçekçi Likert dağılımı üretilir.
+        ///
+        /// Performans bantları (öğrenci sırası):
+        ///   0–9  → Yüksek performans: genel memnuniyet yüksek (ort. 4–5)
+        ///   10–19 → Orta performans: nötr–olumlu (ort. 3–4)
+        ///   20–29 → Alt–orta: karışık yanıtlar (ort. 2–4)
+        ///   30–34 → Düşük performans: daha çok olumsuz (ort. 1–3)
+        ///   35–39 → Anketi doldurmayan öğrenciler (5 kişi)
+        /// </summary>
+        private static async Task EnsureSurveySubmissionsAsync(
+            ProjectDbContext context,
+            List<AppUser> students,
+            Survey survey,
+            List<Question> questions,
+            Random rng)
+        {
+            // Bant başına (minRating, maxRating) — Likert 0-5
+            var bands = new[]
+            {
+                (Min: 4, Max: 5),   //  0– 9: yüksek performans
+                (Min: 3, Max: 5),   // 10–19: orta-iyi
+                (Min: 2, Max: 4),   // 20–29: orta-zayıf
+                (Min: 1, Max: 3),   // 30–34: düşük performans
+            };
+
+            // İlk 35 öğrenci katılıyor
+            for (var i = 0; i < 35; i++)
+            {
+                var student = students[i];
+                if (await context.Submissions.AnyAsync(s => s.SurveyId == survey.Id && s.UserId == student.Id))
+                    continue;
+
+                var submission = new Submission
+                {
+                    Id = Guid.NewGuid(),
+                    SurveyId = survey.Id,
+                    UserId = student.Id,
+                    SubmittedAt = DateTime.UtcNow.AddDays(-rng.Next(1, 14)),
+                    IncludeInStatistics = true
+                };
+                context.Submissions.Add(submission);
+                await context.SaveChangesAsync();
+
+                // Hangi bant?
+                var bandIdx = i < 10 ? 0 : i < 20 ? 1 : i < 30 ? 2 : 3;
+                var (bandMin, bandMax) = bands[bandIdx];
+
+                foreach (var question in questions)
+                {
+                    // Her soruda küçük rastgele sapma; bazı öğrenciler bazı sorulara
+                    // kendi genel eğilimlerinden ±1 sapma yapar.
+                    var deviation = rng.Next(-1, 2);          // -1, 0 veya +1
+                    var rawMin = Math.Clamp(bandMin + deviation, 0, 5);
+                    var rawMax = Math.Clamp(bandMax + deviation, 0, 5);
+                    if (rawMin > rawMax) rawMin = rawMax;
+
+                    var value = rng.Next(rawMin, rawMax + 1);
+
+                    context.Answers.Add(new Answer
+                    {
+                        Id = Guid.NewGuid(),
+                        SubmissionId = submission.Id,
+                        QuestionId = question.Id,
+                        ValueNumeric = value
+                    });
+                }
+                await context.SaveChangesAsync();
+            }
+        }
     }
 }

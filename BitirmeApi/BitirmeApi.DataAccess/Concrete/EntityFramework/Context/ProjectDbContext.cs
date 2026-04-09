@@ -250,6 +250,16 @@ namespace BitirmeApi.DataAccess.Concrete.EntityFramework.Context
                  .WithMany(s => s.Questions)
                  .HasForeignKey(x => x.SurveyId)
                  .OnDelete(DeleteBehavior.Cascade);
+
+                // DÖÇ eşlemesi isteğe bağlı.
+                // SetNull yerine Restrict: SQL Server'da Survey→Questions CASCADE ile çakışan
+                // ikinci bir cascade path oluşmaması için. CLO silinmek istenirse önce
+                // bağlı anket soruları servis katmanında temizlenmelidir.
+                e.HasOne(x => x.CourseLearningOutcome)
+                 .WithMany(c => c.SurveyQuestions)
+                 .HasForeignKey(x => x.CourseLearningOutcomeId)
+                 .OnDelete(DeleteBehavior.Restrict)
+                 .IsRequired(false);
             });
 
             b.Entity<Submission>(e =>

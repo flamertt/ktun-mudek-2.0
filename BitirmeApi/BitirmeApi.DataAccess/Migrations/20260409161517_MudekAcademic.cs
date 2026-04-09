@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace BitirmeApi.DataAccess.Migrations
 {
     /// <inheritdoc />
-    public partial class MudekDbAcademic : Migration
+    public partial class MudekAcademic : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -425,11 +425,18 @@ namespace BitirmeApi.DataAccess.Migrations
                     ScaleMin = table.Column<int>(type: "int", nullable: false),
                     ScaleMax = table.Column<int>(type: "int", nullable: false),
                     Options = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: true),
-                    McqOptionsCsv = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: true)
+                    McqOptionsCsv = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: true),
+                    CourseLearningOutcomeId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Questions", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Questions_Clos_CourseLearningOutcomeId",
+                        column: x => x.CourseLearningOutcomeId,
+                        principalTable: "Clos",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Questions_Surveys_SurveyId",
                         column: x => x.SurveyId,
@@ -980,6 +987,11 @@ namespace BitirmeApi.DataAccess.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_Questions_CourseLearningOutcomeId",
+                table: "Questions",
+                column: "CourseLearningOutcomeId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Questions_SurveyId",
                 table: "Questions",
                 column: "SurveyId");
@@ -1094,9 +1106,6 @@ namespace BitirmeApi.DataAccess.Migrations
                 name: "Submissions");
 
             migrationBuilder.DropTable(
-                name: "Clos");
-
-            migrationBuilder.DropTable(
                 name: "ProgramOutcomes");
 
             migrationBuilder.DropTable(
@@ -1107,6 +1116,9 @@ namespace BitirmeApi.DataAccess.Migrations
 
             migrationBuilder.DropTable(
                 name: "Enrollments");
+
+            migrationBuilder.DropTable(
+                name: "Clos");
 
             migrationBuilder.DropTable(
                 name: "Surveys");
