@@ -1,6 +1,6 @@
 import { createColumnHelper } from '@tanstack/react-table'
 import { RefreshCw, Trash2 } from 'lucide-react'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 
 import {
@@ -11,7 +11,6 @@ import {
   fetchScores,
   updateScore,
 } from '../../../shared/api/teacherApi'
-import { appConfig } from '../../../shared/config/appConfig'
 import { getTeacherToken } from '../../../shared/lib/authToken'
 import { parseMaybeNumber } from '../../../shared/lib/numberUtils.js'
 import formStyles from '../../../shared/ui/admin-form/AdminForm.module.css'
@@ -26,8 +25,6 @@ export function ComponentScoresPage() {
   const { offeringId, evaluationId, componentId } = useParams()
   const navigate = useNavigate()
 
-  const page = appConfig.pages.evaluations
-
   const [enrollments, setEnrollments] = useState([])
   const [scores, setScores] = useState([])
 
@@ -37,6 +34,11 @@ export function ComponentScoresPage() {
 
   const [scoreDraftByEnrollmentId, setScoreDraftByEnrollmentId] = useState({})
   const [notesDraftByEnrollmentId, setNotesDraftByEnrollmentId] = useState({})
+
+  const scoreDraftRef = useRef(scoreDraftByEnrollmentId)
+  const notesDraftRef = useRef(notesDraftByEnrollmentId)
+  scoreDraftRef.current = scoreDraftByEnrollmentId
+  notesDraftRef.current = notesDraftByEnrollmentId
 
   const [saving, setSaving] = useState(false)
   const [submitError, setSubmitError] = useState('')
@@ -81,76 +83,82 @@ export function ComponentScoresPage() {
     load()
   }, [load])
 
-  const handleSaveOne = async (enrollment) => {
-    const token = getTeacherToken()
-    if (!token || !componentId) return
-    setSubmitError('')
+  const handleSaveOne = useCallback(
+    async (enrollment) => {
+      const token = getTeacherToken()
+      if (!token || !componentId) return
+      setSubmitError('')
 
-    const enrollmentId = enrollment.id ?? enrollment.Id
-    const existing = scoreByEnrollmentId.get(enrollmentId)
+      const enrollmentId = enrollment.id ?? enrollment.Id
+      const existing = scoreByEnrollmentId.get(enrollmentId)
 
-    const score = parseMaybeNumber(scoreDraftByEnrollmentId[enrollmentId])
-    const notes = String(notesDraftByEnrollmentId[enrollmentId] ?? '').trim() || null
+      const score = parseMaybeNumber(scoreDraftRef.current[enrollmentId])
+      const notes = String(notesDraftRef.current[enrollmentId] ?? '').trim() || null
 
-    if (score == null) {
-      setSubmitError('Skor zorunlu.')
-      return
-    }
-
-    setSaving(true)
-    try {
-      if (existing?.id ?? existing?.Id) {
-        const scoreId = existing.id ?? existing.Id
-        await updateScore(token, scoreId, { score, notes })
-      } else {
-        await addScore(token, componentId, { enrollmentId, score, notes })
+      if (score == null) {
+        setSubmitError('Puan zorunlu.')
+        return
       }
-      await load()
-    } catch (e) {
-      setSubmitError(e instanceof Error ? e.message : 'Kaydedilemedi.')
-    } finally {
-      setSaving(false)
-    }
-  }
 
-  const handleDeleteOne = async (enrollment) => {
-    const token = getTeacherToken()
-    if (!token || !componentId) return
-    const enrollmentId = enrollment.id ?? enrollment.Id
-    const existing = scoreByEnrollmentId.get(enrollmentId)
-    const scoreId = existing?.id ?? existing?.Id
-    if (!scoreId) return
+      setSaving(true)
+      try {
+        if (existing?.id ?? existing?.Id) {
+          const scoreId = existing.id ?? existing.Id
+          await updateScore(token, scoreId, { score, notes })
+        } else {
+          await addScore(token, componentId, { enrollmentId, score, notes })
+        }
+        await load()
+      } catch (e) {
+        setSubmitError(e instanceof Error ? e.message : 'Kaydedilemedi.')
+      } finally {
+        setSaving(false)
+      }
+    },
+    [componentId, load, scoreByEnrollmentId],
+  )
 
-    const ok = window.confirm('Bu skoru silmek istiyor musun?')
-    if (!ok) return
+  const handleDeleteOne = useCallback(
+    async (enrollment) => {
+      const token = getTeacherToken()
+      if (!token || !componentId) return
+      const enrollmentId = enrollment.id ?? enrollment.Id
+      const existing = scoreByEnrollmentId.get(enrollmentId)
+      const scoreId = existing?.id ?? existing?.Id
+      if (!scoreId) return
 
-    setSubmitError('')
-    setSaving(true)
-    try {
-      await deleteScore(token, scoreId)
-      await load()
-    } catch (e) {
-      setSubmitError(e instanceof Error ? e.message : 'Silinemedi.')
-    } finally {
-      setSaving(false)
-    }
-  }
+      const ok = window.confirm('Bu öğrencinin puan kaydını silmek istiyor musunuz?')
+      if (!ok) return
 
-  const handleSaveBulk = async () => {
+      setSubmitError('')
+      setSaving(true)
+      try {
+        await deleteScore(token, scoreId)
+        await load()
+      } catch (e) {
+        setSubmitError(e instanceof Error ? e.message : 'Silinemedi.')
+      } finally {
+        setSaving(false)
+      }
+    },
+    [componentId, load, scoreByEnrollmentId],
+  )
+
+  const handleSaveBulk = useCallback(async () => {
     const token = getTeacherToken()
     if (!token || !componentId || !offeringId) return
 
     const scoresItems = []
     for (const en of enrollments) {
       const enrollmentId = en.id ?? en.Id
-      const score = parseMaybeNumber(scoreDraftByEnrollmentId[enrollmentId])
+      const score = parseMaybeNumber(scoreDraftRef.current[enrollmentId])
       if (score == null) continue
-      const notes = String(notesDraftByEnrollmentId[enrollmentId] ?? '').trim() || null
+      const notes = String(notesDraftRef.current[enrollmentId] ?? '').trim() || null
       scoresItems.push({ enrollmentId, score, notes })
     }
 
     if (!scoresItems.length) {
-      setSubmitError('Toplu kaydet için en az bir skor gir.')
+      setSubmitError('Toplu kaydet için en az bir satırda puan girin.')
       return
     }
 
@@ -164,7 +172,7 @@ export function ComponentScoresPage() {
     } finally {
       setSaving(false)
     }
-  }
+  }, [componentId, enrollments, load, offeringId])
 
   const columns = useMemo(
     () => [
@@ -173,15 +181,16 @@ export function ComponentScoresPage() {
       columnHelper.accessor('status', { header: 'Durum', cell: (info) => info.getValue() ?? '—' }),
       columnHelper.display({
         id: 'score',
-        header: 'Skor',
+        header: 'Puan',
         cell: ({ row }) => {
           const en = row.original
           const enrollmentId = en.id ?? en.Id
-          const value = scoreDraftByEnrollmentId[enrollmentId] ?? ''
+          const value = scoreDraftRef.current[enrollmentId] ?? ''
           return (
             <input
-              type="number"
-              step="0.01"
+              type="text"
+              inputMode="decimal"
+              autoComplete="off"
               className={formStyles.input}
               style={{ minWidth: '8rem' }}
               value={value}
@@ -197,16 +206,18 @@ export function ComponentScoresPage() {
       }),
       columnHelper.display({
         id: 'notes',
-        header: 'Not',
+        header: 'Açıklama',
         cell: ({ row }) => {
           const en = row.original
           const enrollmentId = en.id ?? en.Id
-          const value = notesDraftByEnrollmentId[enrollmentId] ?? ''
+          const value = notesDraftRef.current[enrollmentId] ?? ''
           return (
             <input
               type="text"
+              autoComplete="off"
               className={formStyles.input}
               style={{ minWidth: '12rem' }}
+              placeholder="İsteğe bağlı kısa not"
               value={value}
               onChange={(e) =>
                 setNotesDraftByEnrollmentId((prev) => ({
@@ -228,7 +239,7 @@ export function ComponentScoresPage() {
           const hasExisting = Boolean(existing?.id ?? existing?.Id)
 
           return (
-            <div className={formStyles.actions}>
+            <div className={formStyles.rowActionGroup}>
               <button
                 type="button"
                 className={`${formStyles.btn} ${formStyles.btnPrimary}`}
@@ -240,12 +251,12 @@ export function ComponentScoresPage() {
               {hasExisting ? (
                 <button
                   type="button"
-                  className={`${formStyles.actionIcon} ${formStyles.actionDanger}`}
+                  className={`${formStyles.rowActionText} ${formStyles.rowActionTextDanger}`}
                   disabled={saving}
-                  title="Skoru sil"
                   onClick={() => handleDeleteOne(en)}
                 >
-                  <Trash2 size={16} aria-hidden />
+                  <Trash2 size={14} aria-hidden />
+                  Kaydı sil
                 </button>
               ) : null}
             </div>
@@ -253,11 +264,15 @@ export function ComponentScoresPage() {
         },
       }),
     ],
-    [handleDeleteOne, handleSaveOne, saving, scoreByEnrollmentId, notesDraftByEnrollmentId, scoreDraftByEnrollmentId],
+    [handleDeleteOne, handleSaveOne, saving, scoreByEnrollmentId],
   )
 
   return (
-    <PageSection title="Bileşen notları" description={page.title} error={error || submitError}>
+    <PageSection
+      title="Bileşen puanları"
+      description="Puan: bu sınav/bileşen için sayısal not (ör. 30, 75.5). Açıklama: harf notu değil; isteğe bağlı kısa metin. Değişiklikler yalnızca Kaydet veya Toplu kaydet ile sunucuya yazılır."
+      error={error || submitError}
+    >
       <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'flex-end' }}>
         <RefreshIconButton onClick={load} loading={loading} title="Yenile" />
         <button
@@ -275,9 +290,8 @@ export function ComponentScoresPage() {
           onClick={() =>
             navigate(`/evaluations/${offeringId}/evaluation/${evaluationId}/components/${componentId}/clos`)
           }
-          title="CLO eşleştirmesini yönet"
         >
-          CLO eşleştir
+          DÖÇ eşlemesi sayfası
         </button>
       </div>
 

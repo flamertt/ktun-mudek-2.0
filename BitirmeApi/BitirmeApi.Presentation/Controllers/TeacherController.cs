@@ -21,8 +21,9 @@ namespace BitirmeApi.Presentation.Controllers
         private readonly IAssessmentComponentOutcomeMappingService _componentOutcomeService;
         private readonly IStudentAnswerService _studentAnswerService;
         private readonly IStudentAssessmentComponentScoreService _componentScoreService;
-        private readonly ICourseEvaluationLetterGradeRuleService _letterRuleService;
+        private readonly IProgramLetterGradeRuleService _programLetterGradeRuleService;
         private readonly ICourseLearningOutcomeService _cloService;
+        private readonly IProgramOutcomeService _programOutcomeService;
         private readonly IMudekEvaluationCalculatorService _mudekCalculator;
         private readonly ISurveyService _surveyService;
 
@@ -37,8 +38,9 @@ namespace BitirmeApi.Presentation.Controllers
             IAssessmentComponentOutcomeMappingService componentOutcomeService,
             IStudentAnswerService studentAnswerService,
             IStudentAssessmentComponentScoreService componentScoreService,
-            ICourseEvaluationLetterGradeRuleService letterRuleService,
+            IProgramLetterGradeRuleService programLetterGradeRuleService,
             ICourseLearningOutcomeService cloService,
+            IProgramOutcomeService programOutcomeService,
             IMudekEvaluationCalculatorService mudekCalculator,
             ISurveyService surveyService)
         {
@@ -52,8 +54,9 @@ namespace BitirmeApi.Presentation.Controllers
             _componentOutcomeService = componentOutcomeService;
             _studentAnswerService = studentAnswerService;
             _componentScoreService = componentScoreService;
-            _letterRuleService = letterRuleService;
+            _programLetterGradeRuleService = programLetterGradeRuleService;
             _cloService = cloService;
+            _programOutcomeService = programOutcomeService;
             _mudekCalculator = mudekCalculator;
             _surveyService = surveyService;
         }
@@ -498,41 +501,16 @@ namespace BitirmeApi.Presentation.Controllers
             catch (UnauthorizedAccessException) { return Forbid(); }
         }
 
-        [HttpGet("evaluations/{evaluationId}/letter-grade-rules")]
-        public async Task<IActionResult> GetLetterRules(Guid evaluationId)
+        /// <summary>
+        /// Geçerli harf notu kuralları (önce programa tanımlı; yoksa eski değerlendirme bazlı kurallar). Salt okunur.
+        /// </summary>
+        [HttpGet("my-courses/{offeringId}/letter-grade-rules")]
+        public async Task<IActionResult> GetLetterRulesForOffering(Guid offeringId)
         {
-            try { return Ok(await _letterRuleService.GetByEvaluationForTeacherAsync(evaluationId, GetTeacherId())); }
-            catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
-            catch (UnauthorizedAccessException) { return Forbid(); }
-        }
-
-        [HttpPost("evaluations/{evaluationId}/letter-grade-rules")]
-        public async Task<IActionResult> AddLetterRule(Guid evaluationId, [FromBody] CreateCourseEvaluationLetterGradeRuleDto dto)
-        {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-            dto.CourseEvaluationId = evaluationId;
-            try { return Ok(await _letterRuleService.AddForTeacherAsync(dto, GetTeacherId())); }
-            catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
-            catch (UnauthorizedAccessException) { return Forbid(); }
-            catch (InvalidOperationException ex) { return Conflict(new { message = ex.Message }); }
-        }
-
-        [HttpPut("letter-grade-rules/{ruleId}")]
-        public async Task<IActionResult> UpdateLetterRule(Guid ruleId, [FromBody] UpdateCourseEvaluationLetterGradeRuleDto dto)
-        {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-            dto.Id = ruleId;
-            try { return Ok(await _letterRuleService.UpdateForTeacherAsync(dto, GetTeacherId())); }
-            catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
-            catch (UnauthorizedAccessException) { return Forbid(); }
-            catch (InvalidOperationException ex) { return Conflict(new { message = ex.Message }); }
-        }
-
-        [HttpDelete("letter-grade-rules/{ruleId}")]
-        public async Task<IActionResult> DeleteLetterRule(Guid ruleId)
-        {
-            try { await _letterRuleService.DeleteForTeacherAsync(ruleId, GetTeacherId()); return Ok(new { message = "Rule silindi." }); }
-            catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
+            try
+            {
+                return Ok(await _programLetterGradeRuleService.GetEffectiveForTeacherOfferingAsync(offeringId, GetTeacherId()));
+            }
             catch (UnauthorizedAccessException) { return Forbid(); }
         }
 
@@ -546,6 +524,17 @@ namespace BitirmeApi.Presentation.Controllers
             var offering = await _offeringService.GetByIdForTeacherAsync(offeringId, GetTeacherId());
             if (offering == null) return NotFound(new { message = "Ders açılışı bulunamadı veya erişim yetkiniz yok." });
             return Ok(await _cloService.GetByCourseIdAsync(offering.CourseId));
+        }
+
+        /// <summary>
+        /// Dersin programına ait program çıktıları (PÇ). MÜDEK özet ekranlarında isim çözümlemesi için.
+        /// </summary>
+        [HttpGet("my-courses/{offeringId}/program-outcomes")]
+        public async Task<IActionResult> GetProgramOutcomesByOffering(Guid offeringId)
+        {
+            var offering = await _offeringService.GetByIdForTeacherAsync(offeringId, GetTeacherId());
+            if (offering == null) return NotFound(new { message = "Ders açılışı bulunamadı veya erişim yetkiniz yok." });
+            return Ok(await _programOutcomeService.GetByProgramIdAsync(offering.ProgramEntityId));
         }
 
         // ════════════════════════════════════════════════════════════════════════

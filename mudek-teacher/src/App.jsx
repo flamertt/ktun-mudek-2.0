@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes } from 'react-router-dom'
+import { Navigate, Route, Routes, useParams } from 'react-router-dom'
 
 import { HomePage } from './pages/home/ui/HomePage.jsx'
 import { LoginPage } from './pages/login/ui/LoginPage.jsx'
@@ -17,13 +17,43 @@ import { QuestionAnswersPage } from './pages/question-answers/ui/QuestionAnswers
 import { ExamComponentsPage } from './pages/exam-components/ui/ExamComponentsPage.jsx'
 import { ComponentClosPage } from './pages/component-clos/ui/ComponentClosPage.jsx'
 import { ComponentScoresPage } from './pages/component-scores/ui/ComponentScoresPage.jsx'
-import { LetterGradeRulesPage } from './pages/letter-grade-rules/ui/LetterGradeRulesPage.jsx'
 import { MudekStudentResultsPage } from './pages/mudek-student-results/ui/MudekStudentResultsPage.jsx'
 import { MudekExamSummariesPage } from './pages/mudek-exam-summaries/ui/MudekExamSummariesPage.jsx'
 import { MudekQuestionComponentResultsPage } from './pages/mudek-question-component-results/ui/MudekQuestionComponentResultsPage.jsx'
 import { MudekItemCloAchievementsPage } from './pages/mudek-item-clo-achievements/ui/MudekItemCloAchievementsPage.jsx'
 import { MudekCloResultsPage } from './pages/mudek-clo-results/ui/MudekCloResultsPage.jsx'
 import { MudekProgramOutcomeResultsPage } from './pages/mudek-program-outcome-results/ui/MudekProgramOutcomeResultsPage.jsx'
+import { CourseSurveysPage } from './pages/course-surveys/ui/CourseSurveysPage.jsx'
+import { TeacherSurveyDetailPage } from './pages/survey-detail/ui/TeacherSurveyDetailPage.jsx'
+import { SurveyLandingPage } from './pages/survey-landing/ui/SurveyLandingPage.jsx'
+import { TeacherSurveyResultsPage } from './pages/survey-results/ui/TeacherSurveyResultsPage.jsx'
+
+const SURVEY_SECTION = appConfig.routes.surveyCreate
+
+function LegacyCourseSurveysListRedirect() {
+  const { offeringId } = useParams()
+  return <Navigate to={`${SURVEY_SECTION}/${offeringId}`} replace />
+}
+
+function LegacyCourseSurveyDetailRedirect() {
+  const { offeringId, surveyId } = useParams()
+  return <Navigate to={`${SURVEY_SECTION}/${offeringId}/${surveyId}`} replace />
+}
+
+function LegacySurveysListRedirect() {
+  const { offeringId } = useParams()
+  return <Navigate to={`${SURVEY_SECTION}/${offeringId}`} replace />
+}
+
+function LegacySurveysDetailRedirect() {
+  const { offeringId, surveyId } = useParams()
+  return <Navigate to={`${SURVEY_SECTION}/${offeringId}/${surveyId}`} replace />
+}
+
+function LegacySurveysResultsRedirect() {
+  const { offeringId, surveyId } = useParams()
+  return <Navigate to={`${SURVEY_SECTION}/${offeringId}/${surveyId}/results`} replace />
+}
 
 export default function App() {
   const navItems = appConfig.navSections.flatMap((section) => section.items)
@@ -33,6 +63,7 @@ export default function App() {
   const PAGE_BY_KEY = {
     courses: MyCoursesPage,
     evaluations: EvaluationsLandingPage,
+    surveyCreate: SurveyLandingPage,
   }
 
   return (
@@ -59,7 +90,17 @@ export default function App() {
         })}
 
         <Route path="/courses/:offeringId" element={<CourseDetailPage />} />
+        <Route path="/courses/:offeringId/surveys" element={<LegacyCourseSurveysListRedirect />} />
+        <Route path="/courses/:offeringId/surveys/:surveyId" element={<LegacyCourseSurveyDetailRedirect />} />
         <Route path="/courses/:offeringId/students" element={<CourseStudentsPage />} />
+
+        <Route path="/surveys/:offeringId/:surveyId/results" element={<LegacySurveysResultsRedirect />} />
+        <Route path="/surveys/:offeringId/:surveyId" element={<LegacySurveysDetailRedirect />} />
+        <Route path="/surveys/:offeringId" element={<LegacySurveysListRedirect />} />
+
+        <Route path={`${SURVEY_SECTION}/:offeringId/:surveyId/results`} element={<TeacherSurveyResultsPage />} />
+        <Route path={`${SURVEY_SECTION}/:offeringId/:surveyId`} element={<TeacherSurveyDetailPage />} />
+        <Route path={`${SURVEY_SECTION}/:offeringId`} element={<CourseSurveysPage />} />
         <Route path="/evaluations/:offeringId" element={<CourseEvaluationPage />} />
         <Route path="/evaluations/:offeringId/mudek/students" element={<MudekStudentResultsPage />} />
         <Route path="/evaluations/:offeringId/mudek/exams" element={<MudekExamSummariesPage />} />
@@ -101,10 +142,6 @@ export default function App() {
         <Route
           path="/evaluations/:offeringId/evaluation/:evaluationId/components/:componentId/scores"
           element={<ComponentScoresPage />}
-        />
-        <Route
-          path="/evaluations/:offeringId/evaluation/:evaluationId/letter-grade-rules"
-          element={<LetterGradeRulesPage />}
         />
       </Route>
       <Route path="*" element={<Navigate to={appConfig.routes.home} replace />} />

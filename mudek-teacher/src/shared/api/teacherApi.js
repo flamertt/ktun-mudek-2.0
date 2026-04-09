@@ -1,6 +1,7 @@
 import {
   deleteJsonWithAuth,
   getJson,
+  patchJsonWithAuth,
   postJsonWithAuth,
   putJsonWithAuth,
 } from './httpClient'
@@ -225,20 +226,9 @@ export function deleteScore(token, scoreId) {
 // Letter grade rules
 // ═════════════════════════════════════════════
 
-export function fetchLetterGradeRules(token, evaluationId) {
-  return getJson(`${TEACHER}/evaluations/${evaluationId}/letter-grade-rules`, { token })
-}
-
-export function addLetterRule(token, evaluationId, body) {
-  return postJsonWithAuth(`${TEACHER}/evaluations/${evaluationId}/letter-grade-rules`, body, token)
-}
-
-export function updateLetterRule(token, ruleId, body) {
-  return putJsonWithAuth(`${TEACHER}/letter-grade-rules/${ruleId}`, body, token)
-}
-
-export function deleteLetterRule(token, ruleId) {
-  return deleteJsonWithAuth(`${TEACHER}/letter-grade-rules/${ruleId}`, token)
+/** Salt okunur: program veya (yalnızca eski veri) değerlendirme kuralları. */
+export function fetchEffectiveLetterGradeRules(token, offeringId) {
+  return getJson(`${TEACHER}/my-courses/${offeringId}/letter-grade-rules`, { token })
 }
 
 // ═════════════════════════════════════════════
@@ -249,11 +239,65 @@ export function fetchOfferingClos(token, offeringId) {
   return getJson(`${TEACHER}/my-courses/${offeringId}/clos`, { token })
 }
 
+/** Ders programına ait PÇ listesi (kod, başlık). */
+export function fetchOfferingProgramOutcomes(token, offeringId) {
+  return getJson(`${TEACHER}/my-courses/${offeringId}/program-outcomes`, { token })
+}
+
 // ═════════════════════════════════════════════
 // MÜDEK results & calculate
 // ═════════════════════════════════════════════
 
 export function fetchMudekResults(token, offeringId) {
   return getJson(`${TEACHER}/my-courses/${offeringId}/mudek-evaluation/results`, { token })
+}
+
+/** Kayıtlı snapshot’ı siler, zinciri baştan hesaplar; güncel özeti döner. */
+export function calculateMudekEvaluation(token, offeringId) {
+  return postJsonWithAuth(`${TEACHER}/my-courses/${offeringId}/mudek-evaluation/calculate`, {}, token)
+}
+
+// ═════════════════════════════════════════════
+// Surveys (Likert)
+// ═════════════════════════════════════════════
+
+export function fetchTeacherSurveys(token, offeringId) {
+  return getJson(`${TEACHER}/my-courses/${offeringId}/surveys`, { token })
+}
+
+export function fetchTeacherSurveyDetail(token, surveyId) {
+  return getJson(`${TEACHER}/surveys/${surveyId}`, { token })
+}
+
+export function createTeacherSurvey(token, body) {
+  return postJsonWithAuth(`${TEACHER}/surveys`, body, token)
+}
+
+export function updateTeacherSurvey(token, surveyId, body) {
+  return putJsonWithAuth(`${TEACHER}/surveys/${surveyId}`, body, token)
+}
+
+export function deleteTeacherSurvey(token, surveyId) {
+  return deleteJsonWithAuth(`${TEACHER}/surveys/${surveyId}`, token)
+}
+
+export function toggleTeacherSurveyActive(token, surveyId) {
+  return patchJsonWithAuth(`${TEACHER}/surveys/${surveyId}/toggle-active`, token)
+}
+
+export function addTeacherSurveyQuestion(token, surveyId, body) {
+  return postJsonWithAuth(`${TEACHER}/surveys/${surveyId}/questions`, body, token)
+}
+
+export function updateTeacherSurveyQuestion(token, surveyId, questionId, body) {
+  return putJsonWithAuth(`${TEACHER}/surveys/${surveyId}/questions/${questionId}`, body, token)
+}
+
+export function deleteTeacherSurveyQuestion(token, surveyId, questionId) {
+  return deleteJsonWithAuth(`${TEACHER}/surveys/${surveyId}/questions/${questionId}`, token)
+}
+
+export function fetchTeacherSurveyResults(token, surveyId) {
+  return getJson(`${TEACHER}/surveys/${surveyId}/results`, { token })
 }
 

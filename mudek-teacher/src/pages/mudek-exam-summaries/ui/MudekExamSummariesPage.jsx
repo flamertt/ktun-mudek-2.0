@@ -4,7 +4,9 @@ import { useParams } from 'react-router-dom'
 
 import { PageSection } from '@shared/ui/page-section/PageSection.jsx'
 import { DataTable } from '@shared/ui/data-table/DataTable.jsx'
+import { formatMudekDecimal } from '../../course-evaluation/lib/mudekDisplayLabels'
 import { useCourseEvaluationMudekData } from '../../course-evaluation/model/useCourseEvaluationMudekData'
+import { EvaluationMudekBackToolbar } from '../../course-evaluation/ui/EvaluationMudekBackToolbar.jsx'
 import styles from './MudekExamSummariesPage.module.css'
 
 const columnHelper = createColumnHelper()
@@ -54,9 +56,18 @@ export function MudekExamSummariesPage() {
       columnHelper.accessor('participantCount', { header: 'Katılımcı' }),
       columnHelper.accessor('includedStudentCount', { header: 'Dahil öğrenci' }),
       columnHelper.accessor('perfectScoreCount', { header: 'Tam puan' }),
-      columnHelper.accessor('maxTotalScore', { header: 'Max toplam' }),
-      columnHelper.accessor('minTotalScore', { header: 'Min toplam' }),
-      columnHelper.accessor('averageTotalScore', { header: 'Ortalama toplam' }),
+      columnHelper.accessor('maxTotalScore', {
+        header: 'En yüksek toplam',
+        cell: (info) => formatMudekDecimal(info.getValue(), 2),
+      }),
+      columnHelper.accessor('minTotalScore', {
+        header: 'En düşük toplam',
+        cell: (info) => formatMudekDecimal(info.getValue(), 2),
+      }),
+      columnHelper.accessor('averageTotalScore', {
+        header: 'Ortalama toplam',
+        cell: (info) => formatMudekDecimal(info.getValue(), 2),
+      }),
       columnHelper.accessor('updatedAt', { header: 'Güncellendi', cell: (info) => d.formatDate(info.getValue()) }),
     ],
     [d],
@@ -64,6 +75,7 @@ export function MudekExamSummariesPage() {
 
   return (
     <PageSection title={`${d.title} · MÜDEK · Sınav`} description="Sınav özetleri" error={d.error} loading={d.loading}>
+      <EvaluationMudekBackToolbar />
       <div className={styles.panel}>
         <h3 className={styles.panelTitle}>MÜDEK · Sınav özetleri</h3>
         <DataTable

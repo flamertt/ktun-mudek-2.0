@@ -302,18 +302,18 @@ export function EvaluationExamsPage() {
                   <div className={styles.actions}>
                     <button
                       type="button"
-                      className={styles.actionBtn}
+                      className={`${styles.actionBtn} ${styles.actionBtnLead}`}
                       onClick={() =>
                         navigate(
                           `/evaluations/${offeringId}/evaluation/${evaluationId}/exams/${row.id}/questions`,
                         )
                       }
                     >
-                      Sorular
+                      Soru yönetimi
                     </button>
                     <button
                       type="button"
-                      className={styles.actionBtn}
+                      className={`${styles.actionBtn} ${styles.actionBtnLead}`}
                       onClick={() =>
                         navigate(
                           `/evaluations/${offeringId}/evaluation/${evaluationId}/exams/${row.id}/components`,
@@ -321,7 +321,7 @@ export function EvaluationExamsPage() {
                       }
                     >
                       <ClipboardCheck size={14} aria-hidden />
-                      Bileşenler
+                      Bileşen yönetimi
                     </button>
                     <button type="button" className={styles.actionBtn} onClick={() => openEdit(row)}>
                       <Pencil size={14} aria-hidden />

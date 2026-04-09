@@ -113,6 +113,24 @@ namespace BitirmeApi.Presentation.Services
                 }
                 await context.SaveChangesAsync();
 
+                // 3b) Tüm programlar için varsayılan harf notu kuralları (kuralları yoksa; elle tek tek eklemeyi önler)
+                var programIds = await context.Programs.Select(p => p.Id).ToListAsync();
+                foreach (var pid in programIds)
+                {
+                    if (await context.ProgramLetterGradeRules.AnyAsync(r => r.ProgramEntityId == pid))
+                        continue;
+                    context.ProgramLetterGradeRules.AddRange(
+                        ProgGradeRule(pid, "AA", 90, 100, true, 50),
+                        ProgGradeRule(pid, "BA", 85, 89.99m, true, 50),
+                        ProgGradeRule(pid, "BB", 80, 84.99m, true, 50),
+                        ProgGradeRule(pid, "CB", 70, 79.99m, true, 45),
+                        ProgGradeRule(pid, "CC", 60, 69.99m, true, 45),
+                        ProgGradeRule(pid, "DC", 50, 59.99m, true, 40),
+                        ProgGradeRule(pid, "DD", 40, 49.99m, false, 40),
+                        ProgGradeRule(pid, "FF", 0, 39.99m, false, null));
+                }
+                await context.SaveChangesAsync();
+
                 // 4) Ders
                 var course = await context.Courses.FirstOrDefaultAsync(c => c.ProgramEntityId == program.Id && c.Code == "BLM401");
                 if (course == null)
@@ -343,20 +361,7 @@ namespace BitirmeApi.Presentation.Services
                     await context.SaveChangesAsync();
                 }
 
-                // 14) Harf notu kuralları
-                if (!await context.CourseEvaluationLetterGradeRules.AnyAsync(r => r.CourseEvaluationId == evaluation.Id))
-                {
-                    context.CourseEvaluationLetterGradeRules.AddRange(
-                        GradeRule(evaluation.Id, "AA", 90, 100, true, 50),
-                        GradeRule(evaluation.Id, "BA", 85, 89.99m, true, 50),
-                        GradeRule(evaluation.Id, "BB", 80, 84.99m, true, 50),
-                        GradeRule(evaluation.Id, "CB", 70, 79.99m, true, 45),
-                        GradeRule(evaluation.Id, "CC", 60, 69.99m, true, 45),
-                        GradeRule(evaluation.Id, "DC", 50, 59.99m, true, 40),
-                        GradeRule(evaluation.Id, "DD", 40, 49.99m, false, 40),
-                        GradeRule(evaluation.Id, "FF", 0, 39.99m, false, null));
-                    await context.SaveChangesAsync();
-                }
+                // 14) Harf notu: program düzeyinde (3b); değerlendirme başına kural eklenmez.
 
                 // 15) Öğrenci puanları (soru notları + quiz score)
                 // Yazılı ham toplamlar (her sınav 100 üzerinden soru toplamı)
@@ -592,8 +597,8 @@ namespace BitirmeApi.Presentation.Services
             await context.SaveChangesAsync();
         }
 
-        private static CourseEvaluationLetterGradeRule GradeRule(
-            Guid evaluationId,
+        private static ProgramLetterGradeRule ProgGradeRule(
+            Guid programId,
             string letter,
             decimal min,
             decimal max,
@@ -602,7 +607,7 @@ namespace BitirmeApi.Presentation.Services
             new()
             {
                 Id = Guid.NewGuid(),
-                CourseEvaluationId = evaluationId,
+                ProgramEntityId = programId,
                 LetterGrade = letter,
                 MinScore = min,
                 MaxScore = max,

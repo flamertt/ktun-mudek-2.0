@@ -9,6 +9,7 @@ import {
   Home,
   Layers,
   Link2,
+  Percent,
   Settings,
   SquarePen,
   Target,
@@ -35,6 +36,7 @@ const NAV_ICON_BY_NAME = {
   settings: Settings,
   layers: Layers,
   'link-2': Link2,
+  percent: Percent,
   'calendar-range': CalendarRange,
   upload: Upload,
 }

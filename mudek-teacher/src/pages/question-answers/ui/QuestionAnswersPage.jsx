@@ -1,6 +1,6 @@
 import { createColumnHelper } from '@tanstack/react-table'
-import { RefreshCw, Trash2 } from 'lucide-react'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { Trash2 } from 'lucide-react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 
 import {
@@ -11,7 +11,6 @@ import {
   fetchCourseStudents,
   updateAnswer,
 } from '../../../shared/api/teacherApi'
-import { appConfig } from '../../../shared/config/appConfig'
 import { getTeacherToken } from '../../../shared/lib/authToken'
 import { parseMaybeNumber } from '../../../shared/lib/numberUtils.js'
 import formStyles from '../../../shared/ui/admin-form/AdminForm.module.css'
@@ -26,8 +25,6 @@ export function QuestionAnswersPage() {
   const { offeringId, evaluationId, questionId } = useParams()
   const navigate = useNavigate()
 
-  const page = appConfig.pages.evaluations
-
   const [enrollments, setEnrollments] = useState([])
   const [answers, setAnswers] = useState([])
 
@@ -36,6 +33,9 @@ export function QuestionAnswersPage() {
   const [globalFilter, setGlobalFilter] = useState('')
 
   const [scoreDraftByEnrollmentId, setScoreDraftByEnrollmentId] = useState({})
+  const scoreDraftRef = useRef(scoreDraftByEnrollmentId)
+  scoreDraftRef.current = scoreDraftByEnrollmentId
+
   const [saving, setSaving] = useState(false)
   const [submitError, setSubmitError] = useState('')
 
@@ -75,74 +75,80 @@ export function QuestionAnswersPage() {
     load()
   }, [load])
 
-  const handleSaveOne = async (enrollment) => {
-    const token = getTeacherToken()
-    if (!token || !questionId) return
+  const handleSaveOne = useCallback(
+    async (enrollment) => {
+      const token = getTeacherToken()
+      if (!token || !questionId) return
 
-    const enrollmentId = enrollment.id ?? enrollment.Id
-    const existing = answerByEnrollmentId.get(enrollmentId)
+      const enrollmentId = enrollment.id ?? enrollment.Id
+      const existing = answerByEnrollmentId.get(enrollmentId)
 
-    const score = parseMaybeNumber(scoreDraftByEnrollmentId[enrollmentId])
-    if (score == null) {
-      setSubmitError('Skor zorunlu.')
-      return
-    }
-
-    setSubmitError('')
-    setSaving(true)
-    try {
-      if (existing?.id ?? existing?.Id) {
-        const answerId = existing.id ?? existing.Id
-        await updateAnswer(token, answerId, { score })
-      } else {
-        await addAnswer(token, questionId, { enrollmentId, score })
+      const score = parseMaybeNumber(scoreDraftRef.current[enrollmentId])
+      if (score == null) {
+        setSubmitError('Puan zorunlu.')
+        return
       }
-      await load()
-    } catch (e) {
-      setSubmitError(e instanceof Error ? e.message : 'Kaydedilemedi.')
-    } finally {
-      setSaving(false)
-    }
-  }
 
-  const handleDeleteOne = async (enrollment) => {
-    const token = getTeacherToken()
-    if (!token || !questionId) return
+      setSubmitError('')
+      setSaving(true)
+      try {
+        if (existing?.id ?? existing?.Id) {
+          const answerId = existing.id ?? existing.Id
+          await updateAnswer(token, answerId, { score })
+        } else {
+          await addAnswer(token, questionId, { enrollmentId, score })
+        }
+        await load()
+      } catch (e) {
+        setSubmitError(e instanceof Error ? e.message : 'Kaydedilemedi.')
+      } finally {
+        setSaving(false)
+      }
+    },
+    [answerByEnrollmentId, load, questionId],
+  )
 
-    const enrollmentId = enrollment.id ?? enrollment.Id
-    const existing = answerByEnrollmentId.get(enrollmentId)
-    const answerId = existing?.id ?? existing?.Id
-    if (!answerId) return
+  const handleDeleteOne = useCallback(
+    async (enrollment) => {
+      const token = getTeacherToken()
+      if (!token || !questionId) return
 
-    const ok = window.confirm('Cevabı silmek istiyor musun?')
-    if (!ok) return
+      const enrollmentId = enrollment.id ?? enrollment.Id
+      const existing = answerByEnrollmentId.get(enrollmentId)
+      const answerId = existing?.id ?? existing?.Id
+      if (!answerId) return
 
-    setSubmitError('')
-    setSaving(true)
-    try {
-      await deleteAnswer(token, answerId)
-      await load()
-    } catch (e) {
-      setSubmitError(e instanceof Error ? e.message : 'Silinemedi.')
-    } finally {
-      setSaving(false)
-    }
-  }
+      const ok = window.confirm('Bu öğrencinin cevap kaydını silmek istiyor musunuz?')
+      if (!ok) return
 
-  const handleSaveBulk = async () => {
+      setSubmitError('')
+      setSaving(true)
+      try {
+        await deleteAnswer(token, answerId)
+        await load()
+      } catch (e) {
+        setSubmitError(e instanceof Error ? e.message : 'Silinemedi.')
+      } finally {
+        setSaving(false)
+      }
+    },
+    [answerByEnrollmentId, load, questionId],
+  )
+
+  const handleSaveBulk = useCallback(async () => {
     const token = getTeacherToken()
     if (!token || !questionId || !offeringId) return
 
     const items = []
     for (const en of enrollments) {
       const enrollmentId = en.id ?? en.Id
-      const score = parseMaybeNumber(scoreDraftByEnrollmentId[enrollmentId])
+      const score = parseMaybeNumber(scoreDraftRef.current[enrollmentId])
       if (score == null) continue
       items.push({ enrollmentId, score })
     }
 
     if (!items.length) {
-      setSubmitError('Toplu kaydet için en az bir skor gir.')
+      setSubmitError('Toplu kaydet için en az bir satırda puan girin.')
       return
     }
 
@@ -156,7 +162,7 @@ export function QuestionAnswersPage() {
     } finally {
       setSaving(false)
     }
-  }
+  }, [enrollments, load, offeringId, questionId])
 
   const columns = useMemo(
     () => [
@@ -165,15 +171,16 @@ export function QuestionAnswersPage() {
       columnHelper.accessor('status', { header: 'Durum', cell: (info) => info.getValue() ?? '—' }),
       columnHelper.display({
         id: 'score',
-        header: 'Skor',
+        header: 'Puan',
         cell: ({ row }) => {
           const en = row.original
           const enrollmentId = en.id ?? en.Id
-          const value = scoreDraftByEnrollmentId[enrollmentId] ?? ''
+          const value = scoreDraftRef.current[enrollmentId] ?? ''
           return (
             <input
-              type="number"
-              step="0.01"
+              type="text"
+              inputMode="decimal"
+              autoComplete="off"
               className={formStyles.input}
               style={{ minWidth: '9rem' }}
               value={value}
@@ -197,7 +204,7 @@ export function QuestionAnswersPage() {
           const hasExisting = Boolean(existing?.id ?? existing?.Id)
 
           return (
-            <div className={formStyles.actions}>
+            <div className={formStyles.rowActionGroup}>
               <button
                 type="button"
                 className={`${formStyles.btn} ${formStyles.btnPrimary}`}
@@ -209,12 +216,12 @@ export function QuestionAnswersPage() {
               {hasExisting ? (
                 <button
                   type="button"
-                  className={`${formStyles.actionIcon} ${formStyles.actionDanger}`}
+                  className={`${formStyles.rowActionText} ${formStyles.rowActionTextDanger}`}
                   disabled={saving}
-                  title="Cevabı sil"
                   onClick={() => handleDeleteOne(en)}
                 >
-                  <Trash2 size={16} aria-hidden />
+                  <Trash2 size={14} aria-hidden />
+                  Kaydı sil
                 </button>
               ) : null}
             </div>
@@ -222,13 +229,13 @@ export function QuestionAnswersPage() {
         },
       }),
     ],
-    [answerByEnrollmentId, handleDeleteOne, handleSaveOne, saving, scoreDraftByEnrollmentId],
+    [answerByEnrollmentId, handleDeleteOne, handleSaveOne, saving],
   )
 
   return (
     <PageSection
-      title="Cevap / Skor girişi"
-      description={page.title}
+      title="Öğrenci cevap puanları"
+      description="Puan: bu soru için sayısal not. Yazarken tablo sütunları yenilenmez; kayıt yalnızca Kaydet veya Toplu kaydet ile sunucuya gider."
       error={error || submitError}
     >
       <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'flex-end' }}>
@@ -248,9 +255,8 @@ export function QuestionAnswersPage() {
           onClick={() =>
             navigate(`/evaluations/${offeringId}/evaluation/${evaluationId}/questions/${questionId}/clos`)
           }
-          title="CLO eşlemesini yönet"
         >
-          CLO eşleştir
+          DÖÇ eşlemesi sayfası
         </button>
       </div>
 
@@ -269,4 +275,3 @@ export function QuestionAnswersPage() {
     </PageSection>
   )
 }
-

@@ -1,0 +1,41 @@
+.hero {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.1rem 1.2rem;
+  border-radius: var(--page-card-radius);
+  background: var(--page-card-bg);
+  border: 1px solid var(--page-card-border);
+  box-shadow: var(--page-card-shadow);
+  margin-bottom: 0.15rem;
+}
+
+.heroIcon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 0.85rem;
+  background: color-mix(in srgb, var(--md-primary-container) 36%, var(--page-card-bg) 64%);
+  border: 1px solid color-mix(in srgb, var(--md-primary-container) 50%, var(--md-outline-variant) 50%);
+  color: var(--md-primary);
+}
+
+.heroTitle {
+  margin: 0;
+  font-family: var(--heading);
+  font-weight: 800;
+  font-size: 0.95rem;
+  letter-spacing: -0.02em;
+  color: var(--md-on-surface);
+}
+
+.heroText {
+  margin: 0.35rem 0 0;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--md-on-surface-variant);
+  max-width: 40rem;
+}

@@ -10,6 +10,7 @@ import { FacultyManagementPage } from './pages/faculty-management/ui/FacultyMana
 import { HomePage } from './pages/home/ui/HomePage.jsx'
 import { LoginPage } from './pages/login/ui/LoginPage.jsx'
 import { OfferingManagementPage } from './pages/offering-management/ui/OfferingManagementPage.jsx'
+import { ProgramLetterGradeRulesPage } from './pages/program-letter-grade-rules/ui/ProgramLetterGradeRulesPage.jsx'
 import { ProgramOutcomesPage } from './pages/program-outcomes/ui/ProgramOutcomesPage.jsx'
 import { StudentManagementPage } from './pages/student-management/ui/StudentManagementPage.jsx'
 import { SurveyManagementPage } from './pages/survey-management/ui/SurveyManagementPage.jsx'
@@ -27,6 +28,7 @@ const PAGE_BY_KEY = {
   courseManagement: CourseManagementPage,
   cloManagement: CloManagementPage,
   cloPoMapping: CloPoMappingPage,
+  letterGradeRules: ProgramLetterGradeRulesPage,
   offeringManagement: OfferingManagementPage,
   studentManagement: StudentManagementPage,
   courseStudents: CourseStudentsPage,

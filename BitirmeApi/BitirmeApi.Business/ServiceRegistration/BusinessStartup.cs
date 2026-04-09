@@ -82,6 +82,9 @@ namespace BitirmeApi.Business.ServiceRegistration
             services.AddScoped<ICourseEvaluationLetterGradeRuleDal, CourseEvaluationLetterGradeRuleDal>();
             services.AddScoped<ICourseEvaluationLetterGradeRuleService, CourseEvaluationLetterGradeRuleService>();
 
+            services.AddScoped<IProgramLetterGradeRuleDal, ProgramLetterGradeRuleDal>();
+            services.AddScoped<IProgramLetterGradeRuleService, ProgramLetterGradeRuleService>();
+
             // Katkı düzeyleri artık catalog CLO + CourseEvaluation FK üzerinden
             services.AddScoped<IProgramOutcomeContributionDal, ProgramOutcomeContributionDal>();
             services.AddScoped<IProgramOutcomeContributionService, ProgramOutcomeContributionService>();

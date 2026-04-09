@@ -141,24 +141,24 @@ export function ComponentClosPage() {
         id: 'actions',
         header: 'İşlemler',
         cell: ({ row }) => (
-          <div className={formStyles.actions}>
+          <div className={formStyles.rowActionGroup}>
             <button
               type="button"
-              className={formStyles.actionIcon}
-              title="Düzenle"
+              className={formStyles.rowActionText}
               onClick={() => openEdit(row.original)}
               disabled={saving}
             >
-              <Pencil size={16} aria-hidden />
+              <Pencil size={14} aria-hidden />
+              Düzenle
             </button>
             <button
               type="button"
-              className={`${formStyles.actionIcon} ${formStyles.actionDanger}`}
-              title="Sil"
+              className={`${formStyles.rowActionText} ${formStyles.rowActionTextDanger}`}
               onClick={() => handleDelete(row.original)}
               disabled={saving}
             >
-              <Trash2 size={16} aria-hidden />
+              <Trash2 size={14} aria-hidden />
+              Sil
             </button>
           </div>
         ),

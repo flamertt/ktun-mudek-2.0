@@ -1,6 +1,7 @@
 import { createColumnHelper } from '@tanstack/react-table'
+import { ArrowLeft } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 
 import { fetchCourseStudents } from '../../../shared/api/teacherApi'
 import { appConfig } from '../../../shared/config/appConfig'
@@ -15,6 +16,7 @@ const columnHelper = createColumnHelper()
 
 export function CourseStudentsPage() {
   const { offeringId } = useParams()
+  const navigate = useNavigate()
   const page = appConfig.pages.courses
 
   const [rows, setRows] = useState([])
@@ -65,6 +67,17 @@ export function CourseStudentsPage() {
       description={'Kayıtlı öğrenci listesi'}
       error={error}
     >
+      <div className={formStyles.actions} style={{ marginBottom: '0.5rem', flexWrap: 'wrap' }}>
+        <button
+          type="button"
+          className={`${formStyles.btn} ${formStyles.btnGhost}`}
+          onClick={() => navigate(appConfig.routes.courses)}
+        >
+          <ArrowLeft size={16} aria-hidden />
+          Derslerim
+        </button>
+      </div>
+
       <DataTable
         columns={columns}
         data={rows}
@@ -83,8 +96,6 @@ export function CourseStudentsPage() {
           Toplam: {rows.length}
         </p>
       ) : null}
-
-      <div className={formStyles.actions} />
     </PageSection>
   )
 }

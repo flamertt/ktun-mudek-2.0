@@ -13,11 +13,12 @@
 }
 
 .card {
-  border: 1px solid color-mix(in srgb, var(--md-outline-variant) 45%, transparent);
-  background: var(--md-surface-container-lowest);
-  border-radius: 0.9rem;
+  border: 1px solid var(--page-card-border);
+  background: var(--page-card-bg);
+  border-radius: var(--page-card-radius);
   padding: 1rem;
   min-width: 0;
+  box-shadow: var(--page-card-shadow);
 }
 
 .cardHead {
@@ -274,7 +275,7 @@
 }
 
 .actionBtn {
-  height: 2rem;
+  min-height: 2.15rem;
   border: 0;
   border-radius: 0.5rem;
   background: transparent;
@@ -282,9 +283,9 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.25rem;
+  gap: 0.3rem;
   cursor: pointer;
-  padding: 0 0.6rem;
+  padding: 0.35rem 0.65rem;
   font-size: 0.78rem;
   font-weight: 700;
   white-space: nowrap;
@@ -292,6 +293,16 @@
 
 .actionBtn:hover {
   background: var(--md-surface-container-high);
+}
+
+.actionBtnLead {
+  border: 1px solid color-mix(in srgb, var(--md-primary) 42%, transparent);
+  background: color-mix(in srgb, var(--md-primary) 10%, transparent);
+  color: var(--md-primary);
+}
+
+.actionBtnLead:hover {
+  background: color-mix(in srgb, var(--md-primary) 18%, transparent);
 }
 
 .secondaryBtn {

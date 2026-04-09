@@ -65,7 +65,7 @@ export const appConfig = {
     },
     surveyCreate: {
       title: 'Anket Oluştur',
-      description: 'Ders ve dönem bazlı anket oluşturma ekranı burada yer alacak.',
+      description: 'Ders seçerek o dersin anketlerini oluşturup yönetebilirsiniz.',
     },
     outcomes: {
       title: 'Program Çıktılarım',

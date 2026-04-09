@@ -182,6 +182,10 @@ namespace BitirmeApi.Business.Helpers
             CreateMap<CreateCourseEvaluationLetterGradeRuleDto, CourseEvaluationLetterGradeRule>();
             CreateMap<UpdateCourseEvaluationLetterGradeRuleDto, CourseEvaluationLetterGradeRule>();
 
+            CreateMap<ProgramLetterGradeRule, ProgramLetterGradeRuleDto>();
+            CreateMap<CreateProgramLetterGradeRuleDto, ProgramLetterGradeRule>();
+            CreateMap<UpdateProgramLetterGradeRuleDto, ProgramLetterGradeRule>();
+
             // ── CloPoMap ──────────────────────────────────────────────────────────
             CreateMap<CloPoMap, CloPoMapDto>()
                 .ForMember(d => d.CloCode, o => o.MapFrom(s =>

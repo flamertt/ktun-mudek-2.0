@@ -34,7 +34,7 @@
   padding: 0.55rem 0.75rem;
   border-radius: 0.5rem;
   border: 1px solid color-mix(in srgb, var(--md-tertiary) 16%, var(--md-outline-variant) 84%);
-  background: var(--md-surface-container-lowest);
+  background: var(--page-card-bg);
   color: var(--md-on-surface);
   font: 500 0.875rem var(--sans);
   outline: none;
@@ -64,17 +64,17 @@
 }
 
 .card {
-  border-radius: 0.95rem;
-  background: var(--md-surface-container-lowest);
-  box-shadow:
-    0 8px 24px color-mix(in srgb, var(--md-on-surface) 6%, transparent);
+  border-radius: var(--page-card-radius);
+  background: var(--page-card-bg);
+  box-shadow: var(--page-card-shadow);
   padding: 2rem;
   display: flex;
   flex-direction: column;
   gap: 0.9rem;
   height: 20rem;
   transition: none;
-  outline: 1px solid color-mix(in srgb, var(--md-outline-variant) 10%, transparent);
+  border: 1px solid var(--page-card-border);
+  outline: none;
 }
 
 .cardTop {

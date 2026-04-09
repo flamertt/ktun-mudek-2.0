@@ -10,6 +10,7 @@ namespace BitirmeApi.Entity.Entities
         {
             ProgramOutcomes = new List<ProgramOutcome>();
             Courses = new List<Course>();
+            LetterGradeRules = new List<ProgramLetterGradeRule>();
         }
 
         [Required, Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -22,5 +23,7 @@ namespace BitirmeApi.Entity.Entities
 
         public ICollection<ProgramOutcome> ProgramOutcomes { get; set; }
         public ICollection<Course> Courses { get; set; }
+
+        public ICollection<ProgramLetterGradeRule> LetterGradeRules { get; set; }
     }
 }

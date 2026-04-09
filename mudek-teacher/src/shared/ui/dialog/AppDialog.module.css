@@ -20,6 +20,7 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  min-height: 0;
   max-height: min(90vh, 720px);
 }
 
@@ -36,6 +37,7 @@
 }
 
 .header {
+  flex-shrink: 0;
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -70,9 +72,12 @@
 .body {
   padding: 1rem;
   overflow: auto;
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
 .footer {
+  flex-shrink: 0;
   padding: 0.75rem 1rem 1rem;
   border-top: 1px solid color-mix(in srgb, var(--md-outline-variant) 35%, transparent);
   display: flex;

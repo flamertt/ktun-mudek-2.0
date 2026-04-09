@@ -5,7 +5,9 @@ import { useParams } from 'react-router-dom'
 import { PageSection } from '@shared/ui/page-section/PageSection.jsx'
 import sectionStyles from '@shared/ui/page-section/PageSection.module.css'
 import { DataTable } from '@shared/ui/data-table/DataTable.jsx'
+import { mudekUsedExamTypeTr } from '../../course-evaluation/lib/mudekDisplayLabels'
 import { useCourseEvaluationMudekData } from '../../course-evaluation/model/useCourseEvaluationMudekData'
+import { EvaluationMudekBackToolbar } from '../../course-evaluation/ui/EvaluationMudekBackToolbar.jsx'
 import styles from './MudekStudentResultsPage.module.css'
 
 const columnHelper = createColumnHelper()
@@ -44,7 +46,10 @@ export function MudekStudentResultsPage() {
       columnHelper.accessor('midtermScore', { header: 'Vize' }),
       columnHelper.accessor('finalScore', { header: 'Final' }),
       columnHelper.accessor('makeupScore', { header: 'Bütleme' }),
-      columnHelper.accessor('usedExamType', { header: 'Kullanılan sınav' }),
+      columnHelper.accessor('usedExamType', {
+        header: 'Kullanılan sınav',
+        cell: (info) => mudekUsedExamTypeTr(info.getValue()),
+      }),
       columnHelper.accessor('successGrade', { header: 'Başarı (örn.)' }),
       columnHelper.accessor('letterGrade', { header: 'Harf notu' }),
       columnHelper.accessor('isPassed', { header: 'Geçti mi?', cell: (info) => (info.getValue() ? 'Evet' : 'Hayır') }),
@@ -75,6 +80,7 @@ export function MudekStudentResultsPage() {
   return (
     <PageSection title={`${d.title} · MÜDEK · Öğrenci`} description="Başarı setleri + öğrenci sonuçları" error={d.error} loading={d.loading}>
       <div className={styles.root}>
+        <EvaluationMudekBackToolbar />
         <div className={styles.cards}>
           <div className={styles.card}>
             <div className={styles.cardLabel}>Sınıf ortalaması</div>

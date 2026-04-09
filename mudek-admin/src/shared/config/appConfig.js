@@ -16,6 +16,7 @@ export const appConfig = {
     courseManagement: '/course-management',
     cloManagement: '/clo-management',
     cloPoMapping: '/clo-po-mapping',
+    letterGradeRules: '/letter-grade-rules',
     offeringManagement: '/offerings',
     studentManagement: '/student-management',
     courseStudents: '/course-students',
@@ -74,6 +75,12 @@ export const appConfig = {
           label: 'CLO ↔ PÇ eşlemesi',
           path: '/clo-po-mapping',
           icon: 'link-2',
+        },
+        {
+          key: 'letterGradeRules',
+          label: 'Harf notu kuralları (program)',
+          path: '/letter-grade-rules',
+          icon: 'percent',
         },
       ],
     },
@@ -182,6 +189,11 @@ export const appConfig = {
     cloPoMapping: {
       title: 'CLO ↔ program çıktısı eşlemesi',
       description: 'Seçilen derse ait CLO ile program çıktıları arasındaki eşleme ve ağırlıkları yönetin.',
+    },
+    letterGradeRules: {
+      title: 'Harf notu kuralları',
+      description:
+        'Lisans programı bazında başarı notu aralıkları; programa bağlı tüm derslerin MÜDEK hesaplamasında kullanılır.',
     },
     offeringManagement: {
       title: 'Ders açılışları',

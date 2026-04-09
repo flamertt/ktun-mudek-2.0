@@ -24,7 +24,7 @@
   padding: 0.5rem 0.65rem;
   border-radius: 0.5rem;
   border: 1px solid color-mix(in srgb, var(--md-tertiary) 16%, var(--md-outline-variant) 84%);
-  background: var(--md-surface-container-lowest);
+  background: var(--page-card-bg);
   color: var(--md-on-surface);
   font: 500 0.875rem var(--sans);
   outline: none;

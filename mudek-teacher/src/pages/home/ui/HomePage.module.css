@@ -80,17 +80,6 @@
   color: var(--md-on-surface);
 }
 
-.sideLink {
-  font-size: 0.8rem;
-  font-weight: 700;
-  color: var(--md-primary);
-  text-decoration: underline;
-  text-underline-offset: 2px;
-  opacity: 0.9;
-  cursor: default;
-  user-select: none;
-}
-
 .smallBadge {
   font-size: 0.7rem;
   font-weight: 800;
@@ -194,73 +183,222 @@
   color: var(--md-on-surface);
 }
 
-.activityList {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
+.activityPanel {
+  padding-bottom: 1rem;
 }
 
-.activityItem {
-  display: flex;
-  gap: 0.85rem;
-  padding: 0.55rem 0;
-  border-bottom: 1px solid color-mix(in srgb, var(--md-outline-variant) 18%, transparent);
-}
-
-.activityItem:hover {
-  background: transparent;
-  transform: none;
-  box-shadow: none;
-}
-
-.activityItem:last-child {
-  border-bottom: none;
-  padding-bottom: 0;
-}
-
-.activityIcon {
-  flex-shrink: 0;
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: 999px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: color-mix(in srgb, var(--md-surface-container-high) 70%, transparent);
-  color: var(--md-primary);
-  box-shadow: 0 1px 0 color-mix(in srgb, var(--md-on-surface) 8%, transparent);
-}
-
-.activityBody {
-  min-width: 0;
-}
-
-.activityTopLine {
+.activityPanelHeader {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 0.75rem;
+  gap: 1rem;
+  padding-bottom: 0.65rem;
+  margin-bottom: 0.15rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--md-outline-variant) 22%, transparent);
+}
+
+.activityPanelIcon {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, var(--md-primary-container) 38%, transparent);
+  color: var(--md-primary);
+  box-shadow: 0 1px 3px color-mix(in srgb, var(--md-on-surface) 8%, transparent);
+}
+
+.activityPanelTitles {
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
+  min-width: 0;
+}
+
+.activityPanelSubtitle {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--md-on-surface-variant);
+  line-height: 1.35;
+}
+
+.activityViewAll {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+  flex-shrink: 0;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--md-primary);
+  padding: 0.35rem 0.55rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--md-primary) 7%, transparent);
+  border: 1px solid color-mix(in srgb, var(--md-primary) 14%, transparent);
+  user-select: none;
+}
+
+.activityFeedViewport {
+  margin-top: 0.25rem;
+  max-height: min(38rem, 72vh);
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--md-outline-variant) 65%, transparent) transparent;
+}
+
+.activityFeed {
+  position: relative;
+  list-style: none;
+  margin: 0;
+  padding: 0 0.1rem 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  z-index: 0;
+}
+
+.activityFeed::before {
+  content: '';
+  position: absolute;
+  left: 1.175rem;
+  top: 0.85rem;
+  bottom: 0.85rem;
+  width: 2px;
+  margin-left: -1px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--md-outline-variant) 38%, transparent);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.activityFeedItem {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 2.35rem minmax(0, 1fr);
+  gap: 0.65rem 0.8rem;
+  align-items: start;
+  padding: 0.3rem 0.05rem;
+}
+
+.activityRail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  width: 2.35rem;
+}
+
+.activityNode {
+  flex-shrink: 0;
+  width: 2.1rem;
+  height: 2.1rem;
+  border-radius: 0.68rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--page-card-bg);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--md-outline-variant) 28%, transparent),
+    0 4px 12px color-mix(in srgb, var(--md-on-surface) 7%, transparent);
+  z-index: 1;
+}
+
+.activityEntry {
+  margin: 0;
+  padding: 0.62rem 0.85rem 0.68rem;
+  border-radius: 0.85rem;
+  border: 1px solid color-mix(in srgb, var(--md-outline-variant) 24%, transparent);
+  background: var(--page-card-bg);
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s ease,
+    background 0.18s ease;
+}
+
+.activityFeedItem:hover .activityEntry {
+  border-color: color-mix(in srgb, var(--md-outline-variant) 42%, transparent);
+  box-shadow: 0 6px 22px color-mix(in srgb, var(--md-on-surface) 7%, transparent);
+  transform: translateY(-1px);
+}
+
+.activityEntryTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.65rem;
+}
+
+.activityNode.activityAccentA {
+  background: color-mix(in srgb, var(--md-primary-container) 42%, transparent);
+  color: var(--md-primary);
+}
+
+.activityEntry.activityAccentA {
+  background: var(--page-card-bg);
+  box-shadow: inset 3px 0 0 var(--md-primary-container);
+}
+
+.activityNode.activityAccentB {
+  background: color-mix(in srgb, var(--md-secondary-container) 58%, transparent);
+  color: var(--md-secondary);
+}
+
+.activityEntry.activityAccentB {
+  background: var(--page-card-bg);
+  box-shadow: inset 3px 0 0 color-mix(in srgb, var(--md-secondary) 55%, var(--md-outline-variant));
+}
+
+.activityNode.activityAccentC {
+  background: color-mix(in srgb, var(--md-tertiary) 12%, var(--md-surface-container-high));
+  color: var(--md-tertiary);
+}
+
+.activityEntry.activityAccentC {
+  background: var(--page-card-bg);
+  box-shadow: inset 3px 0 0 var(--md-tertiary);
 }
 
 .activityTitle {
-  font-size: 0.92rem;
+  margin: 0;
+  font-size: 0.9rem;
   font-weight: 800;
+  font-family: var(--heading);
   color: var(--md-on-surface);
-  line-height: 1.25;
+  line-height: 1.28;
+  letter-spacing: -0.02em;
 }
 
 .activityTime {
-  font-size: 0.78rem;
-  font-weight: 700;
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
   color: var(--md-on-surface-variant);
   white-space: nowrap;
+  padding: 0.2rem 0.45rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--md-on-surface) 5%, transparent);
 }
 
 .activityDesc {
-  margin: 0.25rem 0 0;
-  font-size: 0.84rem;
+  margin: 0.38rem 0 0;
+  font-size: 0.81rem;
   color: var(--md-on-surface-variant);
-  line-height: 1.45;
+  line-height: 1.48;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .activityEntry {
+    transition: none;
+  }
+
+  .activityFeedItem:hover .activityEntry {
+    transform: none;
+  }
 }
 
 .calendarList {

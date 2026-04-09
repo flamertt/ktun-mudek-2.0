@@ -63,15 +63,16 @@
 }
 
 .card {
-  border-radius: 0.95rem;
-  background: var(--md-surface-container-lowest);
-  box-shadow: 0 8px 24px color-mix(in srgb, var(--md-on-surface) 6%, transparent);
+  border-radius: var(--page-card-radius);
+  background: var(--page-card-bg);
+  box-shadow: var(--page-card-shadow);
   padding: 2rem;
   display: flex;
   flex-direction: column;
   gap: 0.9rem;
   height: 20rem;
-  outline: 1px solid color-mix(in srgb, var(--md-outline-variant) 10%, transparent);
+  border: 1px solid var(--page-card-border);
+  outline: none;
 }
 
 .cardHeaderRow {

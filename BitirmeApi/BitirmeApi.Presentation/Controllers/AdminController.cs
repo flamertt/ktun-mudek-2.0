@@ -22,6 +22,7 @@ namespace BitirmeApi.Presentation.Controllers
         private readonly IEnrollmentService _enrollmentService;
         private readonly ICourseEvaluationService _evaluationService;
         private readonly IAppUserService _userService;
+        private readonly IProgramLetterGradeRuleService _programLetterGradeRuleService;
 
         public AdminController(
             IProgramEntityService programService,
@@ -33,7 +34,8 @@ namespace BitirmeApi.Presentation.Controllers
             ICourseOfferingService offeringService,
             IEnrollmentService enrollmentService,
             ICourseEvaluationService evaluationService,
-            IAppUserService userService)
+            IAppUserService userService,
+            IProgramLetterGradeRuleService programLetterGradeRuleService)
         {
             _programService = programService;
             _programOutcomeService = programOutcomeService;
@@ -45,6 +47,7 @@ namespace BitirmeApi.Presentation.Controllers
             _enrollmentService = enrollmentService;
             _evaluationService = evaluationService;
             _userService = userService;
+            _programLetterGradeRuleService = programLetterGradeRuleService;
         }
 
         // ════════════════════════════════════════════════════════════════════════
@@ -56,6 +59,24 @@ namespace BitirmeApi.Presentation.Controllers
         {
             var list = await _programService.GetAllAsync();
             return Ok(list);
+        }
+
+        // Daha uzun şablon, `programs/{id}` ile çakışmasın diye önce tanımlanır.
+        [HttpGet("programs/{programId:guid}/letter-grade-rules")]
+        public async Task<IActionResult> GetProgramLetterGradeRules(Guid programId)
+        {
+            try { return Ok(await _programLetterGradeRuleService.GetByProgramIdAsync(programId)); }
+            catch (KeyNotFoundException) { return NotFound(new { message = "Program bulunamadı." }); }
+        }
+
+        [HttpPost("programs/{programId:guid}/letter-grade-rules")]
+        public async Task<IActionResult> AddProgramLetterGradeRule(Guid programId, [FromBody] CreateProgramLetterGradeRuleDto dto)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            dto.ProgramEntityId = programId;
+            try { return Ok(await _programLetterGradeRuleService.AddAsync(dto)); }
+            catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
+            catch (InvalidOperationException ex) { return Conflict(new { message = ex.Message }); }
         }
 
         [HttpGet("programs/{id}")]
@@ -91,6 +112,31 @@ namespace BitirmeApi.Presentation.Controllers
                 return Ok(new { message = "Program başarıyla silindi." });
             }
             catch (KeyNotFoundException) { return NotFound(); }
+        }
+
+        // ────────────────────────────────────────────────────────────────────────
+        // PROGRAM — HARF NOTU KURALLARI (GET/POST yukarıda `programs/{programId:guid}/...`)
+        // ────────────────────────────────────────────────────────────────────────
+
+        [HttpPut("program-letter-grade-rules/{ruleId}")]
+        public async Task<IActionResult> UpdateProgramLetterGradeRule(Guid ruleId, [FromBody] UpdateProgramLetterGradeRuleDto dto)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            dto.Id = ruleId;
+            try { return Ok(await _programLetterGradeRuleService.UpdateAsync(dto)); }
+            catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
+            catch (InvalidOperationException ex) { return Conflict(new { message = ex.Message }); }
+        }
+
+        [HttpDelete("program-letter-grade-rules/{ruleId}")]
+        public async Task<IActionResult> DeleteProgramLetterGradeRule(Guid ruleId)
+        {
+            try
+            {
+                await _programLetterGradeRuleService.DeleteAsync(ruleId);
+                return Ok(new { message = "Kural silindi." });
+            }
+            catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
         }
 
         // ────────────────────────────────────────────────────────────────────────

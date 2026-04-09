@@ -115,16 +115,30 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-// Uygulama başlatıldığında seed data'yı kontrol et ve ekle
+// Geliştirmede bekleyen migration'ları uygula; aksi halde yeni tablolar (ör. ProgramLetterGradeRules) yokken 500 oluşur.
 using (var scope = app.Services.CreateScope())
 {
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+    if (app.Environment.IsDevelopment())
+    {
+        try
+        {
+            var db = scope.ServiceProvider.GetRequiredService<ProjectDbContext>();
+            await db.Database.MigrateAsync();
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Veritabanı migration uygulanamadı");
+            throw;
+        }
+    }
+
     try
     {
         await DatabaseSeeder.SeedTestUsersAsync(scope.ServiceProvider);
     }
     catch (Exception ex)
     {
-        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
         logger.LogError(ex, "Seed data eklenirken bir hata oluştu");
     }
 }

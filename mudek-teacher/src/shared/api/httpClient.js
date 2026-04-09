@@ -70,6 +70,7 @@ export const postJsonWithAuth = (path, body, token) =>
 export const putJsonWithAuth = (path, body, token) =>
   requestJson('PUT', path, { body, token })
 export const deleteJsonWithAuth = (path, token) => requestJson('DELETE', path, { token })
+export const patchJsonWithAuth = (path, token) => requestJson('PATCH', path, { token })
 
 /**
  * multipart/form-data (ör. Excel içe aktarma). Content-Type set edilmez; boundary tarayıcıda eklenir.

@@ -1,4 +1,4 @@
-import { GraduationCap } from 'lucide-react'
+import { Calculator, ChevronRight, GraduationCap, Layers, ListChecks } from 'lucide-react'
 import { useMemo } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 
@@ -59,6 +59,45 @@ export function CourseEvaluationPage() {
 
         <div className={styles.pageGrid}>
           <div className={styles.mainCol}>
+            {d.evaluationId ? (
+              <section className={styles.examsHero} aria-labelledby="exams-hero-title">
+                <div className={styles.examsHeroAccent} aria-hidden />
+                <div className={styles.examsHeroInner}>
+                  <div className={styles.examsHeroIcon}>
+                    <GraduationCap size={28} strokeWidth={2.2} aria-hidden />
+                  </div>
+                  <div className={styles.examsHeroBody}>
+                    <h3 id="exams-hero-title" className={styles.examsHeroTitle}>
+                      Sınavlar ve ölçme yapısı
+                    </h3>
+                    <p className={styles.examsHeroDesc}>
+                      Bu bölümde sınavları tanımlayıp ağırlıkları ayarlarsınız. Her sınav için sorular, yazılı soru–DÖÇ
+                      eşlemeleri, öğrenci cevapları; ayrıca ölçme bileşenleri, DÖÇ eşlemeleri ve not girişi sayfalarına
+                      buradan geçilir.
+                    </p>
+                    <ul className={styles.examsHeroList}>
+                      <li>
+                        <ListChecks size={15} className={styles.examsHeroLiIcon} aria-hidden />
+                        Sınav listesi → soru yönetimi ve öğrenci cevapları
+                      </li>
+                      <li>
+                        <Layers size={15} className={styles.examsHeroLiIcon} aria-hidden />
+                        Aynı sınavda ölçme bileşenleri ve öğrenci notları
+                      </li>
+                    </ul>
+                    <button
+                      type="button"
+                      className={styles.examsHeroCta}
+                      onClick={() => navigate(`/evaluations/${offeringId}/evaluation/${d.evaluationId}/exams`)}
+                    >
+                      Sınavları yönet
+                      <ChevronRight size={20} aria-hidden />
+                    </button>
+                  </div>
+                </div>
+              </section>
+            ) : null}
+
             <div className={styles.panel}>
               <h3 className={styles.panelTitle}>MÜDEK tabloları</h3>
               <p className={styles.panelHint}>
@@ -92,41 +131,44 @@ export function CourseEvaluationPage() {
                 Son hesaplama:{' '}
                 {d.mudekMeta?.lastCalculatedAt ? d.formatDate(d.mudekMeta.lastCalculatedAt) : '—'}
               </p>
+              {d.mudekMeta?.isCalculationDirty ? (
+                <p className={styles.dirtyHint}>
+                  Notlar veya yapı değişti; tablolar eski olabilir. Aşağıdan yeniden hesaplayın.
+                </p>
+              ) : null}
+              <button
+                type="button"
+                className={styles.calcBtn}
+                disabled={Boolean(d.loading || !offeringId || d.mudekCalcRunning)}
+                onClick={() => void d.runMudekCalculation()}
+              >
+                <Calculator size={18} aria-hidden />
+                {d.mudekCalcRunning ? 'Hesaplanıyor…' : 'MÜDEK sonuçlarını hesapla'}
+              </button>
+              {d.mudekError ? (
+                <p className={sectionStyles.error} role="alert" style={{ margin: 0, fontSize: '0.85rem' }}>
+                  {d.mudekError}
+                </p>
+              ) : null}
             </div>
 
             {d.evaluation ? (
               <>
                 <div className={styles.panel}>
                   <h3 className={styles.panelTitle}>Hızlı erişim</h3>
-                  <div className={styles.navButtons}>
-                    <button
-                      type="button"
-                      className={styles.navButton}
-                      onClick={() => navigate(`/evaluations/${offeringId}/evaluation/${d.evaluationId}/exams`)}
-                    >
-                      <GraduationCap size={16} aria-hidden />
-                      Sınavlar
-                    </button>
-
-                    <button
-                      type="button"
-                      className={styles.navButton}
-                      onClick={() =>
-                        navigate(`/evaluations/${offeringId}/evaluation/${d.evaluationId}/letter-grade-rules`)
-                      }
-                    >
-                      Harf notu kuralları
-                    </button>
-                  </div>
+                  <p className={styles.panelHint}>
+                    Harf notu eşikleri lisans programı bazında admin panelinden yönetilir; bu derste program kuralları
+                    otomatik uygulanır.
+                  </p>
+                  <p className={styles.panelHint}>
+                    <strong>Sınavlar</strong> ve tüm alt sayfalar için ana sütundaki vurgulu{' '}
+                    <strong>Sınavlar ve ölçme yapısı</strong> kutusundaki <strong>Sınavları yönet</strong> düğmesini
+                    kullanın.
+                  </p>
                 </div>
 
                 <div className={styles.panel}>
                   <h3 className={styles.panelTitle}>MÜDEK Snapshot</h3>
-                  {d.mudekError ? (
-                    <p className={sectionStyles.error} role="alert">
-                      {d.mudekError}
-                    </p>
-                  ) : null}
                   <p className={styles.panelHint}>
                     Son hesaplanmış MÜDEK değerlendirme sonuçları bu ders açılışı için aşağıda listelenir.
                   </p>

@@ -69,7 +69,11 @@ export function AppShell() {
 
   const pageTitle = useMemo(() => {
     const matched = navItems.find((item) => item.path === location.pathname)
-    return matched?.label ?? appConfig.sidebarTitle
+    if (matched) return matched.label
+    const p = location.pathname
+    if (/^\/surveys\/[^/]+\/[^/]+$/.test(p)) return 'Anket doldur'
+    if (/^\/surveys\/[^/]+$/.test(p)) return 'Ders anketleri'
+    return appConfig.pages.surveys?.title ?? appConfig.sidebarTitle
   }, [location.pathname, navItems])
 
   useEffect(() => {

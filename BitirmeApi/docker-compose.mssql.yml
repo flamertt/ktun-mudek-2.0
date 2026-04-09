@@ -1,0 +1,13 @@
+# Bash'te ! karakteri history expansion yapar; şifreyi burada tutmak daha güvenli.
+# Kullanım (BitirmeApi klasöründen):
+#   docker compose -f docker-compose.mssql.yml up -d
+services:
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: mudek-mssql
+    restart: unless-stopped
+    environment:
+      ACCEPT_EULA: 'Y'
+      MSSQL_SA_PASSWORD: 'Str0ng!Passw0rd#2026'
+    ports:
+      - '1433:1433'

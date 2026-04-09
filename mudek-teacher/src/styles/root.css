@@ -88,6 +88,20 @@
   --sidebar-nav-active-icon: #ffffff;
   --sidebar-nav-active-hover-bg: color-mix(in srgb, var(--md-primary-container) 88%, #ffffff 12%);
   --sidebar-nav-active-shadow: var(--navbar-active-sidebar-shadow);
+
+  --page-card-bg: #ffffff;
+  --page-card-border: color-mix(in srgb, var(--md-outline-variant) 55%, transparent);
+  --page-card-shadow: 0 1px 3px color-mix(in srgb, var(--md-on-surface) 6%, transparent);
+  --page-card-radius: 1rem;
+  --table-header-bg: color-mix(in srgb, var(--md-primary) 7%, var(--md-surface-container-high) 93%);
+  --table-row-hover-bg: color-mix(in srgb, var(--md-on-surface) 3.5%, var(--page-card-bg));
+}
+
+.pageSurfaceCard {
+  border-radius: var(--page-card-radius);
+  border: 1px solid var(--page-card-border);
+  background: var(--page-card-bg);
+  box-shadow: var(--page-card-shadow);
 }
 
 :root[data-theme='light'] {
@@ -148,4 +162,10 @@
   --sidebar-nav-active-icon: #ffffff;
   --sidebar-nav-active-hover-bg: color-mix(in srgb, var(--md-primary-container) 82%, #1a1a1a 18%);
   --sidebar-nav-active-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.35);
+
+  --page-card-bg: var(--surface);
+  --page-card-border: color-mix(in srgb, var(--line) 70%, transparent);
+  --page-card-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+  --table-header-bg: color-mix(in srgb, var(--md-primary-container) 32%, var(--page-card-bg) 68%);
+  --table-row-hover-bg: color-mix(in srgb, #ffffff 5%, var(--page-card-bg));
 }

@@ -13,6 +13,7 @@ namespace BitirmeApi.DataAccess.Concrete.EntityFramework.Context
         // ───── Program ───────────────────────────────────────────────────────────
         public DbSet<ProgramEntity> Programs => Set<ProgramEntity>();
         public DbSet<ProgramOutcome> ProgramOutcomes => Set<ProgramOutcome>();
+        public DbSet<ProgramLetterGradeRule> ProgramLetterGradeRules => Set<ProgramLetterGradeRule>();
 
         // ───── Akademik Takvim ────────────────────────────────────────────────────
         public DbSet<AcademicTerm> AcademicTerms => Set<AcademicTerm>();
@@ -96,6 +97,24 @@ namespace BitirmeApi.DataAccess.Concrete.EntityFramework.Context
             {
                 e.Property(x => x.Name).IsRequired().HasMaxLength(256);
                 e.Property(x => x.AccreditationCycleYears).HasDefaultValue(5);
+            });
+
+            b.Entity<ProgramLetterGradeRule>(e =>
+            {
+                e.Property(x => x.LetterGrade).IsRequired().HasMaxLength(5);
+                e.Property(x => x.MinScore).HasPrecision(5, 2).IsRequired();
+                e.Property(x => x.MaxScore).HasPrecision(5, 2).IsRequired();
+                e.Property(x => x.MinimumFinalScore).HasPrecision(5, 2);
+                e.Property(x => x.Description).HasMaxLength(500);
+
+                e.HasOne(x => x.Program)
+                    .WithMany(p => p.LetterGradeRules)
+                    .HasForeignKey(x => x.ProgramEntityId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                e.HasIndex(x => new { x.ProgramEntityId, x.LetterGrade }).IsUnique();
+                e.HasCheckConstraint("CK_ProgramLetterGradeRule_ScoreRange", "[MaxScore] >= [MinScore]");
+                e.HasCheckConstraint("CK_ProgramLetterGradeRule_ScoreBounds", "[MinScore] >= 0 AND [MaxScore] <= 100");
             });
 
             b.Entity<ProgramOutcome>(e =>

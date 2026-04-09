@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import {
+  calculateMudekEvaluation,
   createEvaluation,
   fetchCourseStudents,
   fetchEvaluation,
@@ -8,6 +9,7 @@ import {
   fetchMyCourseDetail,
   fetchMudekResults,
   fetchOfferingClos,
+  fetchOfferingProgramOutcomes,
 } from '../../../shared/api/teacherApi'
 import { getTeacherToken } from '../../../shared/lib/authToken'
 
@@ -16,6 +18,7 @@ export function useCourseEvaluationMudekData(offeringId) {
   const [courseDetail, setCourseDetail] = useState(null)
   const [students, setStudents] = useState([])
   const [clos, setClos] = useState([])
+  const [programOutcomes, setProgramOutcomes] = useState([])
   const [exams, setExams] = useState([])
 
   const [loading, setLoading] = useState(false)
@@ -24,6 +27,7 @@ export function useCourseEvaluationMudekData(offeringId) {
   const [mudekLoading, setMudekLoading] = useState(false)
   const [mudekError, setMudekError] = useState('')
   const [mudekResults, setMudekResults] = useState(null)
+  const [mudekCalcRunning, setMudekCalcRunning] = useState(false)
 
   const evaluationId = evaluation?.id ?? evaluation?.Id ?? null
 
@@ -76,17 +80,34 @@ export function useCourseEvaluationMudekData(offeringId) {
       .finally(() => setMudekLoading(false))
   }, [offeringId])
 
+  const runMudekCalculation = useCallback(async () => {
+    const token = getTeacherToken()
+    if (!token || !offeringId) return
+    setMudekCalcRunning(true)
+    setMudekError('')
+    try {
+      const data = await calculateMudekEvaluation(token, offeringId)
+      setMudekResults(data ?? null)
+    } catch (e) {
+      setMudekError(e instanceof Error ? e.message : 'MÜDEK hesaplaması başarısız.')
+    } finally {
+      setMudekCalcRunning(false)
+    }
+  }, [offeringId])
+
   const loadLookups = useCallback(() => {
     const token = getTeacherToken()
     if (!token || !offeringId) return
 
     const p1 = fetchCourseStudents(token, offeringId).catch(() => [])
     const p2 = fetchOfferingClos(token, offeringId).catch(() => [])
-    const p3 = evaluationId ? fetchExams(token, evaluationId).catch(() => []) : Promise.resolve([])
+    const p3 = fetchOfferingProgramOutcomes(token, offeringId).catch(() => [])
+    const p4 = evaluationId ? fetchExams(token, evaluationId).catch(() => []) : Promise.resolve([])
 
-    Promise.all([p1, p2, p3]).then(([studentsData, closData, examsData]) => {
+    Promise.all([p1, p2, p3, p4]).then(([studentsData, closData, programOutcomesData, examsData]) => {
       setStudents(Array.isArray(studentsData) ? studentsData : [])
       setClos(Array.isArray(closData) ? closData : [])
+      setProgramOutcomes(Array.isArray(programOutcomesData) ? programOutcomesData : [])
       setExams(Array.isArray(examsData) ? examsData : [])
     })
   }, [evaluationId, offeringId])
@@ -174,6 +195,19 @@ export function useCourseEvaluationMudekData(offeringId) {
     }
     return map
   }, [clos, shortGuid])
+
+  const programOutcomeById = useMemo(() => {
+    const map = new Map()
+    for (const p of programOutcomes ?? []) {
+      const id = p.id ?? p.Id
+      if (!id) continue
+      const code = p.code ?? p.Code ?? ''
+      const title = p.title ?? p.Title ?? ''
+      const label = code && title ? `${code} — ${title}` : code || title
+      map.set(String(id), label || shortGuid(id))
+    }
+    return map
+  }, [programOutcomes, shortGuid])
 
   const examById = useMemo(() => {
     const map = new Map()
@@ -279,6 +313,8 @@ export function useCourseEvaluationMudekData(offeringId) {
     courseDetail,
     students,
     clos,
+    programOutcomes,
+    programOutcomeById,
     exams,
     loading,
     error,
@@ -286,6 +322,8 @@ export function useCourseEvaluationMudekData(offeringId) {
     mudekError,
     mudekResults,
     mudekMeta,
+    mudekCalcRunning,
+    runMudekCalculation,
     title,
     formatDate,
     shortGuid,

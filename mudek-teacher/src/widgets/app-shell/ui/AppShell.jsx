@@ -68,8 +68,13 @@ export function AppShell() {
   }, [isProfileOpen])
 
   const pageTitle = useMemo(() => {
-    const matched = navItems.find((item) => item.path === location.pathname)
-    return matched?.label ?? appConfig.sidebarTitle
+    const exact = navItems.find((item) => item.path === location.pathname)
+    if (exact) return exact.label
+    const nested = navItems.find(
+      (item) => item.path !== appConfig.routes.home && location.pathname.startsWith(`${item.path}/`),
+    )
+    if (nested) return nested.label
+    return appConfig.sidebarTitle
   }, [location.pathname, navItems])
 
   useEffect(() => {

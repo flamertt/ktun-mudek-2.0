@@ -119,6 +119,24 @@ export function deleteProgram(token, id) {
   return deleteJsonWithAuth(`${ADMIN}/programs/${id}`, token)
 }
 
+// ——— Program harf notu kuralları (MÜDEK) ———
+
+export function fetchProgramLetterGradeRules(token, programId) {
+  return getJson(`${ADMIN}/programs/${programId}/letter-grade-rules`, { token })
+}
+
+export function addProgramLetterGradeRule(token, programId, body) {
+  return postJsonWithAuth(`${ADMIN}/programs/${programId}/letter-grade-rules`, body, token)
+}
+
+export function updateProgramLetterGradeRule(token, ruleId, body) {
+  return putJsonWithAuth(`${ADMIN}/program-letter-grade-rules/${ruleId}`, body, token)
+}
+
+export function deleteProgramLetterGradeRule(token, ruleId) {
+  return deleteJsonWithAuth(`${ADMIN}/program-letter-grade-rules/${ruleId}`, token)
+}
+
 // ——— Program outcome ———
 
 export function createProgramOutcome(token, body) {

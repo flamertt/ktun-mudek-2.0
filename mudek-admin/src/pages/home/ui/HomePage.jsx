@@ -5,6 +5,8 @@ import {
   Upload,
   UsersRound,
   GraduationCap,
+  Activity,
+  ChevronRight,
 } from 'lucide-react'
 
 import {
@@ -36,72 +38,84 @@ export function HomePage() {
   const activityItems = useMemo(
     () => [
       {
+        id: 'a1',
         icon: UsersRound,
         title: 'Kayıtlar güncellendi',
         time: '10 dk önce',
         desc: 'Öğrenci kayıt sayıları aktif dönem için yeniden hesaplandı.',
       },
       {
+        id: 'a2',
         icon: GraduationCap,
         title: 'Öğretmen profili oluşturuldu',
         time: '2 saat önce',
         desc: 'Yeni öğretmen hesabı ve birim bilgileri sisteme eklendi.',
       },
       {
+        id: 'a3',
         icon: Upload,
         title: 'Excel içe aktarma çalıştı',
         time: 'Dün',
         desc: 'Toplu öğrenci aktarımında 128 yeni kayıt doğrulandı.',
       },
       {
+        id: 'a4',
         icon: CalendarRange,
         title: 'Ders açılışı onaylandı',
         time: 'Dün',
         desc: '2026 Bahar dönemi için 6 yeni ders açılışı aktif edildi.',
       },
       {
+        id: 'a5',
         icon: Sparkles,
         title: 'Program çıktısı seti güncellendi',
         time: '3 gün önce',
         desc: 'Mühendislik programı PÇ setinde sürüm yükseltmesi yapıldı.',
       },
       {
+        id: 'a6',
         icon: UsersRound,
         title: 'Ders-öğrenci eşlemesi tamamlandı',
         time: '4 gün önce',
         desc: 'Toplu kayıt ekranından ders atama işlemleri başarıyla bitti.',
       },
       {
+        id: 'a7',
         icon: GraduationCap,
         title: 'Öğretmen ataması revize edildi',
         time: '5 gün önce',
         desc: 'Aktif dönem için 3 ders açılışında öğretmen değişikliği yapıldı.',
       },
       {
+        id: 'a8',
         icon: Upload,
         title: 'Toplu kayıt doğrulaması tamamlandı',
         time: '6 gün önce',
         desc: 'Hatalı satırlar ayıklanarak öğrenci listesi temizlendi.',
       },
       {
+        id: 'a9',
         icon: CalendarRange,
         title: 'Akademik dönem tarihleri güncellendi',
         time: '1 hafta önce',
         desc: 'Dönem başlangıç ve bitiş tarihleri yönetimce onaylandı.',
       },
       {
+        id: 'a10',
         icon: Sparkles,
         title: 'Program çıktısı eşleme raporu üretildi',
         time: '1 hafta önce',
         desc: 'CLO ↔ PÇ kapsama oranları rapor tablosuna eklendi.',
       },
       {
+        id: 'a11',
         icon: UsersRound,
         title: 'Yeni öğrenci grubu oluşturuldu',
         time: '9 gün önce',
         desc: 'Yatay geçiş öğrencileri için ayrı kayıt grubu tanımlandı.',
       },
       {
+        id: 'a12',
         icon: GraduationCap,
         title: 'Danışmanlık rolü atandı',
         time: '10 gün önce',
@@ -194,37 +208,59 @@ export function HomePage() {
               </div>
             </section>
 
-            <section className={styles.sideCard} aria-labelledby="activity-heading">
-              <div className={styles.sideHeader}>
+            <section
+              className={`${styles.sideCard} ${styles.activityPanel}`}
+              aria-labelledby="activity-heading"
+            >
+              <div className={styles.activityPanelHeader}>
                 <div className={styles.sideHeaderLeft}>
-                  <span className={styles.sideHeaderIcon} aria-hidden>
-                    <UsersRound strokeWidth={1.75} size={18} />
+                  <span className={styles.activityPanelIcon} aria-hidden>
+                    <Activity strokeWidth={1.75} size={18} />
                   </span>
-                  <h3 id="activity-heading" className={styles.sideTitle}>
-                    Son aktiviteler
-                  </h3>
+                  <div className={styles.activityPanelTitles}>
+                    <h3 id="activity-heading" className={styles.sideTitle}>
+                      Son aktiviteler
+                    </h3>
+                    <p className={styles.activityPanelSubtitle}>
+                      Sistemdeki son yönetim işlemleri
+                    </p>
+                  </div>
                 </div>
-                <span className={styles.sideLink}>Tümünü gör</span>
+                <span className={styles.activityViewAll}>
+                  <span>Tümünü gör</span>
+                  <ChevronRight strokeWidth={2} size={16} aria-hidden />
+                </span>
               </div>
 
-              <div className={styles.activityList}>
-                {activityItems.map((item) => {
-                  const Icon = item.icon
-                  return (
-                    <div key={item.title} className={styles.activityItem}>
-                      <div className={styles.activityIcon} aria-hidden>
-                        <Icon strokeWidth={1.75} size={18} />
-                      </div>
-                      <div className={styles.activityBody}>
-                        <div className={styles.activityTopLine}>
-                          <span className={styles.activityTitle}>{item.title}</span>
-                          <span className={styles.activityTime}>{item.time}</span>
+              <div className={styles.activityFeedViewport}>
+                <ul className={styles.activityFeed} role="list">
+                  {activityItems.map((item, index) => {
+                    const Icon = item.icon
+                    const accent = index % 3
+                    const accentClass =
+                      accent === 0
+                        ? styles.activityAccentA
+                        : accent === 1
+                          ? styles.activityAccentB
+                          : styles.activityAccentC
+                    return (
+                      <li key={item.id} className={styles.activityFeedItem}>
+                        <div className={styles.activityRail} aria-hidden>
+                          <span className={`${styles.activityNode} ${accentClass}`}>
+                            <Icon strokeWidth={1.75} size={16} />
+                          </span>
                         </div>
-                        <p className={styles.activityDesc}>{item.desc}</p>
-                      </div>
-                    </div>
-                  )
-                })}
+                        <article className={`${styles.activityEntry} ${accentClass}`}>
+                          <div className={styles.activityEntryTop}>
+                            <h4 className={styles.activityTitle}>{item.title}</h4>
+                            <span className={styles.activityTime}>{item.time}</span>
+                          </div>
+                          <p className={styles.activityDesc}>{item.desc}</p>
+                        </article>
+                      </li>
+                    )
+                  })}
+                </ul>
               </div>
             </section>
           </div>

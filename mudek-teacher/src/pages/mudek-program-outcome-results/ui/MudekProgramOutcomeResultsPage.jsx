@@ -4,7 +4,9 @@ import { useParams } from 'react-router-dom'
 
 import { PageSection } from '@shared/ui/page-section/PageSection.jsx'
 import { DataTable } from '@shared/ui/data-table/DataTable.jsx'
+import { formatMudekDecimal } from '../../course-evaluation/lib/mudekDisplayLabels'
 import { useCourseEvaluationMudekData } from '../../course-evaluation/model/useCourseEvaluationMudekData'
+import { EvaluationMudekBackToolbar } from '../../course-evaluation/ui/EvaluationMudekBackToolbar.jsx'
 import styles from './MudekProgramOutcomeResultsPage.module.css'
 
 const columnHelper = createColumnHelper()
@@ -17,13 +19,21 @@ export function MudekProgramOutcomeResultsPage() {
   const rows = useMemo(() => {
     const list = d.mudekResults?.programOutcomeResults ?? d.mudekResults?.ProgramOutcomeResults ?? []
     if (!Array.isArray(list)) return []
-    return list.map((x) => ({
-      id: x.id ?? x.Id,
-      programOutcomeId: x.programOutcomeId ?? x.ProgramOutcomeId,
-      achievementScore: x.achievementScore ?? x.AchievementScore,
-      updatedAt: x.updatedAt ?? x.UpdatedAt,
-    }))
-  }, [d.mudekResults])
+    return list.map((x) => {
+      const programOutcomeId = x.programOutcomeId ?? x.ProgramOutcomeId
+      const raw = String(x.programOutcomeCaption ?? x.ProgramOutcomeCaption ?? '').trim()
+      const fromLookup = programOutcomeId ? d.programOutcomeById.get(String(programOutcomeId)) : undefined
+      const programOutcomeCaption =
+        raw || fromLookup || (programOutcomeId ? `PÇ (${d.shortGuid(programOutcomeId)})` : '—')
+      return {
+        id: x.id ?? x.Id,
+        programOutcomeId,
+        programOutcomeCaption,
+        achievementScore: x.achievementScore ?? x.AchievementScore,
+        updatedAt: x.updatedAt ?? x.UpdatedAt,
+      }
+    })
+  }, [d.mudekResults, d.programOutcomeById, d.shortGuid])
 
   const sorted = useMemo(() => {
     return [...rows].sort((a, b) => Number(b.achievementScore ?? -Infinity) - Number(a.achievementScore ?? -Infinity))
@@ -40,11 +50,14 @@ export function MudekProgramOutcomeResultsPage() {
 
   const columns = useMemo(
     () => [
-      columnHelper.accessor('programOutcomeId', {
-        header: 'PÇ',
-        cell: (info) => `PÇ · ${d.shortGuid(info.getValue())}`,
+      columnHelper.accessor('programOutcomeCaption', {
+        header: 'Program çıktısı (PÇ)',
+        cell: (info) => info.getValue(),
       }),
-      columnHelper.accessor('achievementScore', { header: 'AchievementScore' }),
+      columnHelper.accessor('achievementScore', {
+        header: 'Başarı skoru',
+        cell: (info) => formatMudekDecimal(info.getValue(), 6),
+      }),
       columnHelper.accessor('updatedAt', { header: 'Güncellendi', cell: (info) => d.formatDate(info.getValue()) }),
     ],
     [d],
@@ -57,6 +70,7 @@ export function MudekProgramOutcomeResultsPage() {
       error={d.error}
       loading={d.loading}
     >
+      <EvaluationMudekBackToolbar />
       <div className={styles.panel}>
         <h3 className={styles.panelTitle}>MÜDEK · Program çıktısı sonuçları</h3>
         <DataTable
@@ -64,7 +78,7 @@ export function MudekProgramOutcomeResultsPage() {
           data={ranked}
           globalFilter={filter}
           onGlobalFilterChange={setFilter}
-          searchPlaceholder="ProgramOutcomeId ara…"
+          searchPlaceholder="PÇ kodu, başlık veya skor ara…"
           isLoading={false}
           disablePagination
           getRowClassName={(row) => row?.rankClass ?? ''}

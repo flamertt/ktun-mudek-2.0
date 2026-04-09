@@ -9,10 +9,10 @@
   display: flex;
   align-items: stretch;
   gap: 0;
-  border-radius: 1rem;
-  border: 1px solid color-mix(in srgb, var(--md-outline-variant) 55%, transparent);
-  background: var(--md-surface-container-lowest);
-  box-shadow: 0 1px 3px color-mix(in srgb, var(--md-on-surface) 6%, transparent);
+  border-radius: var(--page-card-radius);
+  border: 1px solid var(--page-card-border);
+  background: var(--page-card-bg);
+  box-shadow: var(--page-card-shadow);
   overflow: hidden;
 }
 
@@ -26,6 +26,11 @@
   flex: 1;
   min-width: 0;
   padding: 1.15rem 1.25rem 1.2rem;
+}
+
+/* Uzun açıklamaların içerik alanıyla aynı genişlikte akması için (ör. anket sayfası) */
+.headMainWide .desc {
+  max-width: none;
 }
 
 .headText {
@@ -54,8 +59,8 @@
   min-width: 14rem;
   padding: 0.5rem 0.75rem;
   border-radius: 0.5rem;
-  border: 1px solid color-mix(in srgb, var(--md-outline-variant) 55%, transparent);
-  background: var(--md-surface-container-lowest);
+  border: 1px solid var(--page-card-border);
+  background: var(--page-card-bg);
   color: var(--md-on-surface);
   font: 500 0.875rem var(--sans);
 }
@@ -63,8 +68,8 @@
 .tableWrap {
   overflow: auto;
   border-radius: 0.5rem;
-  border: 1px solid color-mix(in srgb, var(--md-outline-variant) 45%, transparent);
-  background: var(--md-surface-container-lowest);
+  border: 1px solid var(--page-card-border);
+  background: var(--page-card-bg);
 }
 
 .table {
@@ -81,7 +86,7 @@
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--md-on-surface-variant);
-  background: color-mix(in srgb, var(--md-surface-container-high) 40%, transparent);
+  background: var(--table-header-bg);
   border-bottom: 1px solid color-mix(in srgb, var(--md-outline-variant) 40%, transparent);
 }
 

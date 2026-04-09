@@ -198,53 +198,47 @@ export function ExamComponentsPage() {
         id: 'actions',
         header: 'İşlemler',
         cell: ({ row }) => (
-          <div className={formStyles.actions}>
+          <div className={formStyles.rowActionGroup}>
             <button
               type="button"
-              className={formStyles.actionIcon}
-              title="CLO eşleştir"
+              className={formStyles.rowActionText}
               onClick={() =>
                 navigate(
                   `/evaluations/${offeringId}/evaluation/${evaluationId}/components/${row.original.id}/clos`,
                 )
               }
             >
-              C
+              DÖÇ eşlemesi
             </button>
             <button
               type="button"
-              className={formStyles.actionIcon}
-              title="Notlar"
+              className={formStyles.rowActionText}
               onClick={() =>
                 navigate(
                   `/evaluations/${offeringId}/evaluation/${evaluationId}/components/${row.original.id}/scores`,
                 )
               }
             >
-              N
+              Öğrenci notları
+            </button>
+            <button type="button" className={formStyles.rowActionText} onClick={() => openEdit(row.original)}>
+              <Pencil size={14} aria-hidden />
+              Düzenle
             </button>
             <button
               type="button"
-              className={formStyles.actionIcon}
-              title="Düzenle"
-              onClick={() => openEdit(row.original)}
-            >
-              <Pencil size={16} aria-hidden />
-            </button>
-            <button
-              type="button"
-              className={`${formStyles.actionIcon} ${formStyles.actionDanger}`}
-              title="Sil"
+              className={`${formStyles.rowActionText} ${formStyles.rowActionTextDanger}`}
               onClick={() => handleDelete(row.original)}
               disabled={saving}
             >
-              <Trash2 size={16} aria-hidden />
+              <Trash2 size={14} aria-hidden />
+              Sil
             </button>
           </div>
         ),
       }),
     ],
-    [handleDelete, navigate, offeringId, openEdit, saving],
+    [evaluationId, handleDelete, navigate, offeringId, openEdit, saving],
   )
 
   return (

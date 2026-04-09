@@ -1,8 +1,9 @@
 import styles from './PageSection.module.css'
 
 /**
- * Başlık + açıklama (kart üst alanı). Tablo filtreleri DataTable araç çubuğunda tutulur.
- * Admin / öğretmen / öğrenci kabuklarında ortak kullanım.
+ * Sayfa başlığı (PageSection.headCard): `root.css` içindeki `--page-card-*` ve `--table-header-bg`
+ * token’larıyla hizalanır. Ek kart kutuları için global `pageSurfaceCard` sınıfını veya aynı CSS
+ * değişkenlerini kullanın.
  */
 export function PageSection({ title, description, error, loading, children }) {
   return (

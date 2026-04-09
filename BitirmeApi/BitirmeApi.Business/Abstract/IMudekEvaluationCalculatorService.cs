@@ -21,5 +21,8 @@ namespace BitirmeApi.Business.Abstract
         Task MarkStaleByCourseLearningOutcomeIdAsync(Guid courseLearningOutcomeId, CancellationToken ct = default);
 
         Task MarkStaleByExamIdAsync(Guid examId, CancellationToken ct = default);
+
+        /// <summary>Program harf notu kuralları değişince ilgili tüm ders açılışlarında hesaplamayı eski say.</summary>
+        Task MarkStaleByProgramEntityIdAsync(Guid programEntityId, CancellationToken ct = default);
     }
 }

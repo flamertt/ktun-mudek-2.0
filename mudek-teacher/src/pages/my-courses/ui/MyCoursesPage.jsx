@@ -119,8 +119,8 @@ export function MyCoursesPage() {
                   <button
                     type="button"
                     className={styles.openBtn}
-                    onClick={() => navigate(`/courses/${r.id}`)}
-                    title="Ders detay"
+                    onClick={() => navigate(`/courses/${r.id}/students`)}
+                    title="Öğrenci listesi"
                   >
                     <UsersRound size={16} aria-hidden />
                     Dersi aç

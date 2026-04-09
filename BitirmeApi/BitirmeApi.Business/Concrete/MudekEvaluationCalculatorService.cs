@@ -70,6 +70,9 @@ namespace BitirmeApi.Business.Concrete
                         ExamId = r.ExamId,
                         ExamQuestionId = r.ExamQuestionId,
                         AssessmentComponentId = r.AssessmentComponentId,
+                        ItemCaption = r.ExamQuestion != null
+                            ? (r.ExamQuestion.Title ?? r.ExamQuestion.Description ?? "")
+                            : (r.AssessmentComponent != null ? r.AssessmentComponent.Name : ""),
                         QuestionNumber = r.QuestionNumber,
                         MaxScore = r.MaxScore,
                         AverageScore = r.AverageScore,
@@ -97,6 +100,9 @@ namespace BitirmeApi.Business.Concrete
                     {
                         Id = r.Id,
                         ProgramOutcomeId = r.ProgramOutcomeId,
+                        ProgramOutcomeCaption = r.ProgramOutcome != null
+                            ? r.ProgramOutcome.Code + " — " + r.ProgramOutcome.Title
+                            : "",
                         AchievementScore = r.AchievementScore,
                         UpdatedAt = r.UpdatedAt
                     }).ToListAsync(ct)
@@ -237,10 +243,39 @@ namespace BitirmeApi.Business.Concrete
                 .Where(s => compIds.Contains(s.AssessmentComponentId))
                 .ToListAsync(ct);
 
-            var letterRules = await _db.CourseEvaluationLetterGradeRules.AsNoTracking()
-                .Where(r => r.CourseEvaluationId == evaluation.Id)
+            var programEntityId = access.Course.ProgramEntityId;
+            var programLetterRows = await _db.ProgramLetterGradeRules.AsNoTracking()
+                .Where(r => r.ProgramEntityId == programEntityId)
                 .OrderByDescending(r => r.MaxScore)
                 .ToListAsync(ct);
+
+            List<LetterGradeMatchRow> letterMatchRules;
+            if (programLetterRows.Count > 0)
+            {
+                letterMatchRules = programLetterRows.Select(r => new LetterGradeMatchRow
+                {
+                    LetterGrade = r.LetterGrade,
+                    MinScore = r.MinScore,
+                    MaxScore = r.MaxScore,
+                    IsPassing = r.IsPassing,
+                    MinimumFinalScore = r.MinimumFinalScore
+                }).ToList();
+            }
+            else
+            {
+                var evalLetterRows = await _db.CourseEvaluationLetterGradeRules.AsNoTracking()
+                    .Where(r => r.CourseEvaluationId == evaluation.Id)
+                    .OrderByDescending(r => r.MaxScore)
+                    .ToListAsync(ct);
+                letterMatchRules = evalLetterRows.Select(r => new LetterGradeMatchRow
+                {
+                    LetterGrade = r.LetterGrade,
+                    MinScore = r.MinScore,
+                    MaxScore = r.MaxScore,
+                    IsPassing = r.IsPassing,
+                    MinimumFinalScore = r.MinimumFinalScore
+                }).ToList();
+            }
 
             var answerScores = answers.ToDictionary(a => (a.ExamQuestionId, a.EnrollmentId), a => a.Score);
             var compScoreLookup = compScores
@@ -340,7 +375,7 @@ namespace BitirmeApi.Business.Concrete
                     success = Math.Round(midtermPart * 0.4m + (second ?? 0m) * 0.6m, 0, MidpointRounding.AwayFromZero);
 
                 var rule = success.HasValue
-                    ? MatchLetterRule(success.Value, fin, mk, letterRules)
+                    ? MatchLetterRule(success.Value, fin, mk, letterMatchRules)
                     : null;
 
                 var letter = rule?.LetterGrade;
@@ -619,6 +654,21 @@ namespace BitirmeApi.Business.Concrete
                 .Where(ce => ce.Exams.Any(x => x.Id == examId))
                 .ExecuteUpdateAsync(s => s.SetProperty(e => e.IsCalculationDirty, true), ct);
 
+        public async Task MarkStaleByProgramEntityIdAsync(Guid programEntityId, CancellationToken ct = default)
+        {
+            var courseIds = await _db.Courses.AsNoTracking()
+                .Where(c => c.ProgramEntityId == programEntityId)
+                .Select(c => c.Id)
+                .ToListAsync(ct);
+            if (courseIds.Count == 0) return;
+            var offeringIds = await _db.CourseOfferings.AsNoTracking()
+                .Where(o => courseIds.Contains(o.CourseId))
+                .Select(o => o.Id)
+                .ToListAsync(ct);
+            foreach (var oid in offeringIds)
+                await MarkStaleByOfferingIdAsync(oid, ct);
+        }
+
         private static Exam? PickMidtermExam(List<Exam> exams) =>
             exams.Where(e => e.ExamType.Contains("Vize", StringComparison.OrdinalIgnoreCase)).OrderBy(e => e.OrderIndex).FirstOrDefault();
 
@@ -637,8 +687,8 @@ namespace BitirmeApi.Business.Concrete
                     e.ExamType.Contains("Makeup", StringComparison.OrdinalIgnoreCase))
                 .OrderBy(e => e.OrderIndex).FirstOrDefault();
 
-        private static CourseEvaluationLetterGradeRule? MatchLetterRule(
-            decimal successGrade, decimal? finalScore, decimal? makeupScore, List<CourseEvaluationLetterGradeRule> rules)
+        private static LetterGradeMatchRow? MatchLetterRule(
+            decimal successGrade, decimal? finalScore, decimal? makeupScore, List<LetterGradeMatchRow> rules)
         {
             var effectiveFinal = (makeupScore ?? 0) > 0 ? makeupScore : finalScore;
             var ffRule = rules.FirstOrDefault(r =>
@@ -657,6 +707,15 @@ namespace BitirmeApi.Business.Concrete
 
             // Hiçbir aralığa düşmezse (ör. min şartları hariç) FF'e düşecek şekilde güvenli varsayım.
             return ffRule;
+        }
+
+        private sealed class LetterGradeMatchRow
+        {
+            public string LetterGrade { get; init; } = "";
+            public decimal MinScore { get; init; }
+            public decimal MaxScore { get; init; }
+            public bool IsPassing { get; init; }
+            public decimal? MinimumFinalScore { get; init; }
         }
     }
 }

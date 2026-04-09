@@ -83,6 +83,12 @@ namespace BitirmeApi.Business.DTO
         public Guid ExamId { get; set; }
         public Guid? ExamQuestionId { get; set; }
         public Guid? AssessmentComponentId { get; set; }
+
+        /// <summary>
+        /// Soru satırında: sınav sorusu başlığı veya açıklama; bileşen satırında: bileşen adı.
+        /// </summary>
+        public string? ItemCaption { get; set; }
+
         public int QuestionNumber { get; set; }
         public decimal MaxScore { get; set; }
         public decimal? AverageScore { get; set; }
@@ -108,6 +114,10 @@ namespace BitirmeApi.Business.DTO
     {
         public Guid Id { get; set; }
         public Guid ProgramOutcomeId { get; set; }
+
+        /// <summary>PÇ kodu ve başlığı (örn. <c>PÇ1 — Öğrenme çıktısı</c>).</summary>
+        public string? ProgramOutcomeCaption { get; set; }
+
         public decimal? AchievementScore { get; set; }
         public DateTime UpdatedAt { get; set; }
     }

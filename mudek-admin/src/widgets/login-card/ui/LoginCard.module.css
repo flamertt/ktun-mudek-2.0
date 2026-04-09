@@ -11,12 +11,10 @@
 
 .panel {
   padding: 2rem;
-  border-radius: 0.5rem;
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid color-mix(in srgb, var(--md-outline-variant) 20%, transparent);
-  box-shadow: 0 8px 24px rgba(38, 24, 22, 0.06);
+  border-radius: var(--page-card-radius);
+  background: var(--page-card-bg);
+  border: 1px solid var(--page-card-border);
+  box-shadow: var(--page-card-shadow);
 }
 
 @media (min-width: 768px) {
@@ -109,12 +107,7 @@
   padding: 0.875rem 1rem;
   border-radius: 0.5rem;
   border: 1px solid color-mix(in srgb, var(--md-tertiary) 16%, var(--md-outline-variant) 84%);
-  /* Cam panel üzerinde düz yüzey-low yerine nötr, hafif sıcak beyaz */
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, #ffffff 96%, var(--md-surface-container-highest) 4%) 0%,
-    color-mix(in srgb, #ffffff 92%, var(--md-surface-container-low) 8%) 100%
-  );
+  background: var(--page-card-bg);
   color: var(--md-on-surface);
   font: 500 0.875rem var(--sans);
   outline: none;
@@ -185,11 +178,7 @@
   border-radius: 0.5rem;
   /* dashed ekranda tırtıklı görünüyor; ince solid + tertiary tonu */
   border: 1px solid color-mix(in srgb, var(--md-tertiary) 22%, var(--md-outline-variant) 78%);
-  background: linear-gradient(
-    165deg,
-    color-mix(in srgb, #ffffff 90%, var(--md-secondary-container) 10%) 0%,
-    color-mix(in srgb, #ffffff 82%, var(--md-surface-container-highest) 18%) 100%
-  );
+  background: var(--page-card-bg);
   padding: 0.875rem 1rem;
   text-align: center;
   font-size: 0.8125rem;

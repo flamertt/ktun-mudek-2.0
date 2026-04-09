@@ -34,7 +34,7 @@ export function LoginCard() {
 
       localStorage.setItem(appConfig.storage.tokenKey, response.token)
       localStorage.setItem(appConfig.storage.userKey, JSON.stringify(response.user))
-      navigate(appConfig.routes.home)
+      navigate(appConfig.routes.surveys)
     } catch (error) {
       setErrorMessage(error.message)
     } finally {
