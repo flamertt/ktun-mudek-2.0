@@ -3,8 +3,6 @@ import {
   BookOpen,
   Building2,
   CalendarRange,
-  ClipboardCheck,
-  ClipboardList,
   GraduationCap,
   Home,
   Layers,
@@ -23,8 +21,6 @@ import {
 const NAV_ICON_BY_NAME = {
   home: Home,
   'book-open': BookOpen,
-  'clipboard-list': ClipboardList,
-  'clipboard-check': ClipboardCheck,
   'square-pen': SquarePen,
   target: Target,
   'bar-chart': BarChart3,

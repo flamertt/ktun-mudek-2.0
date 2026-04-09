@@ -349,23 +349,6 @@ export function importEnrollmentsFromExcel(token, offeringId, file) {
   )
 }
 
-// ——— Ders değerlendirmeleri (salt okunur) ———
-
-/** @param {string} token @param {string} offeringId */
-export function fetchCourseOfferingEvaluation(token, offeringId) {
-  return getJson(`${ADMIN}/course-offerings/${offeringId}/evaluation`, { token })
-}
-
-/** @param {string} token @param {string} id */
-export function fetchCourseEvaluationById(token, id) {
-  return getJson(`${ADMIN}/course-evaluations/${id}`, { token })
-}
-
-/** @param {string} token */
-export function fetchCourseEvaluations(token) {
-  return getJson(`${ADMIN}/course-evaluations`, { token })
-}
-
 // ——— Öğretmen / öğrenci (tek kayıt) ———
 
 /** @param {string} token @param {string} id */

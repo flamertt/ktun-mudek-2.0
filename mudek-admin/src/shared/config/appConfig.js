@@ -21,8 +21,6 @@ export const appConfig = {
     studentManagement: '/student-management',
     courseStudents: '/course-students',
     enrollmentBulk: '/enrollment-bulk',
-    courseEvaluations: '/course-evaluations',
-    surveyManagement: '/survey-management',
   },
   navSections: [
     {
@@ -118,24 +116,6 @@ export const appConfig = {
           path: '/enrollment-bulk',
           icon: 'upload',
         },
-        {
-          key: 'courseEvaluations',
-          label: 'Ders değerlendirmeleri',
-          path: '/course-evaluations',
-          icon: 'clipboard-check',
-        },
-      ],
-    },
-    {
-      key: 'other',
-      title: 'Diğer',
-      items: [
-        {
-          key: 'surveyManagement',
-          label: 'Anket Yönetimi',
-          path: '/survey-management',
-          icon: 'clipboard-list',
-        },
       ],
     },
   ],
@@ -178,10 +158,6 @@ export const appConfig = {
       title: 'Ders Öğrencileri',
       description: 'Ders bazlı öğrenci listeleri ve toplu işlemler bu bölümde olacak.',
     },
-    surveyManagement: {
-      title: 'Anket Yönetimi',
-      description: 'Anket oluşturma, düzenleme ve yayınlama işlemleri burada yönetilecek.',
-    },
     cloManagement: {
       title: 'Ders öğrenim çıktıları (CLO)',
       description: 'Katalog dersine bağlı CLO kayıtlarını oluşturun, düzenleyin veya silin.',
@@ -202,10 +178,6 @@ export const appConfig = {
     enrollmentBulk: {
       title: 'Toplu öğrenci kaydı',
       description: 'Öğrenci kimlik listesi ile toplu kayıt veya Excel dosyası ile içe aktarma.',
-    },
-    courseEvaluations: {
-      title: 'Ders değerlendirmeleri',
-      description: 'Sistemdeki ders değerlendirme kayıtları (salt okunur).',
     },
   },
   ui: {
