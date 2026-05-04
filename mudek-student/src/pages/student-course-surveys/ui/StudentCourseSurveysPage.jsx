@@ -4,6 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 
 import { fetchStudentCourses, fetchStudentSurveysForOffering } from '../../../shared/api/studentApi'
 import { getStudentToken } from '../../../shared/lib/authToken'
+import { getStudentCourseOfferingId } from '../../../shared/lib/studentCourseMap'
 import { PageSection } from '@shared/ui/page-section/PageSection.jsx'
 import sectionStyles from '@shared/ui/page-section/PageSection.module.css'
 import styles from './StudentCourseSurveysPage.module.css'
@@ -29,10 +30,7 @@ export function StudentCourseSurveysPage() {
     Promise.all([fetchStudentCourses(token), fetchStudentSurveysForOffering(token, offeringId)])
       .then(([courses, list]) => {
         const arr = Array.isArray(courses) ? courses : []
-        const match = arr.find(
-          (c) =>
-            String(c?.courseOfferingId ?? c?.CourseOfferingId ?? c?.id ?? c?.Id ?? '') === String(offeringId),
-        )
+        const match = arr.find((c) => getStudentCourseOfferingId(c) === String(offeringId))
         const code = match?.courseCode ?? match?.CourseCode ?? ''
         const name = match?.courseName ?? match?.CourseName ?? ''
         setCourseLabel(code && name ? `${code} — ${name}` : (name || code || 'Ders'))

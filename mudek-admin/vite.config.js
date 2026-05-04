@@ -6,14 +6,26 @@ import react from '@vitejs/plugin-react'
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const nm = path.join(__dirname, 'node_modules')
 
-/** Backend kök URL (deploy’da güncelleyin) */
-const API_BASE_URL = 'http://localhost:5010'
+/** BitirmeApi (http profili). HTTPS-only çalıştırıyorsanız https://localhost:7097 */
+const DEV_API_TARGET = process.env.VITE_DEV_API_PROXY_TARGET ?? 'http://localhost:5010'
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
-  define: {
-    'import.meta.env.VITE_API_BASE_URL': JSON.stringify(API_BASE_URL),
+  server: {
+    proxy: {
+      '/api': {
+        target: DEV_API_TARGET,
+        changeOrigin: true,
+        secure: false,
+        configure(proxy) {
+          proxy.on('proxyReq', (proxyReq, req) => {
+            const auth = req.headers.authorization
+            if (auth) proxyReq.setHeader('Authorization', auth)
+          })
+        },
+      },
+    },
   },
   resolve: {
     alias: {

@@ -9,18 +9,31 @@ import {
 const TEACHER = '/api/Teacher'
 
 // ═════════════════════════════════════════════
+// Akademik dönemler (üniversite)
+// ═════════════════════════════════════════════
+
+/** Tüm akademik dönemler (`id` / `ad`). */
+export function fetchTeacherAcademicTerms(token) {
+  return getJson(`${TEACHER}/academic-terms`, { token })
+}
+
+// ═════════════════════════════════════════════
 // Courses / My courses
 // ═════════════════════════════════════════════
 
+/** Aktif dönem: `GET my-courses`. Belirli dönem: `GET my-courses/academic-terms?termId=`. */
 export function fetchMyCourses(token, termId) {
-  return getJson(`${TEACHER}/my-courses`, {
-    token,
-    query: termId ? { termId } : undefined,
-  })
+  if (termId != null && termId !== '') {
+    return getJson(`${TEACHER}/my-courses/academic-terms`, {
+      token,
+      query: { termId },
+    })
+  }
+  return getJson(`${TEACHER}/my-courses`, { token })
 }
 
 export function fetchMyCourseDetail(token, offeringId) {
-  return getJson(`${TEACHER}/my-courses/${offeringId}`, { token })
+  return getJson(`${TEACHER}/my-courses/${offeringId}/detail`, { token })
 }
 
 export function fetchCourseStudents(token, offeringId) {
@@ -35,19 +48,27 @@ export function createEvaluation(token, offeringId, body) {
   return postJsonWithAuth(`${TEACHER}/my-courses/${offeringId}/evaluation`, body, token)
 }
 
-export function updateEvaluation(token, offeringId, evaluationId, body) {
-  return putJsonWithAuth(
-    `${TEACHER}/my-courses/${offeringId}/evaluation/${evaluationId}`,
-    body,
-    token,
-  )
+export function updateEvaluation(token, evaluationId, body) {
+  return putJsonWithAuth(`${TEACHER}/evaluations/${evaluationId}`, body, token)
 }
 
-export function deleteEvaluation(token, offeringId, evaluationId) {
-  return deleteJsonWithAuth(
-    `${TEACHER}/my-courses/${offeringId}/evaluation/${evaluationId}`,
-    token,
-  )
+export function deleteEvaluation(token, evaluationId) {
+  return deleteJsonWithAuth(`${TEACHER}/evaluations/${evaluationId}`, token)
+}
+
+/** Bu öğretmenin tüm ders değerlendirme kayıtları (özet liste). */
+export function fetchMyEvaluations(token) {
+  return getJson(`${TEACHER}/my-evaluations`, { token })
+}
+
+/** Değerlendirme + sınavlar + bileşenler (öğretmen yetkisiyle). */
+export function fetchEvaluationFullDetail(token, evaluationId) {
+  return getJson(`${TEACHER}/evaluations/${evaluationId}/full-detail`, { token })
+}
+
+/** `evaluationId` üzerinden MÜDEK yeniden hesaplama (offering bilinmiyorsa). */
+export function postEvaluationMudekCalculate(token, evaluationId) {
+  return postJsonWithAuth(`${TEACHER}/evaluations/${evaluationId}/mudek-evaluation/calculate`, {}, token)
 }
 
 // ═════════════════════════════════════════════
@@ -223,15 +244,6 @@ export function deleteScore(token, scoreId) {
 }
 
 // ═════════════════════════════════════════════
-// Letter grade rules
-// ═════════════════════════════════════════════
-
-/** Salt okunur: program veya (yalnızca eski veri) değerlendirme kuralları. */
-export function fetchEffectiveLetterGradeRules(token, offeringId) {
-  return getJson(`${TEACHER}/my-courses/${offeringId}/letter-grade-rules`, { token })
-}
-
-// ═════════════════════════════════════════════
 // CLO list (Offering clos)
 // ═════════════════════════════════════════════
 
@@ -242,6 +254,11 @@ export function fetchOfferingClos(token, offeringId) {
 /** Ders programına ait PÇ listesi (kod, başlık). */
 export function fetchOfferingProgramOutcomes(token, offeringId) {
   return getJson(`${TEACHER}/my-courses/${offeringId}/program-outcomes`, { token })
+}
+
+/** Katalog `courseId` ile CLO–program çıktısı matrisi (üniversite). */
+export function fetchCourseCloPoMap(token, courseId) {
+  return getJson(`${TEACHER}/courses/${courseId}/clo-po-map`, { token })
 }
 
 // ═════════════════════════════════════════════

@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import { fetchStudentCourses } from '../../../shared/api/studentApi'
 import { appConfig } from '../../../shared/config/appConfig'
 import { getStudentToken } from '../../../shared/lib/authToken'
+import { getStudentCourseOfferingId } from '../../../shared/lib/studentCourseMap'
 import { PageSection } from '@shared/ui/page-section/PageSection.jsx'
 import sectionStyles from '@shared/ui/page-section/PageSection.module.css'
 import styles from './StudentCoursesPage.module.css'
@@ -28,7 +29,14 @@ export function StudentCoursesPage({ surveysOnly = false }) {
     setError('')
     fetchStudentCourses(token)
       .then((data) => setRows(Array.isArray(data) ? data : []))
-      .catch((e) => setError(e instanceof Error ? e.message : 'Dersler alınamadı.'))
+      .catch((e) => {
+        const msg = e instanceof Error ? e.message : 'Dersler alınamadı.'
+        const extra =
+          /aktif|sync|dönem/i.test(msg) && !/Yönetici/i.test(msg)
+            ? `${msg} — Yönetici panelinde «Akademik Dönem» üzerinden üniversite senkronizasyonu yapılmalıdır.`
+            : msg
+        setError(extra)
+      })
       .finally(() => setLoading(false))
   }, [])
 
@@ -39,7 +47,7 @@ export function StudentCoursesPage({ surveysOnly = false }) {
   const normalizedRows = useMemo(() => {
     return (rows ?? [])
       .map((r) => {
-        const id = r?.courseOfferingId ?? r?.CourseOfferingId ?? r?.id ?? r?.Id ?? ''
+        const id = getStudentCourseOfferingId(r)
         const courseCode = r?.courseCode ?? r?.CourseCode ?? ''
         const courseName = r?.courseName ?? r?.CourseName ?? ''
         const termName = r?.termName ?? r?.TermName ?? ''

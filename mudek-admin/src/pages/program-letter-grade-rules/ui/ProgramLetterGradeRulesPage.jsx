@@ -3,11 +3,11 @@ import { Pencil, Plus, Trash2 } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import {
-  addProgramLetterGradeRule,
-  deleteProgramLetterGradeRule,
-  fetchProgramLetterGradeRules,
-  fetchPrograms,
-  updateProgramLetterGradeRule,
+  createLetterGradeRule,
+  deleteLetterGradeRule,
+  fetchLetterGradeRulesByProgram,
+  fetchUniversityPrograms,
+  updateLetterGradeRule,
 } from '../../../shared/api/adminApi'
 import { appConfig } from '../../../shared/config/appConfig'
 import { getAdminToken } from '../../../shared/lib/authToken'
@@ -21,8 +21,12 @@ import styles from './ProgramLetterGradeRulesPage.module.css'
 
 const columnHelper = createColumnHelper()
 
-function rid(x) {
-  return x?.id ?? x?.Id ?? ''
+function programKey(p) {
+  return String(p?.programId ?? p?.ProgramId ?? '')
+}
+
+function ruleKey(r) {
+  return String(r?.id ?? r?.Id ?? '')
 }
 
 function rstr(x, a, b) {
@@ -59,13 +63,13 @@ export function ProgramLetterGradeRulesPage() {
     setLoadingPrograms(true)
     setError('')
     try {
-      const data = await fetchPrograms(token)
+      const data = await fetchUniversityPrograms(token)
       const list = Array.isArray(data) ? data : []
       setPrograms(list)
       setProgramId((prev) => {
         if (!list.length) return ''
-        if (prev && list.some((p) => rid(p) === prev)) return prev
-        return rid(list[0])
+        if (prev && list.some((p) => programKey(p) === prev)) return prev
+        return programKey(list[0])
       })
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Programlar yüklenemedi.')
@@ -83,7 +87,7 @@ export function ProgramLetterGradeRulesPage() {
     setLoadingRules(true)
     setError('')
     try {
-      const data = await fetchProgramLetterGradeRules(token, programId)
+      const data = await fetchLetterGradeRulesByProgram(token, Number(programId))
       setRows(Array.isArray(data) ? data : [])
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Kurallar yüklenemedi.')
@@ -109,7 +113,7 @@ export function ProgramLetterGradeRulesPage() {
   }
 
   const openEdit = (r) => {
-    const id = rid(r)
+    const id = ruleKey(r)
     setEditId(id)
     setForm({
       letterGrade: rstr(r, 'letterGrade', 'LetterGrade'),
@@ -158,9 +162,12 @@ export function ProgramLetterGradeRulesPage() {
         description: form.description.trim() || null,
       }
       if (editId) {
-        await updateProgramLetterGradeRule(token, editId, { id: editId, ...body })
+        await updateLetterGradeRule(token, editId, { id: editId, ...body })
       } else {
-        await addProgramLetterGradeRule(token, programId, { programEntityId: programId, ...body })
+        await createLetterGradeRule(token, {
+          externalProgramId: Number(programId),
+          ...body,
+        })
       }
       setDialogOpen(false)
       await loadRules()
@@ -177,7 +184,7 @@ export function ProgramLetterGradeRulesPage() {
     if (!token) return
     setError('')
     try {
-      await deleteProgramLetterGradeRule(token, id)
+      await deleteLetterGradeRule(token, id)
       await loadRules()
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Silinemedi.')
@@ -198,7 +205,7 @@ export function ProgramLetterGradeRulesPage() {
         header: '',
         cell: (ctx) => {
           const r = ctx.row.original
-          const id = rid(r)
+          const id = ruleKey(r)
           return (
             <div className={styles.actions}>
               <button type="button" className={styles.mini} onClick={() => openEdit(r)} title="Düzenle">
@@ -215,7 +222,9 @@ export function ProgramLetterGradeRulesPage() {
     [],
   )
 
-  const programName = programs.find((p) => rid(p) === programId)?.name
+  const programName =
+    programs.find((p) => programKey(p) === programId)?.programName ??
+    programs.find((p) => programKey(p) === programId)?.ProgramName
 
   return (
     <PageSection title={page.title} description={page.description} error={error}>
@@ -231,8 +240,8 @@ export function ProgramLetterGradeRulesPage() {
           >
             {!programs.length ? <option value="">—</option> : null}
             {programs.map((p) => (
-              <option key={rid(p)} value={rid(p)}>
-                {p.name}
+              <option key={programKey(p)} value={programKey(p)}>
+                {p.programName ?? p.ProgramName ?? programKey(p)}
               </option>
             ))}
           </select>

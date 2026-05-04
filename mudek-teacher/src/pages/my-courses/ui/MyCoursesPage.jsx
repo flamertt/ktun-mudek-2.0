@@ -2,9 +2,10 @@ import { UsersRound } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-import { fetchMyCourses } from '../../../shared/api/teacherApi'
+import { fetchMyCourses, fetchTeacherAcademicTerms } from '../../../shared/api/teacherApi'
 import { appConfig } from '../../../shared/config/appConfig'
 import { getTeacherToken } from '../../../shared/lib/authToken'
+import { academicTermRowId, academicTermRowLabel } from '../../../shared/lib/teacherAcademicTermMap'
 import { RefreshIconButton } from '../../../shared/ui/refresh-icon-button/RefreshIconButton.jsx'
 import { PageSection } from '@shared/ui/page-section/PageSection.jsx'
 import sectionStyles from '@shared/ui/page-section/PageSection.module.css'
@@ -18,17 +19,38 @@ export function MyCoursesPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [query, setQuery] = useState('')
+  const [academicTerms, setAcademicTerms] = useState([])
+  const [selectedTermId, setSelectedTermId] = useState('')
+
+  useEffect(() => {
+    const token = getTeacherToken()
+    if (!token) return undefined
+    let cancelled = false
+    fetchTeacherAcademicTerms(token)
+      .then((data) => {
+        if (cancelled || !Array.isArray(data)) return
+        setAcademicTerms(
+          [...data].sort((a, b) => Number(academicTermRowId(b)) - Number(academicTermRowId(a))),
+        )
+      })
+      .catch(() => {
+        if (!cancelled) setAcademicTerms([])
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   const load = useCallback(() => {
     const token = getTeacherToken()
     if (!token) return
     setLoading(true)
     setError('')
-    fetchMyCourses(token)
+    fetchMyCourses(token, selectedTermId)
       .then((data) => setRows(Array.isArray(data) ? data : []))
       .catch((e) => setError(e instanceof Error ? e.message : 'Dersler alınamadı.'))
       .finally(() => setLoading(false))
-  }, [])
+  }, [selectedTermId])
 
   useEffect(() => {
     void Promise.resolve().then(load)
@@ -37,7 +59,16 @@ export function MyCoursesPage() {
   const normalizedRows = useMemo(() => {
     return (rows ?? [])
       .map((r) => {
-        const id = r?.id ?? r?.Id ?? r?.offeringId ?? r?.OfferingId ?? ''
+        const id =
+          r?.externalCourseOfferingId ??
+          r?.ExternalCourseOfferingId ??
+          r?.id ??
+          r?.Id ??
+          r?.courseOfferingId ??
+          r?.CourseOfferingId ??
+          r?.offeringId ??
+          r?.OfferingId ??
+          ''
         const courseCode = r?.courseCode ?? r?.CourseCode ?? ''
         const courseName = r?.courseName ?? r?.CourseName ?? ''
         const termName = r?.termName ?? r?.TermName ?? ''
@@ -74,6 +105,28 @@ export function MyCoursesPage() {
     <PageSection title={page.title} description={page.description} error={error}>
       <div className={styles.root}>
         <div className={styles.toolbar}>
+          {academicTerms.length ? (
+            <label className={styles.searchLabel} htmlFor="my-course-term">
+              Akademik dönem
+              <select
+                id="my-course-term"
+                className={sectionStyles.select}
+                value={selectedTermId}
+                onChange={(e) => setSelectedTermId(e.target.value)}
+              >
+                <option value="">Aktif dönem (üniversite)</option>
+                {academicTerms.map((t) => {
+                  const tid = academicTermRowId(t)
+                  if (!tid) return null
+                  return (
+                    <option key={tid} value={tid}>
+                      {academicTermRowLabel(t)}
+                    </option>
+                  )
+                })}
+              </select>
+            </label>
+          ) : null}
           <div className={styles.search}>
             <label className={styles.searchLabel} htmlFor="my-course-search">
               Ders ara

@@ -152,6 +152,33 @@ export function CourseEvaluationPage() {
               ) : null}
             </div>
 
+            {d.cloPoMap?.length ? (
+              <div className={styles.panel}>
+                <h3 className={styles.panelTitle}>CLO ↔ PÇ matrisi (üniversite)</h3>
+                <p className={styles.panelHint}>
+                  Bu dersin katalog numarasına göre üniversite kaynaklı DÖÇ–program çıktısı ağırlıkları (ilk 15 satır).
+                </p>
+                <ul style={{ margin: '0.35rem 0 0', paddingLeft: '1.15rem', fontSize: '0.82rem', lineHeight: 1.45 }}>
+                  {d.cloPoMap.slice(0, 15).map((row, idx) => {
+                    const clo = row.cloId ?? row.CloId
+                    const po = row.programOutcomeId ?? row.ProgramOutcomeId
+                    const w = row.weight ?? row.Weight
+                    return (
+                      <li key={`${clo}-${po}-${idx}`}>
+                        DÖÇ {clo} → PÇ {po}
+                        {w != null ? ` · ağırlık: ${w}` : ''}
+                      </li>
+                    )
+                  })}
+                </ul>
+                {d.cloPoMap.length > 15 ? (
+                  <p className={sectionStyles.muted} style={{ margin: '0.5rem 0 0', fontSize: '0.8rem' }}>
+                    … ve {d.cloPoMap.length - 15} kayıt daha
+                  </p>
+                ) : null}
+              </div>
+            ) : null}
+
             {d.evaluation ? (
               <>
                 <div className={styles.panel}>

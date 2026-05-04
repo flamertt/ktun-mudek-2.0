@@ -1,12 +1,13 @@
 using BitirmeApi.Business.ServiceRegistration;
 using BitirmeApi.DataAccess.Concrete.EntityFramework.Context;
+using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
+var isDevelopment = builder.Environment.IsDevelopment();
 
 // DbContext
 builder.Services.AddDbContext<ProjectDbContext>(options =>
@@ -21,17 +22,19 @@ builder.Services.AddAuthentication(options =>
 })
 .AddJwtBearer(options =>
 {
-    // ASP.NET Core 8 yeni pipeline: JsonWebTokenHandler kullanır,
-    // SignatureValidator JsonWebToken döndürmelidir.
+    // Varsayılan JsonWebTokenHandler yolu, SignatureValidator'dan JwtSecurityToken dönünce uyumsuz kalıp 401 verebiliyor.
+    options.UseSecurityTokenValidators = true;
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuer = false,
         ValidateAudience = false,
-        ValidateLifetime = true,
+        // Üniversite token'ında exp/nbf farklı saat dilimleri veya kısa ömür geliştirmede sık 401 üretir.
+        ValidateLifetime = !isDevelopment,
         ValidateIssuerSigningKey = false,
         RequireSignedTokens = false,
-        SignatureValidator = (token, _) => new JsonWebTokenHandler().ReadJsonWebToken(token),
-        ClockSkew = TimeSpan.FromMinutes(5)
+        // Login tarafında claim'ler JwtSecurityToken ile okunuyor; JsonWebTokenHandler bazı üretici JWT'lerinde 401 üretebiliyor.
+        SignatureValidator = (token, _) => new JwtSecurityTokenHandler().ReadJwtToken(token),
+        ClockSkew = TimeSpan.FromMinutes(isDevelopment ? 30 : 5)
     };
     options.Events = new JwtBearerEvents
     {
@@ -39,7 +42,13 @@ builder.Services.AddAuthentication(options =>
         {
             var logger = ctx.HttpContext.RequestServices
                 .GetRequiredService<ILogger<Program>>();
-            logger.LogWarning("Token doğrulama hatası: {Error}", ctx.Exception.Message);
+            var http = ctx.HttpContext;
+            var hasAuth = http.Request.Headers.Authorization.Count > 0;
+            logger.LogWarning(
+                "JWT doğrulama başarısız: {Path} AuthorizationVar={HasAuth} Hata={Error}",
+                http.Request.Path.Value,
+                hasAuth,
+                ctx.Exception.Message);
             return Task.CompletedTask;
         }
     };
@@ -93,7 +102,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+// Geliştirmede HTTP (5010) → HTTPS yönlendirmesi, tarayıcının Authorization başlığını düşürebilir; Vite proxy http kullanır.
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();

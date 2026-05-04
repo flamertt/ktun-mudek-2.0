@@ -40,6 +40,17 @@ export function CourseStudentsPage() {
     void Promise.resolve().then(load)
   }, [load])
 
+  /** BitirmeApi UniversityStudentDto: studentId, studentNumber, fullName */
+  const tableRows = useMemo(() => {
+    return (rows ?? []).map((r) => ({
+      studentId: r?.studentId ?? r?.StudentId,
+      studentNumber: r?.studentNumber ?? r?.StudentNumber ?? '',
+      studentFullName: r?.fullName ?? r?.FullName ?? r?.studentFullName ?? r?.StudentFullName ?? '—',
+      status: r?.status ?? r?.Status ?? '—',
+      enrolledAt: r?.enrolledAt ?? r?.EnrolledAt ?? null,
+    }))
+  }, [rows])
+
   const columns = useMemo(
     () => [
       columnHelper.accessor('studentFullName', { header: 'Öğrenci' }),
@@ -80,7 +91,7 @@ export function CourseStudentsPage() {
 
       <DataTable
         columns={columns}
-        data={rows}
+        data={tableRows}
         globalFilter={globalFilter}
         onGlobalFilterChange={setGlobalFilter}
         searchPlaceholder="Öğrenci ara…"
@@ -91,9 +102,9 @@ export function CourseStudentsPage() {
         pageSize={10}
       />
 
-      {rows.length ? (
+      {tableRows.length ? (
         <p className={sectionStyles.muted} style={{ marginTop: '0.75rem', fontSize: '0.8rem' }}>
-          Toplam: {rows.length}
+          Toplam: {tableRows.length}
         </p>
       ) : null}
     </PageSection>

@@ -4,6 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 
 import { fetchStudentCourses, fetchStudentSurveyDetail, submitStudentSurvey } from '../../../shared/api/studentApi'
 import { getStudentToken } from '../../../shared/lib/authToken'
+import { getStudentCourseOfferingId } from '../../../shared/lib/studentCourseMap'
 import { PageSection } from '@shared/ui/page-section/PageSection.jsx'
 import sectionStyles from '@shared/ui/page-section/PageSection.module.css'
 import styles from './StudentSurveyFillPage.module.css'
@@ -48,10 +49,7 @@ export function StudentSurveyFillPage() {
       .then(([d, courses]) => {
         setDetail(d ?? null)
         const arr = Array.isArray(courses) ? courses : []
-        const match = arr.find(
-          (c) =>
-            String(c?.courseOfferingId ?? c?.CourseOfferingId ?? c?.id ?? c?.Id ?? '') === String(offeringId),
-        )
+        const match = arr.find((c) => getStudentCourseOfferingId(c) === String(offeringId))
         const code = match?.courseCode ?? match?.CourseCode ?? ''
         const name = match?.courseName ?? match?.CourseName ?? ''
         setCourseLabel(code && name ? `${code} — ${name}` : (name || code || ''))

@@ -8,7 +8,7 @@ import { authTexts } from '../../../shared/lib/texts/auth.js'
 
 export function LoginCard() {
   const navigate = useNavigate()
-  const [email, setEmail] = useState('')
+  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [rememberMe, setRememberMe] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -19,7 +19,7 @@ export function LoginCard() {
 
     setErrorMessage('')
 
-    if (!email.trim() || !password) {
+    if (!username.trim() || !password) {
       setErrorMessage(authTexts.requiredError)
       return
     }
@@ -28,12 +28,20 @@ export function LoginCard() {
 
     try {
       const response = await loginAsStudent({
-        email: email.trim(),
+        email: username.trim(),
         password,
       })
 
-      localStorage.setItem(appConfig.storage.tokenKey, response.token)
-      localStorage.setItem(appConfig.storage.userKey, JSON.stringify(response.user))
+      const token = response?.token ?? response?.Token
+      const user = response?.user ?? response?.User
+      if (!token || user == null) {
+        throw new Error(
+          response?.message ?? response?.Message ?? 'Giriş yanıtı geçersiz (token veya kullanıcı eksik).',
+        )
+      }
+
+      localStorage.setItem(appConfig.storage.tokenKey, token)
+      localStorage.setItem(appConfig.storage.userKey, JSON.stringify(user))
       navigate(appConfig.routes.surveys)
     } catch (error) {
       setErrorMessage(error.message)
@@ -62,11 +70,11 @@ export function LoginCard() {
               className={styles.input}
               id="username"
               name="username"
-              type="email"
+              type="text"
               autoComplete="username"
               placeholder={authTexts.usernamePlaceholder}
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
+              value={username}
+              onChange={(event) => setUsername(event.target.value)}
             />
           </div>
 

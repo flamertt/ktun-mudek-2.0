@@ -2,6 +2,13 @@ import { API_BASE_URL } from '@shared/config/env.js'
 
 export { API_BASE_URL }
 
+function normalizeBearerToken(token) {
+  if (token == null) return ''
+  const s = String(token).trim()
+  if (!s) return ''
+  return s.replace(/^Bearer\s+/i, '').trim()
+}
+
 function buildUrl(path, query) {
   const base = path.startsWith('http') ? path : `${API_BASE_URL}${path}`
   if (!query || typeof query !== 'object') return base
@@ -44,12 +51,24 @@ export async function requestJson(method, path, options = {}) {
   const headers = {}
   const hasBody = body != null && method !== 'GET' && method !== 'DELETE'
   if (hasBody) headers['Content-Type'] = 'application/json'
-  if (token) headers.Authorization = `Bearer ${token}`
+  const bearer = normalizeBearerToken(token)
+  if (bearer) headers.Authorization = `Bearer ${bearer}`
+  else if (import.meta.env.DEV && path.includes('/api/Admin')) {
+    console.warn('[httpClient] /api/Admin çağrısı Bearer olmadan gidiyor (401 beklenir).', path)
+  }
 
   const init = { method, headers }
   if (hasBody) init.body = JSON.stringify(body)
 
   const response = await fetch(url, init)
+
+  if (response.status === 204 || response.status === 205) {
+    if (!response.ok) {
+      throw new Error(`İstek başarısız (${response.status})`)
+    }
+    return null
+  }
+
   const data = await parseJsonSafely(response)
 
   if (!response.ok) {
@@ -75,7 +94,8 @@ export const deleteJsonWithAuth = (path, token) => requestJson('DELETE', path, {
 export async function postFormDataWithAuth(path, formData, token) {
   const url = buildUrl(path, undefined)
   const headers = {}
-  if (token) headers.Authorization = `Bearer ${token}`
+  const bearer = normalizeBearerToken(token)
+  if (bearer) headers.Authorization = `Bearer ${bearer}`
   const response = await fetch(url, { method: 'POST', headers, body: formData })
   const data = await parseJsonSafely(response)
   if (!response.ok) {

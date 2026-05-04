@@ -88,7 +88,11 @@ namespace BitirmeApi.Presentation.Controllers
         {
             var term = await _academicTermService.GetActiveAsync();
             return term == null
-                ? NotFound(new { message = "DB'de henüz aktif dönem yok. Önce /sync çağırın." })
+                ? NotFound(new
+                {
+                    message =
+                        "Veritabanında aktif akademik dönem kaydı yok. Admin panelinden veya POST /api/Admin/university/academic-terms/sync ile üniversite aktif dönemini senkronize edin."
+                })
                 : Ok(term);
         }
 

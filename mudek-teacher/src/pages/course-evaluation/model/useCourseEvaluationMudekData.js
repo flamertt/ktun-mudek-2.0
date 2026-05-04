@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   calculateMudekEvaluation,
   createEvaluation,
+  fetchCourseCloPoMap,
   fetchCourseStudents,
   fetchEvaluation,
   fetchExams,
@@ -20,6 +21,7 @@ export function useCourseEvaluationMudekData(offeringId) {
   const [clos, setClos] = useState([])
   const [programOutcomes, setProgramOutcomes] = useState([])
   const [exams, setExams] = useState([])
+  const [cloPoMap, setCloPoMap] = useState([])
 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -121,6 +123,31 @@ export function useCourseEvaluationMudekData(offeringId) {
     if (!offeringId) return
     void Promise.resolve().then(loadCourseDetail)
   }, [loadCourseDetail, offeringId])
+
+  useEffect(() => {
+    const token = getTeacherToken()
+    const cid = courseDetail?.courseId ?? courseDetail?.CourseId
+    if (!token || cid == null || cid === '') {
+      setCloPoMap([])
+      return undefined
+    }
+    const n = Number(cid)
+    if (!Number.isFinite(n)) {
+      setCloPoMap([])
+      return undefined
+    }
+    let cancelled = false
+    fetchCourseCloPoMap(token, n)
+      .then((data) => {
+        if (!cancelled) setCloPoMap(Array.isArray(data) ? data : [])
+      })
+      .catch(() => {
+        if (!cancelled) setCloPoMap([])
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [courseDetail])
 
   useEffect(() => {
     if (!offeringId) return
@@ -315,6 +342,7 @@ export function useCourseEvaluationMudekData(offeringId) {
     clos,
     programOutcomes,
     programOutcomeById,
+    cloPoMap,
     exams,
     loading,
     error,

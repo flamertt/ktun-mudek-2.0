@@ -2,9 +2,16 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ClipboardCheck, Plus } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
-import { createEvaluation, fetchEvaluation, fetchMyCourses } from '../../../shared/api/teacherApi'
+import {
+  createEvaluation,
+  fetchEvaluation,
+  fetchMyCourses,
+  fetchMyEvaluations,
+  fetchTeacherAcademicTerms,
+} from '../../../shared/api/teacherApi'
 import { appConfig } from '../../../shared/config/appConfig'
 import { getTeacherToken } from '../../../shared/lib/authToken'
+import { academicTermRowId, academicTermRowLabel } from '../../../shared/lib/teacherAcademicTermMap'
 import { PageSection } from '@shared/ui/page-section/PageSection.jsx'
 import { RefreshIconButton } from '../../../shared/ui/refresh-icon-button/RefreshIconButton.jsx'
 import sectionStyles from '@shared/ui/page-section/PageSection.module.css'
@@ -20,6 +27,9 @@ export function EvaluationsLandingPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [query, setQuery] = useState('')
+  const [academicTerms, setAcademicTerms] = useState([])
+  const [selectedTermId, setSelectedTermId] = useState('')
+  const [allEvaluationsCount, setAllEvaluationsCount] = useState(null)
 
   const [createOpen, setCreateOpen] = useState(false)
   const [selectedOfferingIds, setSelectedOfferingIds] = useState([])
@@ -36,6 +46,33 @@ export function EvaluationsLandingPage() {
     } catch {
       return false
     }
+  }, [])
+
+  useEffect(() => {
+    const token = getTeacherToken()
+    if (!token) return undefined
+    let cancelled = false
+    fetchTeacherAcademicTerms(token)
+      .then((data) => {
+        if (cancelled || !Array.isArray(data)) return
+        setAcademicTerms(
+          [...data].sort((a, b) => Number(academicTermRowId(b)) - Number(academicTermRowId(a))),
+        )
+      })
+      .catch(() => {
+        if (!cancelled) setAcademicTerms([])
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  useEffect(() => {
+    const token = getTeacherToken()
+    if (!token) return
+    fetchMyEvaluations(token)
+      .then((data) => setAllEvaluationsCount(Array.isArray(data) ? data.length : 0))
+      .catch(() => setAllEvaluationsCount(null))
   }, [])
 
   const runPool = useCallback(async (items, concurrency, worker) => {
@@ -57,7 +94,7 @@ export function EvaluationsLandingPage() {
     if (!token) return
     setLoading(true)
     setError('')
-    fetchMyCourses(token)
+    fetchMyCourses(token, selectedTermId)
       .then(async (data) => {
         const list = Array.isArray(data) ? data : []
         setRows(list)
@@ -65,7 +102,18 @@ export function EvaluationsLandingPage() {
         // `my-courses` bazen "hasEvaluation" bayrağını eksik/uyumsuz döndürüyor.
         // Bu yüzden offering bazlı `GET /my-courses/{offeringId}/evaluation` ile var/yok kontrolü yapıyoruz.
         const offeringIds = list
-          .map((r) => r?.id ?? r?.Id ?? r?.offeringId ?? r?.OfferingId ?? '')
+          .map(
+            (r) =>
+              r?.externalCourseOfferingId ??
+              r?.ExternalCourseOfferingId ??
+              r?.id ??
+              r?.Id ??
+              r?.courseOfferingId ??
+              r?.CourseOfferingId ??
+              r?.offeringId ??
+              r?.OfferingId ??
+              '',
+          )
           .filter(Boolean)
 
         if (!offeringIds.length) {
@@ -92,7 +140,7 @@ export function EvaluationsLandingPage() {
       })
       .catch((e) => setError(e instanceof Error ? e.message : 'Dersler alınamadı.'))
       .finally(() => setLoading(false))
-  }, [checkEvaluationExists, runPool])
+  }, [checkEvaluationExists, runPool, selectedTermId])
 
   useEffect(() => {
     void Promise.resolve().then(load)
@@ -101,7 +149,16 @@ export function EvaluationsLandingPage() {
   const normalizedRows = useMemo(() => {
     return (rows ?? [])
       .map((r) => {
-        const id = r?.id ?? r?.Id ?? r?.offeringId ?? r?.OfferingId ?? ''
+        const id =
+          r?.externalCourseOfferingId ??
+          r?.ExternalCourseOfferingId ??
+          r?.id ??
+          r?.Id ??
+          r?.courseOfferingId ??
+          r?.CourseOfferingId ??
+          r?.offeringId ??
+          r?.OfferingId ??
+          ''
         const courseCode = r?.courseCode ?? r?.CourseCode ?? ''
         const courseName = r?.courseName ?? r?.CourseName ?? ''
         const termName = r?.termName ?? r?.TermName ?? ''
@@ -195,6 +252,28 @@ export function EvaluationsLandingPage() {
     <PageSection title={page.title} description={page.description} error={error}>
       <div className={styles.root}>
         <div className={styles.toolbar}>
+          {academicTerms.length ? (
+            <label className={styles.searchLabel} htmlFor="eval-course-term">
+              Akademik dönem
+              <select
+                id="eval-course-term"
+                className={sectionStyles.select}
+                value={selectedTermId}
+                onChange={(e) => setSelectedTermId(e.target.value)}
+              >
+                <option value="">Aktif dönem (üniversite)</option>
+                {academicTerms.map((t) => {
+                  const tid = academicTermRowId(t)
+                  if (!tid) return null
+                  return (
+                    <option key={tid} value={tid}>
+                      {academicTermRowLabel(t)}
+                    </option>
+                  )
+                })}
+              </select>
+            </label>
+          ) : null}
           <div className={styles.search}>
             <label className={styles.searchLabel} htmlFor="eval-course-search">
               Ders ara
@@ -226,7 +305,8 @@ export function EvaluationsLandingPage() {
               Değerlendirme oluştur
             </button>
             <span className={sectionStyles.muted} style={{ fontSize: '0.85rem' }}>
-              {filtered.length} değerlendirme
+              {filtered.length} ders (seçili dönem)
+              {allEvaluationsCount != null ? ` · veritabanında toplam ${allEvaluationsCount} değerlendirme` : ''}
             </span>
           </div>
         </div>

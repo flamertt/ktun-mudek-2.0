@@ -10,12 +10,10 @@ import {
 } from 'lucide-react'
 
 import {
-  fetchActiveAcademicTerm,
-  fetchCourseOfferingsActiveTerm,
-  fetchCourses,
-  fetchPrograms,
-  fetchStudents,
-  fetchTeachers,
+  fetchAllCourseEvaluations,
+  fetchDbActiveAcademicTerm,
+  fetchUniversityPrograms,
+  syncUniversityActiveAcademicTerm,
 } from '../../../shared/api/adminApi'
 import { getAdminToken } from '../../../shared/lib/authToken'
 import { appConfig } from '../../../shared/config/appConfig'
@@ -26,12 +24,9 @@ import styles from './HomePage.module.css'
 export function HomePage() {
   const [stats, setStats] = useState({
     programs: '—',
-    courses: '—',
-    teachers: '—',
-    students: '—',
+    evaluations: '—',
   })
   const [activeTermName, setActiveTermName] = useState(null)
-  const [offeringsCount, setOfferingsCount] = useState(null)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
 
@@ -136,22 +131,26 @@ export function HomePage() {
     setError('')
     setLoading(true)
     try {
-      const [programs, courses, teachers, students, activeTerm, offerings] = await Promise.all([
-        fetchPrograms(token),
-        fetchCourses(token),
-        fetchTeachers(token),
-        fetchStudents(token),
-        fetchActiveAcademicTerm(token).catch(() => null),
-        fetchCourseOfferingsActiveTerm(token).catch(() => []),
+      const [programs, evaluations, activeTermInitial] = await Promise.all([
+        fetchUniversityPrograms(token),
+        fetchAllCourseEvaluations(token).catch(() => []),
+        fetchDbActiveAcademicTerm(token).catch(() => null),
       ])
+      let activeTerm = activeTermInitial
+      if (activeTerm == null) {
+        try {
+          await syncUniversityActiveAcademicTerm(token)
+          activeTerm = await fetchDbActiveAcademicTerm(token).catch(() => null)
+        } catch {
+          /* senkron başarısız; özet yine de program/değerlendirme ile dolsun */
+        }
+      }
       setStats({
         programs: String(Array.isArray(programs) ? programs.length : 0),
-        courses: String(Array.isArray(courses) ? courses.length : 0),
-        teachers: String(Array.isArray(teachers) ? teachers.length : 0),
-        students: String(Array.isArray(students) ? students.length : 0),
+        evaluations: String(Array.isArray(evaluations) ? evaluations.length : 0),
       })
-      setActiveTermName(activeTerm?.name?.trim() || null)
-      setOfferingsCount(Array.isArray(offerings) ? offerings.length : 0)
+      const termLabel = activeTerm?.ad ?? activeTerm?.Ad ?? activeTerm?.name ?? activeTerm?.Name
+      setActiveTermName(termLabel?.trim() || null)
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Özet yüklenemedi.')
     } finally {
@@ -190,19 +189,17 @@ export function HomePage() {
                   Hoş geldiniz
                 </h2>
                 <p className={styles.heroLead}>
-                  {termShort} dönemi için canlı özet ve hızlı erişim.
-                  Sol menüden modüllere geçebilir veya aşağıdaki kısayolları kullanabilirsiniz.
+                  Üniversite programları ve MÜDEK ders değerlendirme kayıtları özeti. Öğrenci uygulaması için aktif dönem
+                  senkronu: Akademik Dönem sayfası.
                 </p>
                 <div className={styles.heroMetrics}>
                   <div className={styles.heroMetric}>
-                    <span className={styles.heroMetricLabel}>Aktif dönem açılışı</span>
-                    <span className={styles.heroMetricValue}>
-                      {loading ? '…' : offeringsCount != null ? String(offeringsCount) : '—'}
-                    </span>
+                    <span className={styles.heroMetricLabel}>Program (üniversite)</span>
+                    <span className={styles.heroMetricValue}>{loading ? '…' : stats.programs}</span>
                   </div>
                   <div className={styles.heroMetric}>
-                    <span className={styles.heroMetricLabel}>Toplam öğrenci</span>
-                    <span className={styles.heroMetricValue}>{loading ? '…' : stats.students}</span>
+                    <span className={styles.heroMetricLabel}>Ders değerlendirmesi</span>
+                    <span className={styles.heroMetricValue}>{loading ? '…' : stats.evaluations}</span>
                   </div>
                 </div>
               </div>
