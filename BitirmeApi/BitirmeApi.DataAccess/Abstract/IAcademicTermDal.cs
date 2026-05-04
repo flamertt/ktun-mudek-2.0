@@ -5,7 +5,7 @@ namespace BitirmeApi.DataAccess.Abstract
 {
     public interface IAcademicTermDal : IRepository<AcademicTerm>
     {
-        Task<AcademicTerm?> GetActiveTermAsync();
-        Task DeactivateAllAsync();
+        /// <summary>En büyük Id'ye sahip (en güncel) dönemi döner.</summary>
+        Task<AcademicTerm?> GetActiveAsync();
     }
 }

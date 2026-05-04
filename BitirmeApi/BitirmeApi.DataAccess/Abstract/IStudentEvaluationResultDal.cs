@@ -5,11 +5,7 @@ namespace BitirmeApi.DataAccess.Abstract
 {
     public interface IStudentEvaluationResultDal : IRepository<StudentEvaluationResult>
     {
-        /// <summary>
-        /// Belirtilen ders açılışında dersi geçen öğrencilerin UserId setini döner.
-        /// StudentEvaluationResult → Enrollment → StudentId zinciri kullanılır.
-        /// Hesaplama yapılmamışsa boş set döner.
-        /// </summary>
-        Task<HashSet<Guid>> GetPassingStudentIdsAsync(Guid courseOfferingId);
+        /// <summary>Belirtilen ders açılışında dersi geçen öğrencilerin ExternalStudentId setini döner.</summary>
+        Task<HashSet<int>> GetPassingStudentIdsAsync(int externalCourseOfferingId);
     }
 }

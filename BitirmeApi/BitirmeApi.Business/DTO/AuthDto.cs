@@ -1,15 +1,14 @@
 namespace BitirmeApi.Business.DTO
 {
+    /// <summary>Login sonucu dönen kullanıcı bilgisi (yerel DB'siz, üniversite API'den)</summary>
     public class AuthUserResponseDto
     {
-        public Guid Id { get; set; }
+        public int ExternalId { get; set; }
         public string FullName { get; set; } = default!;
         public string Email { get; set; } = default!;
         public string Role { get; set; } = default!;
         public string? StudentNumber { get; set; }
         public string? Title { get; set; }
-        public Guid? ProgramEntityId { get; set; }
-        public string? ProgramName { get; set; }
     }
 
     public class AuthResponseDto

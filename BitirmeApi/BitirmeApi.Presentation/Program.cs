@@ -1,25 +1,19 @@
 using BitirmeApi.Business.ServiceRegistration;
 using BitirmeApi.DataAccess.Concrete.EntityFramework.Context;
-using BitirmeApi.Presentation.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using System.Security.Claims;
-using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
-// DbContext configuration
+// DbContext
 builder.Services.AddDbContext<ProjectDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// JWT Authentication
-var jwtSettings = builder.Configuration.GetSection("Jwt");
-var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]);
-
+// Üniversite API token'ını doğrudan kabul et — imza doğrulaması yapılmaz.
+// Signing key üniversitenin elindedir; biz sadece token'ı decode edip claim'leri okuruz.
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -27,79 +21,72 @@ builder.Services.AddAuthentication(options =>
 })
 .AddJwtBearer(options =>
 {
+    // ASP.NET Core 8 yeni pipeline: JsonWebTokenHandler kullanır,
+    // SignatureValidator JsonWebToken döndürmelidir.
     options.TokenValidationParameters = new TokenValidationParameters
     {
-        ValidateIssuer = true,
-        ValidateAudience = true,
+        ValidateIssuer = false,
+        ValidateAudience = false,
         ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,
-        ValidIssuer = jwtSettings["Issuer"],
-        ValidAudience = jwtSettings["Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(key),
-        RoleClaimType=ClaimTypes.Role,
-        ClockSkew = TimeSpan.Zero
+        ValidateIssuerSigningKey = false,
+        RequireSignedTokens = false,
+        SignatureValidator = (token, _) => new JsonWebTokenHandler().ReadJsonWebToken(token),
+        ClockSkew = TimeSpan.FromMinutes(5)
+    };
+    options.Events = new JwtBearerEvents
+    {
+        OnAuthenticationFailed = ctx =>
+        {
+            var logger = ctx.HttpContext.RequestServices
+                .GetRequiredService<ILogger<Program>>();
+            logger.LogWarning("Token doğrulama hatası: {Error}", ctx.Exception.Message);
+            return Task.CompletedTask;
+        }
     };
 });
 
-// Authorization policies
-builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
-    options.AddPolicy("TeacherOnly", policy => policy.RequireRole("Teacher"));
-    options.AddPolicy("StudentOnly", policy => policy.RequireRole("Student"));
-});
+builder.Services.AddAuthorization();
 
 // CORS
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll", builder =>
-    {
-        builder.AllowAnyOrigin()
-               .AllowAnyMethod()
-               .AllowAnyHeader();
-    });
+    options.AddPolicy("AllowAll", policy =>
+        policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 });
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
-// Swagger configuration with JWT support
+// Swagger with JWT
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Bitirme API", Version = "v1" });
-    
-    // JWT Bearer için Swagger yapılandırması
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "MÜDEK API", Version = "v1" });
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
-        Description = "JWT Authorization header using the Bearer scheme. Example: \"Bearer {token}\"",
+        Description = "Login endpoint'inden alınan token'ı buraya yapıştır (Bearer prefix gerekmez).",
         Name = "Authorization",
         In = ParameterLocation.Header,
-        Type = SecuritySchemeType.ApiKey,
-        Scheme = "Bearer"
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT"
     });
-
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
             new OpenApiSecurityScheme
             {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
+                Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
             },
             Array.Empty<string>()
         }
     });
 });
 
-// Business layer services
-builder.Services.BusinessRegister();
+// Business layer
+builder.Services.BusinessRegister(builder.Configuration);
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -107,15 +94,12 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
 app.UseCors("AllowAll");
-
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
 
-// Geliştirmede bekleyen migration'ları uygula; aksi halde yeni tablolar (ör. ProgramLetterGradeRules) yokken 500 oluşur.
+// Migration (geliştirmede otomatik)
 using (var scope = app.Services.CreateScope())
 {
     var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
@@ -128,18 +112,9 @@ using (var scope = app.Services.CreateScope())
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Veritabanı migration uygulanamadı");
+            logger.LogError(ex, "Migration uygulanamadı");
             throw;
         }
-    }
-
-    try
-    {
-        await DatabaseSeeder.SeedTestUsersAsync(scope.ServiceProvider);
-    }
-    catch (Exception ex)
-    {
-        logger.LogError(ex, "Seed data eklenirken bir hata oluştu");
     }
 }
 

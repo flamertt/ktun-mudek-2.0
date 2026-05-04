@@ -1,5 +1,6 @@
 using BitirmeApi.Business.Abstract;
 using BitirmeApi.Business.DTO;
+using BitirmeApi.Business.Integration.Abstract;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -8,11 +9,10 @@ namespace BitirmeApi.Presentation.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Policy = "TeacherOnly")]
+    [Authorize]
     public class TeacherController : ControllerBase
     {
-        private readonly ICourseOfferingService _offeringService;
-        private readonly IEnrollmentService _enrollmentService;
+        private readonly IUniversityApiService _universityApi;
         private readonly ICourseEvaluationService _evaluationService;
         private readonly IExamService _examService;
         private readonly IExamQuestionService _questionService;
@@ -21,15 +21,11 @@ namespace BitirmeApi.Presentation.Controllers
         private readonly IAssessmentComponentOutcomeMappingService _componentOutcomeService;
         private readonly IStudentAnswerService _studentAnswerService;
         private readonly IStudentAssessmentComponentScoreService _componentScoreService;
-        private readonly IProgramLetterGradeRuleService _programLetterGradeRuleService;
-        private readonly ICourseLearningOutcomeService _cloService;
-        private readonly IProgramOutcomeService _programOutcomeService;
         private readonly IMudekEvaluationCalculatorService _mudekCalculator;
         private readonly ISurveyService _surveyService;
 
         public TeacherController(
-            ICourseOfferingService offeringService,
-            IEnrollmentService enrollmentService,
+            IUniversityApiService universityApi,
             ICourseEvaluationService evaluationService,
             IExamService examService,
             IExamQuestionService questionService,
@@ -38,14 +34,10 @@ namespace BitirmeApi.Presentation.Controllers
             IAssessmentComponentOutcomeMappingService componentOutcomeService,
             IStudentAnswerService studentAnswerService,
             IStudentAssessmentComponentScoreService componentScoreService,
-            IProgramLetterGradeRuleService programLetterGradeRuleService,
-            ICourseLearningOutcomeService cloService,
-            IProgramOutcomeService programOutcomeService,
             IMudekEvaluationCalculatorService mudekCalculator,
             ISurveyService surveyService)
         {
-            _offeringService = offeringService;
-            _enrollmentService = enrollmentService;
+            _universityApi = universityApi;
             _evaluationService = evaluationService;
             _examService = examService;
             _questionService = questionService;
@@ -54,58 +46,160 @@ namespace BitirmeApi.Presentation.Controllers
             _componentOutcomeService = componentOutcomeService;
             _studentAnswerService = studentAnswerService;
             _componentScoreService = componentScoreService;
-            _programLetterGradeRuleService = programLetterGradeRuleService;
-            _cloService = cloService;
-            _programOutcomeService = programOutcomeService;
             _mudekCalculator = mudekCalculator;
             _surveyService = surveyService;
         }
 
-        private Guid GetTeacherId()
+        /// <summary>Üniversite JWT'sindeki kullanıcı ID'si (sub claim).</summary>
+        private int GetExternalTeacherId()
         {
-            var sub = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-                   ?? User.FindFirst("sub")?.Value;
-            if (string.IsNullOrEmpty(sub) || !Guid.TryParse(sub, out var id))
-                throw new UnauthorizedAccessException("Token geçersiz.");
+            var val = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                   ?? User.FindFirst("sub")?.Value
+                   ?? User.FindFirst("nameid")?.Value;
+            if (string.IsNullOrEmpty(val) || !int.TryParse(val, out var id))
+                throw new UnauthorizedAccessException("Kullanıcı ID claim bulunamadı.");
             return id;
         }
 
+        /// <summary>Authorization header'daki Bearer token'ı döndürür (üniversite API token'ı).</summary>
+        private string GetUniversityToken()
+        {
+            var header = HttpContext.Request.Headers["Authorization"].FirstOrDefault();
+            if (string.IsNullOrEmpty(header) || !header.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+                throw new UnauthorizedAccessException("Authorization header bulunamadı.");
+            return header["Bearer ".Length..].Trim();
+        }
+
         // ════════════════════════════════════════════════════════════════════════
-        // DERSLERİM (CourseOffering üzerinden)
+        // AKADEMİK DÖNEMLER
         // ════════════════════════════════════════════════════════════════════════
 
+        /// <summary>Üniversite API'sindeki tüm akademik dönemleri listeler.</summary>
+        [HttpGet("academic-terms")]
+        public async Task<IActionResult> GetAcademicTerms()
+        {
+            try { return Ok(await _universityApi.GetAcademicTermsAsync(GetUniversityToken())); }
+            catch (Exception ex) { return BadRequest(new { message = ex.Message }); }
+        }
+
+        // ════════════════════════════════════════════════════════════════════════
+        // ÜNİVERSİTE API — DERSLERİM
+        // ════════════════════════════════════════════════════════════════════════
+
+        /// <summary>
+        /// Öğretmenin üniversite API'sinde tanımlı aktif dönemdeki (en yüksek dönem Id) derslerini çeker.
+        /// </summary>
         [HttpGet("my-courses")]
-        public async Task<IActionResult> GetMyCourses([FromQuery] Guid? termId)
-            => Ok(await _offeringService.GetByTeacherIdAndTermAsync(GetTeacherId(), termId));
-
-        [HttpGet("my-courses/{offeringId}")]
-        public async Task<IActionResult> GetMyCourseDetail(Guid offeringId)
+        public async Task<IActionResult> GetMyCourses()
         {
-            var offering = await _offeringService.GetByIdForTeacherAsync(offeringId, GetTeacherId());
-            return offering == null
-                ? NotFound(new { message = "Ders açılışı bulunamadı veya erişim yetkiniz yok." })
-                : Ok(offering);
+            try
+            {
+                var token = GetUniversityToken();
+                var activeTerm = await _universityApi.GetActiveAcademicTermAsync(token);
+                if (activeTerm == null)
+                    return NotFound(new { message = "Aktif akademik dönem bulunamadı." });
+
+                var courses = await _universityApi.GetTeacherOfferingsAsync(
+                    GetExternalTeacherId(), activeTerm.AcademicTermId, token);
+                return Ok(courses);
+            }
+            catch (Exception ex) { return BadRequest(new { message = ex.Message }); }
         }
 
+        /// <summary>Verilen akademik dönem Id için öğretmenin derslerini üniversite API'sinden çeker.</summary>
+        [HttpGet("my-courses/academic-terms")]
+        public async Task<IActionResult> GetMyCoursesByAcademicTerm([FromQuery] int termId)
+        {
+            try
+            {
+                var courses = await _universityApi.GetTeacherOfferingsAsync(
+                    GetExternalTeacherId(), termId, GetUniversityToken());
+                return Ok(courses);
+            }
+            catch (Exception ex) { return BadRequest(new { message = ex.Message }); }
+        }
+
+        /// <summary>Belirtilen ders açılışının detayını ve öğrenci listesini üniversite API'sinden çeker.</summary>
+        [HttpGet("my-courses/{offeringId}/detail")]
+        public async Task<IActionResult> GetCourseDetail(int offeringId)
+        {
+            try
+            {
+                var detail = await _universityApi.GetCourseOfferingDetailAsync(GetExternalTeacherId(), offeringId, GetUniversityToken());
+                return detail == null
+                    ? NotFound(new { message = "Ders açılışı bulunamadı." })
+                    : Ok(detail);
+            }
+            catch (Exception ex) { return BadRequest(new { message = ex.Message }); }
+        }
+
+        /// <summary>Ders açılışına kayıtlı öğrenci listesini üniversite API'sinden çeker.</summary>
         [HttpGet("my-courses/{offeringId}/students")]
-        public async Task<IActionResult> GetCourseStudents(Guid offeringId)
+        public async Task<IActionResult> GetCourseStudents(int offeringId)
         {
-            if (await _offeringService.GetByIdForTeacherAsync(offeringId, GetTeacherId()) == null)
-                return NotFound(new { message = "Ders açılışı bulunamadı veya erişim yetkiniz yok." });
+            try
+            {
+                var students = await _universityApi.GetStudentsForOfferingAsync(GetExternalTeacherId(), offeringId, GetUniversityToken());
+                return students == null
+                    ? NotFound(new { message = "Ders açılışı bulunamadı." })
+                    : Ok(students);
+            }
+            catch (Exception ex) { return BadRequest(new { message = ex.Message }); }
+        }
 
-            return Ok(await _enrollmentService.GetByOfferingIdAsync(offeringId));
+        /// <summary>Belirtilen ders açılışına ait DÖÇ listesini üniversite API'sinden çeker (anket sorusu eklemek için).</summary>
+        [HttpGet("my-courses/{offeringId}/clos")]
+        public async Task<IActionResult> GetClosByOffering(int offeringId)
+        {
+            try
+            {
+                // Önce courseId'yi öğren
+                var detail = await _universityApi.GetCourseOfferingDetailAsync(GetExternalTeacherId(), offeringId, GetUniversityToken());
+                if (detail == null) return NotFound(new { message = "Ders açılışı bulunamadı." });
+
+                var clos = await _universityApi.GetClosByCourseidAsync(detail.CourseId, GetUniversityToken());
+                return Ok(clos);
+            }
+            catch (Exception ex) { return BadRequest(new { message = ex.Message }); }
+        }
+
+        /// <summary>Dersin programına ait program çıktılarını üniversite API'sinden çeker.</summary>
+        [HttpGet("my-courses/{offeringId}/program-outcomes")]
+        public async Task<IActionResult> GetProgramOutcomesByOffering(int offeringId)
+        {
+            try
+            {
+                var detail = await _universityApi.GetCourseOfferingDetailAsync(GetExternalTeacherId(), offeringId, GetUniversityToken());
+                if (detail == null) return NotFound(new { message = "Ders açılışı bulunamadı." });
+
+                var outcomes = await _universityApi.GetProgramOutcomesAsync(detail.ProgramId, GetUniversityToken());
+                return Ok(outcomes);
+            }
+            catch (Exception ex) { return BadRequest(new { message = ex.Message }); }
+        }
+
+        /// <summary>Verilen courseId için CLO–Program çıktısı matrisini üniversite API'sinden çeker.</summary>
+        [HttpGet("courses/{courseId}/clo-po-map")]
+        public async Task<IActionResult> GetCloPloMap(int courseId)
+        {
+            try { return Ok(await _universityApi.GetCloPloMapAsync(courseId, GetUniversityToken())); }
+            catch (Exception ex) { return BadRequest(new { message = ex.Message }); }
         }
 
         // ════════════════════════════════════════════════════════════════════════
-        // MÜDEK DEĞERLENDİRME
+        // MÜDEK DEĞERLENDİRME (CourseEvaluation)
         // ════════════════════════════════════════════════════════════════════════
+
+        [HttpGet("my-evaluations")]
+        public async Task<IActionResult> GetMyEvaluations()
+        {
+            try { return Ok(await _evaluationService.GetByTeacherIdAsync(GetExternalTeacherId())); }
+            catch (Exception ex) { return BadRequest(new { message = ex.Message }); }
+        }
 
         [HttpGet("my-courses/{offeringId}/evaluation")]
-        public async Task<IActionResult> GetEvaluation(Guid offeringId)
+        public async Task<IActionResult> GetEvaluation(int offeringId)
         {
-            if (await _offeringService.GetByIdForTeacherAsync(offeringId, GetTeacherId()) == null)
-                return NotFound(new { message = "Ders açılışı bulunamadı veya erişim yetkiniz yok." });
-
             var evaluation = await _evaluationService.GetByOfferingIdAsync(offeringId);
             return evaluation == null
                 ? NotFound(new { message = "Bu ders açılışı için henüz değerlendirme oluşturulmamış." })
@@ -113,13 +207,13 @@ namespace BitirmeApi.Presentation.Controllers
         }
 
         [HttpPost("my-courses/{offeringId}/evaluation")]
-        public async Task<IActionResult> CreateEvaluation(Guid offeringId, [FromBody] CourseEvaluationCreateDto dto)
+        public async Task<IActionResult> CreateEvaluation(int offeringId, [FromBody] CourseEvaluationCreateDto dto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            dto.CourseOfferingId = offeringId;
+            dto.ExternalCourseOfferingId = offeringId;
             try
             {
-                var result = await _evaluationService.CreateForTeacherAsync(dto, GetTeacherId());
+                var result = await _evaluationService.CreateForTeacherAsync(dto, GetExternalTeacherId(), GetUniversityToken());
                 return CreatedAtAction(nameof(GetEvaluation), new { offeringId }, result);
             }
             catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
@@ -127,22 +221,22 @@ namespace BitirmeApi.Presentation.Controllers
             catch (InvalidOperationException ex) { return Conflict(new { message = ex.Message }); }
         }
 
-        [HttpPut("my-courses/{offeringId}/evaluation/{evaluationId}")]
-        public async Task<IActionResult> UpdateEvaluation(Guid offeringId, Guid evaluationId, [FromBody] CourseEvaluationUpdateDto dto)
+        [HttpPut("evaluations/{evaluationId}")]
+        public async Task<IActionResult> UpdateEvaluation(Guid evaluationId, [FromBody] CourseEvaluationUpdateDto dto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             dto.Id = evaluationId;
-            try { return Ok(await _evaluationService.UpdateForTeacherAsync(dto, GetTeacherId())); }
+            try { return Ok(await _evaluationService.UpdateForTeacherAsync(dto, GetExternalTeacherId())); }
             catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
             catch (UnauthorizedAccessException) { return Forbid(); }
         }
 
-        [HttpDelete("my-courses/{offeringId}/evaluation/{evaluationId}")]
-        public async Task<IActionResult> DeleteEvaluation(Guid offeringId, Guid evaluationId)
+        [HttpDelete("evaluations/{evaluationId}")]
+        public async Task<IActionResult> DeleteEvaluation(Guid evaluationId)
         {
             try
             {
-                await _evaluationService.DeleteForTeacherAsync(evaluationId, GetTeacherId());
+                await _evaluationService.DeleteForTeacherAsync(evaluationId, GetExternalTeacherId());
                 return Ok(new { message = "Değerlendirme silindi." });
             }
             catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
@@ -153,11 +247,10 @@ namespace BitirmeApi.Presentation.Controllers
         // SINAV (Exam)
         // ════════════════════════════════════════════════════════════════════════
 
-        /// <summary>Bir değerlendirmeye ait sınavları listeler</summary>
         [HttpGet("evaluations/{evaluationId}/exams")]
         public async Task<IActionResult> GetExams(Guid evaluationId)
         {
-            try { return Ok(await _examService.GetByEvaluationIdForTeacherAsync(evaluationId, GetTeacherId())); }
+            try { return Ok(await _examService.GetByEvaluationIdForTeacherAsync(evaluationId, GetExternalTeacherId())); }
             catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
             catch (UnauthorizedAccessException) { return Forbid(); }
         }
@@ -167,16 +260,12 @@ namespace BitirmeApi.Presentation.Controllers
         {
             try
             {
-                var item = await _examService.GetByIdForTeacherAsync(examId, GetTeacherId());
+                var item = await _examService.GetByIdForTeacherAsync(examId, GetExternalTeacherId());
                 return item == null ? NotFound() : Ok(item);
             }
             catch (UnauthorizedAccessException) { return Forbid(); }
         }
 
-        /// <summary>
-        /// Değerlendirmeye yeni sınav ekler.
-        /// Ownership servis katmanında doğrulanır.
-        /// </summary>
         [HttpPost("evaluations/{evaluationId}/exams")]
         public async Task<IActionResult> CreateExam(Guid evaluationId, [FromBody] CreateExamDto dto)
         {
@@ -184,7 +273,7 @@ namespace BitirmeApi.Presentation.Controllers
             dto.CourseEvaluationId = evaluationId;
             try
             {
-                var result = await _examService.CreateAsync(dto, GetTeacherId());
+                var result = await _examService.CreateAsync(dto, GetExternalTeacherId());
                 return CreatedAtAction(nameof(GetExam), new { examId = result.Id }, result);
             }
             catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
@@ -197,7 +286,7 @@ namespace BitirmeApi.Presentation.Controllers
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             dto.Id = examId;
-            try { return Ok(await _examService.UpdateAsync(dto, GetTeacherId())); }
+            try { return Ok(await _examService.UpdateAsync(dto, GetExternalTeacherId())); }
             catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
             catch (UnauthorizedAccessException) { return Forbid(); }
             catch (InvalidOperationException ex) { return BadRequest(new { message = ex.Message }); }
@@ -208,7 +297,7 @@ namespace BitirmeApi.Presentation.Controllers
         {
             try
             {
-                await _examService.DeleteAsync(examId, GetTeacherId());
+                await _examService.DeleteAsync(examId, GetExternalTeacherId());
                 return Ok(new { message = "Sınav silindi." });
             }
             catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
@@ -222,7 +311,7 @@ namespace BitirmeApi.Presentation.Controllers
         [HttpGet("exams/{examId}/questions")]
         public async Task<IActionResult> GetQuestions(Guid examId)
         {
-            try { return Ok(await _questionService.GetByExamIdForTeacherAsync(examId, GetTeacherId())); }
+            try { return Ok(await _questionService.GetByExamIdForTeacherAsync(examId, GetExternalTeacherId())); }
             catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
             catch (UnauthorizedAccessException) { return Forbid(); }
         }
@@ -232,16 +321,12 @@ namespace BitirmeApi.Presentation.Controllers
         {
             try
             {
-                var item = await _questionService.GetByIdForTeacherAsync(questionId, GetTeacherId());
+                var item = await _questionService.GetByIdForTeacherAsync(questionId, GetExternalTeacherId());
                 return item == null ? NotFound() : Ok(item);
             }
             catch (UnauthorizedAccessException) { return Forbid(); }
         }
 
-        /// <summary>
-        /// Sınava yeni soru ekler.
-        /// Ownership servis katmanında doğrulanır.
-        /// </summary>
         [HttpPost("exams/{examId}/questions")]
         public async Task<IActionResult> CreateQuestion(Guid examId, [FromBody] CreateExamQuestionDto dto)
         {
@@ -249,7 +334,7 @@ namespace BitirmeApi.Presentation.Controllers
             dto.ExamId = examId;
             try
             {
-                var result = await _questionService.CreateAsync(dto, GetTeacherId());
+                var result = await _questionService.CreateAsync(dto, GetExternalTeacherId());
                 return CreatedAtAction(nameof(GetQuestion), new { questionId = result.Id }, result);
             }
             catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
@@ -262,7 +347,7 @@ namespace BitirmeApi.Presentation.Controllers
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             dto.Id = questionId;
-            try { return Ok(await _questionService.UpdateAsync(dto, GetTeacherId())); }
+            try { return Ok(await _questionService.UpdateAsync(dto, GetExternalTeacherId())); }
             catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
             catch (UnauthorizedAccessException) { return Forbid(); }
             catch (InvalidOperationException ex) { return Conflict(new { message = ex.Message }); }
@@ -273,7 +358,7 @@ namespace BitirmeApi.Presentation.Controllers
         {
             try
             {
-                await _questionService.DeleteAsync(questionId, GetTeacherId());
+                await _questionService.DeleteAsync(questionId, GetExternalTeacherId());
                 return Ok(new { message = "Soru silindi." });
             }
             catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
@@ -284,7 +369,7 @@ namespace BitirmeApi.Presentation.Controllers
         [HttpGet("exam-questions/{questionId}/clos")]
         public async Task<IActionResult> GetQuestionClos(Guid questionId)
         {
-            try { return Ok(await _questionOutcomeService.GetByQuestionIdForTeacherAsync(questionId, GetTeacherId())); }
+            try { return Ok(await _questionOutcomeService.GetByQuestionIdForTeacherAsync(questionId, GetExternalTeacherId())); }
             catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
             catch (UnauthorizedAccessException) { return Forbid(); }
         }
@@ -294,7 +379,7 @@ namespace BitirmeApi.Presentation.Controllers
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             dto.ExamQuestionId = questionId;
-            try { return Ok(await _questionOutcomeService.AddForTeacherAsync(dto, GetTeacherId())); }
+            try { return Ok(await _questionOutcomeService.AddForTeacherAsync(dto, GetExternalTeacherId())); }
             catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
             catch (UnauthorizedAccessException) { return Forbid(); }
             catch (InvalidOperationException ex) { return Conflict(new { message = ex.Message }); }
@@ -305,7 +390,7 @@ namespace BitirmeApi.Presentation.Controllers
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             dto.Id = mappingId;
-            try { return Ok(await _questionOutcomeService.UpdateForTeacherAsync(dto, GetTeacherId())); }
+            try { return Ok(await _questionOutcomeService.UpdateForTeacherAsync(dto, GetExternalTeacherId())); }
             catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
             catch (UnauthorizedAccessException) { return Forbid(); }
             catch (InvalidOperationException ex) { return Conflict(new { message = ex.Message }); }
@@ -314,15 +399,19 @@ namespace BitirmeApi.Presentation.Controllers
         [HttpDelete("exam-question-outcome-mappings/{mappingId}")]
         public async Task<IActionResult> DeleteQuestionCloMapping(Guid mappingId)
         {
-            try { await _questionOutcomeService.DeleteForTeacherAsync(mappingId, GetTeacherId()); return Ok(new { message = "Mapping silindi." }); }
+            try { await _questionOutcomeService.DeleteForTeacherAsync(mappingId, GetExternalTeacherId()); return Ok(new { message = "Mapping silindi." }); }
             catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
             catch (UnauthorizedAccessException) { return Forbid(); }
         }
 
+        // ════════════════════════════════════════════════════════════════════════
+        // ASSESSMENT COMPONENT
+        // ════════════════════════════════════════════════════════════════════════
+
         [HttpGet("exams/{examId}/components")]
         public async Task<IActionResult> GetComponents(Guid examId)
         {
-            try { return Ok(await _componentService.GetByExamIdForTeacherAsync(examId, GetTeacherId())); }
+            try { return Ok(await _componentService.GetByExamIdForTeacherAsync(examId, GetExternalTeacherId())); }
             catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
             catch (UnauthorizedAccessException) { return Forbid(); }
         }
@@ -332,7 +421,7 @@ namespace BitirmeApi.Presentation.Controllers
         {
             try
             {
-                var item = await _componentService.GetByIdForTeacherAsync(componentId, GetTeacherId());
+                var item = await _componentService.GetByIdForTeacherAsync(componentId, GetExternalTeacherId());
                 return item == null ? NotFound() : Ok(item);
             }
             catch (UnauthorizedAccessException) { return Forbid(); }
@@ -343,7 +432,7 @@ namespace BitirmeApi.Presentation.Controllers
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             dto.ExamId = examId;
-            try { return Ok(await _componentService.AddForTeacherAsync(dto, GetTeacherId())); }
+            try { return Ok(await _componentService.AddForTeacherAsync(dto, GetExternalTeacherId())); }
             catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
             catch (UnauthorizedAccessException) { return Forbid(); }
             catch (InvalidOperationException ex) { return Conflict(new { message = ex.Message }); }
@@ -354,7 +443,7 @@ namespace BitirmeApi.Presentation.Controllers
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             dto.Id = componentId;
-            try { return Ok(await _componentService.UpdateForTeacherAsync(dto, GetTeacherId())); }
+            try { return Ok(await _componentService.UpdateForTeacherAsync(dto, GetExternalTeacherId())); }
             catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
             catch (UnauthorizedAccessException) { return Forbid(); }
             catch (InvalidOperationException ex) { return Conflict(new { message = ex.Message }); }
@@ -363,7 +452,7 @@ namespace BitirmeApi.Presentation.Controllers
         [HttpDelete("assessment-components/{componentId}")]
         public async Task<IActionResult> DeleteComponent(Guid componentId)
         {
-            try { await _componentService.DeleteForTeacherAsync(componentId, GetTeacherId()); return Ok(new { message = "Component silindi." }); }
+            try { await _componentService.DeleteForTeacherAsync(componentId, GetExternalTeacherId()); return Ok(new { message = "Component silindi." }); }
             catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
             catch (UnauthorizedAccessException) { return Forbid(); }
             catch (InvalidOperationException ex) { return Conflict(new { message = ex.Message }); }
@@ -372,7 +461,7 @@ namespace BitirmeApi.Presentation.Controllers
         [HttpGet("assessment-components/{componentId}/clos")]
         public async Task<IActionResult> GetComponentClos(Guid componentId)
         {
-            try { return Ok(await _componentOutcomeService.GetByComponentIdForTeacherAsync(componentId, GetTeacherId())); }
+            try { return Ok(await _componentOutcomeService.GetByComponentIdForTeacherAsync(componentId, GetExternalTeacherId())); }
             catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
             catch (UnauthorizedAccessException) { return Forbid(); }
         }
@@ -382,7 +471,7 @@ namespace BitirmeApi.Presentation.Controllers
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             dto.AssessmentComponentId = componentId;
-            try { return Ok(await _componentOutcomeService.AddForTeacherAsync(dto, GetTeacherId())); }
+            try { return Ok(await _componentOutcomeService.AddForTeacherAsync(dto, GetExternalTeacherId())); }
             catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
             catch (UnauthorizedAccessException) { return Forbid(); }
             catch (InvalidOperationException ex) { return Conflict(new { message = ex.Message }); }
@@ -393,7 +482,7 @@ namespace BitirmeApi.Presentation.Controllers
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             dto.Id = mappingId;
-            try { return Ok(await _componentOutcomeService.UpdateForTeacherAsync(dto, GetTeacherId())); }
+            try { return Ok(await _componentOutcomeService.UpdateForTeacherAsync(dto, GetExternalTeacherId())); }
             catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
             catch (UnauthorizedAccessException) { return Forbid(); }
             catch (InvalidOperationException ex) { return Conflict(new { message = ex.Message }); }
@@ -402,15 +491,19 @@ namespace BitirmeApi.Presentation.Controllers
         [HttpDelete("assessment-component-outcome-mappings/{mappingId}")]
         public async Task<IActionResult> DeleteComponentClo(Guid mappingId)
         {
-            try { await _componentOutcomeService.DeleteForTeacherAsync(mappingId, GetTeacherId()); return Ok(new { message = "Mapping silindi." }); }
+            try { await _componentOutcomeService.DeleteForTeacherAsync(mappingId, GetExternalTeacherId()); return Ok(new { message = "Mapping silindi." }); }
             catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
             catch (UnauthorizedAccessException) { return Forbid(); }
         }
 
+        // ════════════════════════════════════════════════════════════════════════
+        // ÖĞRENCİ CEVAPLARI (StudentAnswer)
+        // ════════════════════════════════════════════════════════════════════════
+
         [HttpGet("exam-questions/{questionId}/answers")]
         public async Task<IActionResult> GetAnswers(Guid questionId)
         {
-            try { return Ok(await _studentAnswerService.GetByQuestionForTeacherAsync(questionId, GetTeacherId())); }
+            try { return Ok(await _studentAnswerService.GetByQuestionForTeacherAsync(questionId, GetExternalTeacherId())); }
             catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
             catch (UnauthorizedAccessException) { return Forbid(); }
         }
@@ -420,7 +513,7 @@ namespace BitirmeApi.Presentation.Controllers
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             dto.ExamQuestionId = questionId;
-            try { return Ok(await _studentAnswerService.AddForTeacherAsync(dto, GetTeacherId())); }
+            try { return Ok(await _studentAnswerService.AddForTeacherAsync(dto, GetExternalTeacherId())); }
             catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
             catch (UnauthorizedAccessException) { return Forbid(); }
             catch (InvalidOperationException ex) { return Conflict(new { message = ex.Message }); }
@@ -430,7 +523,7 @@ namespace BitirmeApi.Presentation.Controllers
         public async Task<IActionResult> AddAnswersBulk(Guid questionId, [FromBody] BulkStudentAnswerRequestDto dto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            try { return Ok(await _studentAnswerService.AddBulkForTeacherAsync(questionId, dto.Items, GetTeacherId())); }
+            try { return Ok(await _studentAnswerService.AddBulkForTeacherAsync(questionId, dto.Items, GetExternalTeacherId())); }
             catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
             catch (UnauthorizedAccessException) { return Forbid(); }
         }
@@ -440,7 +533,7 @@ namespace BitirmeApi.Presentation.Controllers
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             dto.Id = answerId;
-            try { return Ok(await _studentAnswerService.UpdateForTeacherAsync(dto, GetTeacherId())); }
+            try { return Ok(await _studentAnswerService.UpdateForTeacherAsync(dto, GetExternalTeacherId())); }
             catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
             catch (UnauthorizedAccessException) { return Forbid(); }
             catch (InvalidOperationException ex) { return BadRequest(new { message = ex.Message }); }
@@ -449,15 +542,19 @@ namespace BitirmeApi.Presentation.Controllers
         [HttpDelete("student-answers/{answerId}")]
         public async Task<IActionResult> DeleteAnswer(Guid answerId)
         {
-            try { await _studentAnswerService.DeleteForTeacherAsync(answerId, GetTeacherId()); return Ok(new { message = "Answer silindi." }); }
+            try { await _studentAnswerService.DeleteForTeacherAsync(answerId, GetExternalTeacherId()); return Ok(new { message = "Answer silindi." }); }
             catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
             catch (UnauthorizedAccessException) { return Forbid(); }
         }
 
+        // ════════════════════════════════════════════════════════════════════════
+        // COMPONENT SCORE
+        // ════════════════════════════════════════════════════════════════════════
+
         [HttpGet("assessment-components/{componentId}/scores")]
         public async Task<IActionResult> GetScores(Guid componentId)
         {
-            try { return Ok(await _componentScoreService.GetByComponentForTeacherAsync(componentId, GetTeacherId())); }
+            try { return Ok(await _componentScoreService.GetByComponentForTeacherAsync(componentId, GetExternalTeacherId())); }
             catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
             catch (UnauthorizedAccessException) { return Forbid(); }
         }
@@ -467,7 +564,7 @@ namespace BitirmeApi.Presentation.Controllers
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             dto.AssessmentComponentId = componentId;
-            try { return Ok(await _componentScoreService.AddForTeacherAsync(dto, GetTeacherId())); }
+            try { return Ok(await _componentScoreService.AddForTeacherAsync(dto, GetExternalTeacherId())); }
             catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
             catch (UnauthorizedAccessException) { return Forbid(); }
             catch (InvalidOperationException ex) { return Conflict(new { message = ex.Message }); }
@@ -477,7 +574,7 @@ namespace BitirmeApi.Presentation.Controllers
         public async Task<IActionResult> AddScoresBulk(Guid componentId, [FromBody] BulkStudentScoreDto dto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            try { return Ok(await _componentScoreService.AddBulkForTeacherAsync(componentId, dto.Scores, GetTeacherId())); }
+            try { return Ok(await _componentScoreService.AddBulkForTeacherAsync(componentId, dto.Scores, GetExternalTeacherId())); }
             catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
             catch (UnauthorizedAccessException) { return Forbid(); }
         }
@@ -487,7 +584,7 @@ namespace BitirmeApi.Presentation.Controllers
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             dto.Id = scoreId;
-            try { return Ok(await _componentScoreService.UpdateForTeacherAsync(dto, GetTeacherId())); }
+            try { return Ok(await _componentScoreService.UpdateForTeacherAsync(dto, GetExternalTeacherId())); }
             catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
             catch (UnauthorizedAccessException) { return Forbid(); }
             catch (InvalidOperationException ex) { return BadRequest(new { message = ex.Message }); }
@@ -496,93 +593,47 @@ namespace BitirmeApi.Presentation.Controllers
         [HttpDelete("student-assessment-component-scores/{scoreId}")]
         public async Task<IActionResult> DeleteScore(Guid scoreId)
         {
-            try { await _componentScoreService.DeleteForTeacherAsync(scoreId, GetTeacherId()); return Ok(new { message = "Score silindi." }); }
+            try { await _componentScoreService.DeleteForTeacherAsync(scoreId, GetExternalTeacherId()); return Ok(new { message = "Score silindi." }); }
             catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
             catch (UnauthorizedAccessException) { return Forbid(); }
         }
 
-        /// <summary>
-        /// Geçerli harf notu kuralları (önce programa tanımlı; yoksa eski değerlendirme bazlı kurallar). Salt okunur.
-        /// </summary>
-        [HttpGet("my-courses/{offeringId}/letter-grade-rules")]
-        public async Task<IActionResult> GetLetterRulesForOffering(Guid offeringId)
+        // ════════════════════════════════════════════════════════════════════════
+        // MÜDEK HESAPLAMA
+        // ════════════════════════════════════════════════════════════════════════
+
+        /// <summary>Kaydedilmiş MÜDEK sonuç özeti.</summary>
+        [HttpGet("my-courses/{offeringId}/mudek-evaluation/results")]
+        public async Task<IActionResult> GetMudekResults(int offeringId)
         {
-            try
-            {
-                return Ok(await _programLetterGradeRuleService.GetEffectiveForTeacherOfferingAsync(offeringId, GetTeacherId()));
-            }
+            try { return Ok(await _mudekCalculator.GetSnapshotAsync(offeringId, GetExternalTeacherId())); }
+            catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
             catch (UnauthorizedAccessException) { return Forbid(); }
         }
 
-        /// <summary>
-        /// Belirtilen ders açılışına ait DÖÇ (CLO) listesini getirir.
-        /// Anket sorusu eklerken DÖÇ seçimi için yardımcı endpoint.
-        /// </summary>
-        [HttpGet("my-courses/{offeringId}/clos")]
-        public async Task<IActionResult> GetClosByOffering(Guid offeringId)
-        {
-            var offering = await _offeringService.GetByIdForTeacherAsync(offeringId, GetTeacherId());
-            if (offering == null) return NotFound(new { message = "Ders açılışı bulunamadı veya erişim yetkiniz yok." });
-            return Ok(await _cloService.GetByCourseIdAsync(offering.CourseId));
-        }
-
-        /// <summary>
-        /// Dersin programına ait program çıktıları (PÇ). MÜDEK özet ekranlarında isim çözümlemesi için.
-        /// </summary>
-        [HttpGet("my-courses/{offeringId}/program-outcomes")]
-        public async Task<IActionResult> GetProgramOutcomesByOffering(Guid offeringId)
-        {
-            var offering = await _offeringService.GetByIdForTeacherAsync(offeringId, GetTeacherId());
-            if (offering == null) return NotFound(new { message = "Ders açılışı bulunamadı veya erişim yetkiniz yok." });
-            return Ok(await _programOutcomeService.GetByProgramIdAsync(offering.ProgramEntityId));
-        }
-
-        // ════════════════════════════════════════════════════════════════════════
-        // MÜDEK snapshot hesapları (docs/MUDEK_Rapor.md zinciri — geçme notu → çıktılar → DÖÇ → PÇ)
-        // ════════════════════════════════════════════════════════════════════════
-
-        /// <summary>Kaydedilmiş MÜDEK sonuç özeti. Ham veri değiştiyse <see cref="MudekEvaluationSnapshotDto.IsCalculationDirty"/> true olabilir.</summary>
-        [HttpGet("my-courses/{offeringId}/mudek-evaluation/results")]
-        public async Task<IActionResult> GetMudekResults(Guid offeringId)
-        {
-            if (await _offeringService.GetByIdForTeacherAsync(offeringId, GetTeacherId()) == null)
-                return NotFound(new { message = "Ders açılışı bulunamadı veya erişim yetkiniz yok." });
-
-            return Ok(await _mudekCalculator.GetSnapshotForTeacherAsync(offeringId, GetTeacherId()));
-        }
-
-        /// <summary>
-        /// <b>Hesapla:</b> Vize/final/büt soru ve bileşen notları, harf kuralları, soru–DÖÇ ve DÖÇ–PÇ eşlemeleriyle
-        /// rapordaki zinciri çalıştırır; sonuç tablolarına yazar. Önce değerlendirme kaydı ve sınavlar oluşturulmuş olmalıdır.
-        /// </summary>
+        /// <summary>MÜDEK hesapla (yeni veya güncelle).</summary>
         [HttpPost("my-courses/{offeringId}/mudek-evaluation/calculate")]
-        public Task<IActionResult> CalculateMudek(Guid offeringId) => ExecuteMudekRecalculateAsync(offeringId);
+        public Task<IActionResult> CalculateMudek(int offeringId) => ExecuteMudekRecalculateAsync(offeringId);
 
-        /// <summary>
-        /// Aynı işlem <c>calculate</c> ile. Offering için mevcut snapshot satırlarını siler, baştan hesaplar, tek transaction’da kaydeder.
-        /// </summary>
         [HttpPost("my-courses/{offeringId}/mudek-evaluation/recalculate")]
-        public Task<IActionResult> RecalculateMudek(Guid offeringId) => ExecuteMudekRecalculateAsync(offeringId);
+        public Task<IActionResult> RecalculateMudek(int offeringId) => ExecuteMudekRecalculateAsync(offeringId);
 
-        /// <summary>
-        /// Değerlendirme ekranında yalnızca <c>evaluationId</c> varsa: aynı hesaplamayı bu id üzerinden tetikler.
-        /// </summary>
         [HttpPost("evaluations/{evaluationId}/mudek-evaluation/calculate")]
         public async Task<IActionResult> CalculateMudekForEvaluation(Guid evaluationId)
         {
             var eval = await _evaluationService.GetByIdAsync(evaluationId);
             if (eval == null)
                 return NotFound(new { message = "Değerlendirme bulunamadı." });
-            if (await _offeringService.GetByIdForTeacherAsync(eval.CourseOfferingId, GetTeacherId()) == null)
-                return NotFound(new { message = "Ders açılışı bulunamadı veya erişim yetkiniz yok." });
-            return await ExecuteMudekRecalculateAsync(eval.CourseOfferingId);
+            if (eval.ExternalTeacherId != GetExternalTeacherId())
+                return Forbid();
+            return await ExecuteMudekRecalculateAsync(eval.ExternalCourseOfferingId);
         }
 
-        private async Task<IActionResult> ExecuteMudekRecalculateAsync(Guid courseOfferingId)
+        private async Task<IActionResult> ExecuteMudekRecalculateAsync(int externalCourseOfferingId)
         {
             try
             {
-                return Ok(await _mudekCalculator.RecalculateForTeacherAsync(courseOfferingId, GetTeacherId()));
+                return Ok(await _mudekCalculator.RecalculateAsync(externalCourseOfferingId, GetExternalTeacherId(), GetUniversityToken()));
             }
             catch (InvalidOperationException ex) { return BadRequest(new { message = ex.Message }); }
             catch (UnauthorizedAccessException) { return Forbid(); }
@@ -593,11 +644,15 @@ namespace BitirmeApi.Presentation.Controllers
         {
             try
             {
-                var exams = await _examService.GetByEvaluationIdForTeacherAsync(evaluationId, GetTeacherId());
+                var eval = await _evaluationService.GetByIdAsync(evaluationId);
+                if (eval == null) return NotFound(new { message = "Değerlendirme bulunamadı." });
+                if (eval.ExternalTeacherId != GetExternalTeacherId()) return Forbid();
+
+                var exams = await _examService.GetByEvaluationIdForTeacherAsync(evaluationId, GetExternalTeacherId());
                 var componentsByExam = new Dictionary<Guid, object>();
                 foreach (var exam in exams)
                 {
-                    componentsByExam[exam.Id] = await _componentService.GetByExamIdForTeacherAsync(exam.Id, GetTeacherId());
+                    componentsByExam[exam.Id] = await _componentService.GetByExamIdForTeacherAsync(exam.Id, GetExternalTeacherId());
                 }
                 return Ok(new { evaluationId, exams, componentsByExam });
             }
@@ -606,29 +661,23 @@ namespace BitirmeApi.Presentation.Controllers
         }
 
         // ════════════════════════════════════════════════════════════════════════
-        // ANKET (SURVEY) — Likert (0-5)
+        // ANKET (SURVEY)
         // ════════════════════════════════════════════════════════════════════════
 
-        /// <summary>
-        /// Belirtilen ders açılışına ait anketleri listeler.
-        /// </summary>
         [HttpGet("my-courses/{offeringId}/surveys")]
-        public async Task<IActionResult> GetSurveys(Guid offeringId)
+        public async Task<IActionResult> GetSurveys(int offeringId)
         {
-            try { return Ok(await _surveyService.GetByOfferingIdAsync(offeringId, GetTeacherId())); }
+            try { return Ok(await _surveyService.GetByOfferingIdAsync(offeringId, GetExternalTeacherId())); }
             catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
             catch (UnauthorizedAccessException) { return Forbid(); }
         }
 
-        /// <summary>
-        /// Anket detayını sorularıyla birlikte getirir.
-        /// </summary>
         [HttpGet("surveys/{surveyId}")]
         public async Task<IActionResult> GetSurvey(Guid surveyId)
         {
             try
             {
-                var result = await _surveyService.GetByIdAsync(surveyId, GetTeacherId());
+                var result = await _surveyService.GetByIdAsync(surveyId, GetExternalTeacherId());
                 return result == null
                     ? NotFound(new { message = "Anket bulunamadı." })
                     : Ok(result);
@@ -636,43 +685,34 @@ namespace BitirmeApi.Presentation.Controllers
             catch (UnauthorizedAccessException) { return Forbid(); }
         }
 
-        /// <summary>
-        /// Yeni anket oluşturur. Body: { courseOfferingId, title, description?, isActive }
-        /// </summary>
         [HttpPost("surveys")]
         public async Task<IActionResult> CreateSurvey([FromBody] CreateSurveyDto dto)
         {
             try
             {
-                var result = await _surveyService.CreateAsync(dto, GetTeacherId());
+                var result = await _surveyService.CreateAsync(dto, GetExternalTeacherId());
                 return CreatedAtAction(nameof(GetSurvey), new { surveyId = result.Id }, result);
             }
             catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
             catch (UnauthorizedAccessException) { return Forbid(); }
         }
 
-        /// <summary>
-        /// Anketi günceller (başlık, açıklama, aktif/pasif).
-        /// </summary>
         [HttpPut("surveys/{surveyId}")]
         public async Task<IActionResult> UpdateSurvey(Guid surveyId, [FromBody] UpdateSurveyDto dto)
         {
             if (dto.Id != surveyId)
                 return BadRequest(new { message = "URL ile body Id uyuşmuyor." });
-            try { return Ok(await _surveyService.UpdateAsync(dto, GetTeacherId())); }
+            try { return Ok(await _surveyService.UpdateAsync(dto, GetExternalTeacherId())); }
             catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
             catch (UnauthorizedAccessException) { return Forbid(); }
         }
 
-        /// <summary>
-        /// Anketi siler. Gönderim varsa hata döner.
-        /// </summary>
         [HttpDelete("surveys/{surveyId}")]
         public async Task<IActionResult> DeleteSurvey(Guid surveyId)
         {
             try
             {
-                await _surveyService.DeleteAsync(surveyId, GetTeacherId());
+                await _surveyService.DeleteAsync(surveyId, GetExternalTeacherId());
                 return NoContent();
             }
             catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
@@ -680,77 +720,56 @@ namespace BitirmeApi.Presentation.Controllers
             catch (UnauthorizedAccessException) { return Forbid(); }
         }
 
-        /// <summary>
-        /// Anketin aktif/pasif durumunu tersine çevirir.
-        /// </summary>
         [HttpPatch("surveys/{surveyId}/toggle-active")]
         public async Task<IActionResult> ToggleSurveyActive(Guid surveyId)
         {
             try
             {
-                await _surveyService.ToggleActiveAsync(surveyId, GetTeacherId());
+                await _surveyService.ToggleActiveAsync(surveyId, GetExternalTeacherId());
                 return NoContent();
             }
             catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
             catch (UnauthorizedAccessException) { return Forbid(); }
         }
 
-        // ── Anket Soruları ────────────────────────────────────────────────────────
-
-        /// <summary>
-        /// Ankete yeni Likert sorusu ekler.
-        /// Body: { surveyId, text, orderIndex, isRequired, scaleMin (0), scaleMax (5) }
-        /// </summary>
         [HttpPost("surveys/{surveyId}/questions")]
         public async Task<IActionResult> AddSurveyQuestion(Guid surveyId, [FromBody] CreateSurveyQuestionDto dto)
         {
             if (dto.SurveyId != surveyId)
                 return BadRequest(new { message = "URL ile body surveyId uyuşmuyor." });
-            try { return Ok(await _surveyService.AddQuestionAsync(dto, GetTeacherId())); }
+            try { return Ok(await _surveyService.AddQuestionAsync(dto, GetExternalTeacherId())); }
             catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
             catch (InvalidOperationException ex) { return BadRequest(new { message = ex.Message }); }
             catch (UnauthorizedAccessException) { return Forbid(); }
         }
 
-        /// <summary>
-        /// Mevcut soruyu günceller (metin, sıra, zorunlu, ölçek).
-        /// </summary>
         [HttpPut("surveys/{surveyId}/questions/{questionId}")]
         public async Task<IActionResult> UpdateSurveyQuestion(Guid surveyId, Guid questionId, [FromBody] UpdateSurveyQuestionDto dto)
         {
             if (dto.Id != questionId)
                 return BadRequest(new { message = "URL ile body Id uyuşmuyor." });
-            try { return Ok(await _surveyService.UpdateQuestionAsync(dto, GetTeacherId())); }
+            try { return Ok(await _surveyService.UpdateQuestionAsync(dto, GetExternalTeacherId())); }
             catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
             catch (InvalidOperationException ex) { return BadRequest(new { message = ex.Message }); }
             catch (UnauthorizedAccessException) { return Forbid(); }
         }
 
-        /// <summary>
-        /// Soruyu siler.
-        /// </summary>
         [HttpDelete("surveys/{surveyId}/questions/{questionId}")]
         public async Task<IActionResult> DeleteSurveyQuestion(Guid surveyId, Guid questionId)
         {
             try
             {
-                await _surveyService.DeleteQuestionAsync(questionId, GetTeacherId());
+                await _surveyService.DeleteQuestionAsync(questionId, GetExternalTeacherId());
                 return NoContent();
             }
             catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
             catch (UnauthorizedAccessException) { return Forbid(); }
         }
 
-        // ── Anket Sonuçları ───────────────────────────────────────────────────────
-
-        /// <summary>
-        /// Anketin soru bazlı Likert sonuçlarını döner:
-        /// ortalama puan, yanıt sayısı ve puan dağılımı (0→n, 1→n, …, 5→n).
-        /// </summary>
         [HttpGet("surveys/{surveyId}/results")]
         public async Task<IActionResult> GetSurveyResults(Guid surveyId)
         {
-            try { return Ok(await _surveyService.GetResultsAsync(surveyId, GetTeacherId())); }
+            try { return Ok(await _surveyService.GetResultsAsync(surveyId, GetExternalTeacherId(), GetUniversityToken())); }
             catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
             catch (UnauthorizedAccessException) { return Forbid(); }
         }

@@ -6,34 +6,50 @@ namespace BitirmeApi.Entity.Entities
 {
     /// <summary>
     /// MÜDEK ders değerlendirme belgesi.
-    /// Tek CourseOffering'e bağlıdır (unique).
-    /// Tüm ders/dönem/hoca bilgisi CourseOffering üzerinden gelir — denormalized string alanlar yok.
-    /// Unique: (CourseOfferingId)
+    /// Üniversite API'sindeki CourseOffering'e bağlıdır (ExternalCourseOfferingId ile).
+    /// Unique: (ExternalCourseOfferingId)
     /// </summary>
     public class CourseEvaluation : IEntity
     {
         public CourseEvaluation()
         {
             Exams = new List<Exam>();
-            LetterGradeRules = new List<CourseEvaluationLetterGradeRule>();
             ProgramOutcomeContributions = new List<ProgramOutcomeContribution>();
         }
 
         [Required, Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid Id { get; set; }
 
-        /// <summary>Zorunlu — 1 offering = 1 evaluation</summary>
+        /// <summary>Üniversite API CourseOffering ID (int)</summary>
         [Required]
-        public Guid CourseOfferingId { get; set; }
-        public CourseOffering CourseOffering { get; set; } = default!;
+        public int ExternalCourseOfferingId { get; set; }
+
+        /// <summary>Üniversite API Course ID</summary>
+        [Required]
+        public int ExternalCourseId { get; set; }
+
+        /// <summary>Üniversite API Program ID</summary>
+        public int ExternalProgramId { get; set; }
+
+        /// <summary>Üniversite API Teacher (user) ID</summary>
+        public int ExternalTeacherId { get; set; }
+
+        /// <summary>Ders kodu (denormalized görüntü için)</summary>
+        [MaxLength(64)]
+        public string? CourseCode { get; set; }
+
+        /// <summary>Ders adı (denormalized)</summary>
+        [MaxLength(256)]
+        public string? CourseName { get; set; }
+
+        /// <summary>Akademik dönem adı (denormalized)</summary>
+        [MaxLength(128)]
+        public string? AcademicTermName { get; set; }
 
         public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
         public DateTime? UpdatedAt { get; set; }
 
-        /// <summary>Son tam MÜDEK hesap çalıştırma zamanı (UTC).</summary>
         public DateTime? LastCalculatedAt { get; set; }
-
-        /// <summary>Offering ile ilgili ham veri değiştiyse true; yeniden hesap sonrası false.</summary>
         public bool IsCalculationDirty { get; set; } = true;
 
         public string? StudentFeedbackEvaluation { get; set; }
@@ -41,11 +57,7 @@ namespace BitirmeApi.Entity.Entities
         public string? GeneralEvaluation { get; set; }
         public string? ImprovementSuggestions { get; set; }
 
-        // Navigation — sınav ve puan yapısı
         public ICollection<Exam> Exams { get; set; }
-        public ICollection<CourseEvaluationLetterGradeRule> LetterGradeRules { get; set; }
-
-        /// <summary>Bu değerlendirme için CLO → PO katkı düzeyleri (catalog CLO kullanılır)</summary>
         public ICollection<ProgramOutcomeContribution> ProgramOutcomeContributions { get; set; }
     }
 }

@@ -8,7 +8,7 @@ namespace BitirmeApi.DataAccess.Abstract
         Task<List<ExamQuestionOutcomeMapping>> GetByQuestionIdWithDetailsAsync(Guid questionId);
         Task<ExamQuestionOutcomeMapping?> GetByIdWithDetailsAsync(Guid id);
         Task<ExamQuestionOutcomeMapping?> GetByIdWithOwnershipAsync(Guid id);
-        Task<ExamQuestionOutcomeMapping?> GetByIdsAsync(Guid questionId, Guid cloId);
-        Task<bool> ExistsAsync(Guid questionId, Guid cloId);
+        Task<ExamQuestionOutcomeMapping?> GetByIdsAsync(Guid questionId, int externalCloId);
+        Task<bool> ExistsAsync(Guid questionId, int externalCloId);
     }
 }

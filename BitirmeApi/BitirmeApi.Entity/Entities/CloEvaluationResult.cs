@@ -6,32 +6,36 @@ namespace BitirmeApi.Entity.Entities
 {
     /// <summary>
     /// CLO / DÖÇ başarı skoru (sınav bazlı veya birleşik).
-    /// Unique: (CourseOfferingId, CourseLearningOutcomeId, ResultType)
+    /// Unique: (ExternalCourseOfferingId, ExternalCloId, ResultType)
     /// </summary>
     public class CloEvaluationResult : IEntity
     {
         [Required, Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid Id { get; set; }
 
+        /// <summary>Üniversite API CourseOffering ID</summary>
         [Required]
-        public Guid CourseOfferingId { get; set; }
-        public CourseOffering CourseOffering { get; set; } = default!;
+        public int ExternalCourseOfferingId { get; set; }
 
+        /// <summary>Üniversite API CLO ID</summary>
         [Required]
-        public Guid CourseLearningOutcomeId { get; set; }
-        public CourseLearningOutcome CourseLearningOutcome { get; set; } = default!;
+        public int ExternalCloId { get; set; }
 
-        /// <summary>Bkz: <see cref="CloEvaluationResultType"/></summary>
+        [MaxLength(64)]
+        public string? CloCode { get; set; }
+
+        [MaxLength(2000)]
+        public string? CloDescription { get; set; }
+
         [Required, MaxLength(32)]
         public string ResultType { get; set; } = CloEvaluationResultType.Combined;
 
         public Guid? ExamId { get; set; }
+
+        [ForeignKey("ExamId")]
         public Exam? Exam { get; set; }
 
-        /// <summary>İlgili ResultType için hesaplanan başarı skoru (0–1).</summary>
         public decimal? AchievementScore { get; set; }
-
-        /// <summary>İsteğe bağlı; birleşik raporlamada ek alan (şimdilik çoğu satırda null).</summary>
         public decimal? CombinedAchievementScore { get; set; }
 
         public decimal? SurveyScore { get; set; }

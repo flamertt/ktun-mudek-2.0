@@ -7,22 +7,14 @@ namespace BitirmeApi.Business.Abstract
     /// </summary>
     public interface IMudekEvaluationCalculatorService
     {
-        /// <summary>Tüm sonuçları siler, yeniden hesaplar ve kaydeder. CourseEvaluation güncellenir.</summary>
-        Task<MudekEvaluationSnapshotDto> RecalculateForTeacherAsync(Guid courseOfferingId, Guid teacherId, CancellationToken ct = default);
+        /// <summary>Tüm sonuçları siler, yeniden hesaplar ve kaydeder. Üniversite API token gerekli.</summary>
+        Task<MudekEvaluationSnapshotDto> RecalculateAsync(int externalCourseOfferingId, int externalTeacherId, string universityToken, CancellationToken ct = default);
 
         /// <summary>Veritabanındaki güncel snapshot (hesaplama yapmaz).</summary>
-        Task<MudekEvaluationSnapshotDto?> GetSnapshotForTeacherAsync(Guid courseOfferingId, Guid teacherId, CancellationToken ct = default);
+        Task<MudekEvaluationSnapshotDto?> GetSnapshotAsync(int externalCourseOfferingId, int externalTeacherId, CancellationToken ct = default);
 
-        Task MarkStaleByOfferingIdAsync(Guid courseOfferingId, CancellationToken ct = default);
+        Task MarkStaleByOfferingIdAsync(int externalCourseOfferingId, CancellationToken ct = default);
         Task MarkStaleByCourseEvaluationIdAsync(Guid courseEvaluationId, CancellationToken ct = default);
-        Task MarkStaleByEnrollmentIdAsync(Guid enrollmentId, CancellationToken ct = default);
-
-        /// <summary>CLO–PÇ eşlemesi katalog CLO üzerinden değiştiğinde ilgili tüm offeringler.</summary>
-        Task MarkStaleByCourseLearningOutcomeIdAsync(Guid courseLearningOutcomeId, CancellationToken ct = default);
-
         Task MarkStaleByExamIdAsync(Guid examId, CancellationToken ct = default);
-
-        /// <summary>Program harf notu kuralları değişince ilgili tüm ders açılışlarında hesaplamayı eski say.</summary>
-        Task MarkStaleByProgramEntityIdAsync(Guid programEntityId, CancellationToken ct = default);
     }
 }

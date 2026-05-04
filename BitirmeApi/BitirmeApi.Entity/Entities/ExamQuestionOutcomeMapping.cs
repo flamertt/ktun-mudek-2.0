@@ -5,9 +5,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace BitirmeApi.Entity.Entities
 {
     /// <summary>
-    /// Sınav sorusunun katalog CLO'larına ağırlıklı eşlemesi.
-    /// CourseLearningOutcome = katalog seviyesi (dönemsel değil).
-    /// Unique: (ExamQuestionId, CourseLearningOutcomeId)
+    /// Sınav sorusunun CLO'lara ağırlıklı eşlemesi.
+    /// CLO, üniversite API'sinden int ID ile temsil edilir.
+    /// Unique: (ExamQuestionId, ExternalCloId)
     /// </summary>
     public class ExamQuestionOutcomeMapping : IEntity
     {
@@ -20,12 +20,17 @@ namespace BitirmeApi.Entity.Entities
         [ForeignKey("ExamQuestionId")]
         public ExamQuestion ExamQuestion { get; set; } = default!;
 
-        /// <summary>Katalog CLO — tek CLO kaynağı</summary>
+        /// <summary>Üniversite API CLO ID (int)</summary>
         [Required]
-        public Guid CourseLearningOutcomeId { get; set; }
+        public int ExternalCloId { get; set; }
 
-        [ForeignKey("CourseLearningOutcomeId")]
-        public CourseLearningOutcome CourseLearningOutcome { get; set; } = default!;
+        /// <summary>CLO kodu (denormalized)</summary>
+        [MaxLength(64)]
+        public string? CloCode { get; set; }
+
+        /// <summary>CLO açıklaması (denormalized)</summary>
+        [MaxLength(2000)]
+        public string? CloDescription { get; set; }
 
         [Required]
         public decimal Weight { get; set; }

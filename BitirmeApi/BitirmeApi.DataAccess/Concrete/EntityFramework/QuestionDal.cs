@@ -21,8 +21,6 @@ namespace BitirmeApi.DataAccess.Concrete.EntityFramework
             await _context.Questions
                 .Where(q => q.Id == id)
                 .Include(q => q.Survey)
-                    .ThenInclude(s => s.CourseOffering)
-                .Include(q => q.CourseLearningOutcome)
                 .AsNoTracking()
                 .FirstOrDefaultAsync();
     }

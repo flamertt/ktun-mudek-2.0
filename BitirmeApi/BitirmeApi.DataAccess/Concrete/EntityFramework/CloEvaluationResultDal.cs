@@ -10,11 +10,10 @@ namespace BitirmeApi.DataAccess.Concrete.EntityFramework
     {
         public CloEvaluationResultDal(ProjectDbContext context) : base(context) { }
 
-        public async Task<List<CloEvaluationResult>> GetCombinedByOfferingAsync(Guid courseOfferingId) =>
+        public async Task<List<CloEvaluationResult>> GetCombinedByOfferingAsync(int externalCourseOfferingId) =>
             await _context.CloEvaluationResults
-                .Where(c => c.CourseOfferingId == courseOfferingId
+                .Where(c => c.ExternalCourseOfferingId == externalCourseOfferingId
                          && c.ResultType == CloEvaluationResultType.Combined)
-                .Include(c => c.CourseLearningOutcome)
                 .ToListAsync();
     }
 }

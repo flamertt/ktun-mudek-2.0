@@ -14,7 +14,6 @@ namespace BitirmeApi.DataAccess.Concrete.EntityFramework
             await _context.ExamQuestionOutcomeMappings
                 .Where(m => m.ExamQuestionId == questionId)
                 .Include(m => m.ExamQuestion)
-                .Include(m => m.CourseLearningOutcome)
                 .AsNoTracking()
                 .ToListAsync();
 
@@ -22,7 +21,6 @@ namespace BitirmeApi.DataAccess.Concrete.EntityFramework
             await _context.ExamQuestionOutcomeMappings
                 .Where(m => m.Id == id)
                 .Include(m => m.ExamQuestion)
-                .Include(m => m.CourseLearningOutcome)
                 .AsNoTracking()
                 .FirstOrDefaultAsync();
 
@@ -32,16 +30,15 @@ namespace BitirmeApi.DataAccess.Concrete.EntityFramework
                 .Include(m => m.ExamQuestion)
                     .ThenInclude(q => q.Exam)
                         .ThenInclude(e => e.CourseEvaluation)
-                            .ThenInclude(ev => ev.CourseOffering)
                 .AsNoTracking()
                 .FirstOrDefaultAsync();
 
-        public async Task<ExamQuestionOutcomeMapping?> GetByIdsAsync(Guid questionId, Guid cloId) =>
+        public async Task<ExamQuestionOutcomeMapping?> GetByIdsAsync(Guid questionId, int externalCloId) =>
             await _context.ExamQuestionOutcomeMappings
-                .FirstOrDefaultAsync(m => m.ExamQuestionId == questionId && m.CourseLearningOutcomeId == cloId);
+                .FirstOrDefaultAsync(m => m.ExamQuestionId == questionId && m.ExternalCloId == externalCloId);
 
-        public async Task<bool> ExistsAsync(Guid questionId, Guid cloId) =>
+        public async Task<bool> ExistsAsync(Guid questionId, int externalCloId) =>
             await _context.ExamQuestionOutcomeMappings
-                .AnyAsync(m => m.ExamQuestionId == questionId && m.CourseLearningOutcomeId == cloId);
+                .AnyAsync(m => m.ExamQuestionId == questionId && m.ExternalCloId == externalCloId);
     }
 }

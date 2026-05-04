@@ -6,8 +6,7 @@ namespace BitirmeApi.Entity.Entities
 {
     /// <summary>
     /// Öğrencinin değerlendirme bileşeninden aldığı puan.
-    /// StudentEnrollment yerine Enrollment kullanılır (tek öğrenci kayıt modeli).
-    /// Unique: (AssessmentComponentId, EnrollmentId)
+    /// Unique: (AssessmentComponentId, ExternalStudentId)
     /// </summary>
     public class StudentAssessmentComponentScore : IEntity
     {
@@ -20,12 +19,9 @@ namespace BitirmeApi.Entity.Entities
         [ForeignKey("AssessmentComponentId")]
         public AssessmentComponent AssessmentComponent { get; set; } = default!;
 
-        /// <summary>Tek öğrenci kayıt modeli: Enrollment</summary>
+        /// <summary>Üniversite API Student ID (int)</summary>
         [Required]
-        public Guid EnrollmentId { get; set; }
-
-        [ForeignKey("EnrollmentId")]
-        public Enrollment Enrollment { get; set; } = default!;
+        public int ExternalStudentId { get; set; }
 
         public decimal? Score { get; set; }
 

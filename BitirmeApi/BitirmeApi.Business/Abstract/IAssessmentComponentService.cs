@@ -11,10 +11,10 @@ namespace BitirmeApi.Business.Abstract
         Task<AssessmentComponentDto> UpdateAsync(UpdateAssessmentComponentDto updateDto);
         Task DeleteAsync(Guid id);
 
-        Task<List<AssessmentComponentListDto>> GetByExamIdForTeacherAsync(Guid examId, Guid teacherId);
-        Task<AssessmentComponentDto?> GetByIdForTeacherAsync(Guid id, Guid teacherId);
-        Task<AssessmentComponentDto> AddForTeacherAsync(CreateAssessmentComponentDto createDto, Guid teacherId);
-        Task<AssessmentComponentDto> UpdateForTeacherAsync(UpdateAssessmentComponentDto updateDto, Guid teacherId);
-        Task DeleteForTeacherAsync(Guid id, Guid teacherId);
+        Task<List<AssessmentComponentListDto>> GetByExamIdForTeacherAsync(Guid examId, int externalTeacherId);
+        Task<AssessmentComponentDto?> GetByIdForTeacherAsync(Guid id, int externalTeacherId);
+        Task<AssessmentComponentDto> AddForTeacherAsync(CreateAssessmentComponentDto createDto, int externalTeacherId);
+        Task<AssessmentComponentDto> UpdateForTeacherAsync(UpdateAssessmentComponentDto updateDto, int externalTeacherId);
+        Task DeleteForTeacherAsync(Guid id, int externalTeacherId);
     }
 }

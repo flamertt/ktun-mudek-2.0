@@ -5,9 +5,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace BitirmeApi.Entity.Entities
 {
     /// <summary>
-    /// Değerlendirme bileşeninin katalog CLO'larına ağırlıklı eşlemesi.
-    /// CourseLearningOutcome = katalog seviyesi (dönemsel değil).
-    /// Unique: (AssessmentComponentId, CourseLearningOutcomeId)
+    /// Değerlendirme bileşeninin CLO'lara ağırlıklı eşlemesi.
+    /// Unique: (AssessmentComponentId, ExternalCloId)
     /// </summary>
     public class AssessmentComponentOutcomeMapping : IEntity
     {
@@ -20,12 +19,15 @@ namespace BitirmeApi.Entity.Entities
         [ForeignKey("AssessmentComponentId")]
         public AssessmentComponent AssessmentComponent { get; set; } = default!;
 
-        /// <summary>Katalog CLO — tek CLO kaynağı</summary>
+        /// <summary>Üniversite API CLO ID (int)</summary>
         [Required]
-        public Guid CourseLearningOutcomeId { get; set; }
+        public int ExternalCloId { get; set; }
 
-        [ForeignKey("CourseLearningOutcomeId")]
-        public CourseLearningOutcome CourseLearningOutcome { get; set; } = default!;
+        [MaxLength(64)]
+        public string? CloCode { get; set; }
+
+        [MaxLength(2000)]
+        public string? CloDescription { get; set; }
 
         [Required]
         public decimal Weight { get; set; }

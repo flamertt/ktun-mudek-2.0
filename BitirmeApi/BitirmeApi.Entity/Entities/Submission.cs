@@ -4,6 +4,11 @@ using BitirmeApi.Core.Entity;
 
 namespace BitirmeApi.Entity.Entities
 {
+    /// <summary>
+    /// Anket gönderimi.
+    /// Öğrenci üniversite API ile kimlik doğrular; yerel kullanıcı tablosu yoktur.
+    /// Unique: (SurveyId, ExternalStudentId)
+    /// </summary>
     public class Submission : IEntity
     {
         [Required, Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -11,20 +16,19 @@ namespace BitirmeApi.Entity.Entities
 
         [Required]
         public Guid SurveyId { get; set; }
+
         [Required]
         public Survey Survey { get; set; } = default!;
 
+        /// <summary>Üniversite sistemindeki öğrenci ID'si.</summary>
         [Required]
-        public Guid UserId { get; set; }
+        public int ExternalStudentId { get; set; }
 
-        [ForeignKey("UserId")]
-        public AppUser User { get; set; } = default!; 
+        public DateTime SubmittedAt { get; set; } = DateTime.UtcNow;
 
-    public DateTime SubmittedAt { get; set; } = DateTime.UtcNow;
+        /// <summary>İstatistiklere dahil edilsin mi? (Dersten geçemeyen öğrenciler için false)</summary>
+        public bool IncludeInStatistics { get; set; } = true;
 
-    // İstatistiklere dahil edilsin mi? (Dersten geçemeyen öğrenciler için false)
-    public bool IncludeInStatistics { get; set; } = true;
-
-    public ICollection<Answer> Answers { get; set; } = new List<Answer>();
+        public ICollection<Answer> Answers { get; set; } = new List<Answer>();
     }
 }

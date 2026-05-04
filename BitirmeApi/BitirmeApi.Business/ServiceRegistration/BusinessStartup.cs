@@ -1,8 +1,11 @@
 using BitirmeApi.Business.Abstract;
 using BitirmeApi.Business.Concrete;
 using BitirmeApi.Business.Helpers;
+using BitirmeApi.Business.Integration.Abstract;
+using BitirmeApi.Business.Integration.Concrete;
 using BitirmeApi.DataAccess.Abstract;
 using BitirmeApi.DataAccess.Concrete.EntityFramework;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 
@@ -10,48 +13,26 @@ namespace BitirmeApi.Business.ServiceRegistration
 {
     public static class BusinessStartup
     {
-        public static void BusinessRegister(this IServiceCollection services)
+        public static void BusinessRegister(this IServiceCollection services, IConfiguration? configuration = null)
         {
             services.AddAutoMapper(configAction => configAction.AddMaps(Assembly.GetExecutingAssembly()));
 
-            // ── Kullanıcı ──────────────────────────────────────────────────────────
-            services.AddScoped<IAppUserDal, AppUserDal>();
-            services.AddScoped<IAppUserService, AppUserService>();
+            // ── Üniversite API Entegrasyonu ───────────────────────────────────────
+            var baseUrl = configuration?["UniversityApi:BaseUrl"] ?? "https://coreapiv1.ktun.edu.tr/";
+            services.AddHttpClient<IUniversityApiService, UniversityApiService>(client =>
+            {
+                client.BaseAddress = new Uri(baseUrl);
+                client.Timeout = TimeSpan.FromSeconds(30);
+            });
 
-            // ── Auth & JWT ─────────────────────────────────────────────────────────
-            services.AddScoped<IJwtService, JwtService>();
-            services.AddScoped<IAuthService, AuthService>();
+            // ── Auth ───────────────────────────────────────────────────────────────
+            services.AddScoped<Abstract.IAuthService, Helpers.AuthService>();
 
-            // ── Program ────────────────────────────────────────────────────────────
-            services.AddScoped<IProgramEntityDal, ProgramEntityDal>();
-            services.AddScoped<IProgramEntityService, ProgramEntityService>();
-            services.AddScoped<IProgramOutcomeDal, ProgramOutcomeDal>();
-            services.AddScoped<IProgramOutcomeService, ProgramOutcomeService>();
-
-            // ── Ders Kataloğu ──────────────────────────────────────────────────────
-            services.AddScoped<ICourseDal, CourseDal>();
-            services.AddScoped<ICourseService, CourseService>();
-
-            // Katalog CLO (tek CLO kaynağı — CourseLearningOutcomeEntity kaldırıldı)
-            services.AddScoped<ICourseLearningOutcomeDal, CourseLearningOutcomeDal>();
-            services.AddScoped<ICourseLearningOutcomeService, CourseLearningOutcomeService>();
-
-            services.AddScoped<ICloPoMapDal, CloPoMapDal>();
-            services.AddScoped<ICloPoMapService, CloPoMapService>();
-
-            // ── Akademik Dönem + Ders Açılışı + Kayıt ─────────────────────────────
+            // ── Akademik Dönem ─────────────────────────────────────────────────────
             services.AddScoped<IAcademicTermDal, AcademicTermDal>();
             services.AddScoped<IAcademicTermService, AcademicTermService>();
 
-            services.AddScoped<ICourseOfferingDal, CourseOfferingDal>();
-            services.AddScoped<ICourseOfferingService, CourseOfferingService>();
-
-            // Tek öğrenci kayıt modeli — StudentEnrollment kaldırıldı
-            services.AddScoped<IEnrollmentDal, EnrollmentDal>();
-            services.AddScoped<IEnrollmentService, EnrollmentService>();
-
             // ── MÜDEK Değerlendirme ────────────────────────────────────────────────
-            // Yeni: CourseEvaluation → CourseOffering (1:1)
             services.AddScoped<ICourseEvaluationDal, CourseEvaluationDal>();
             services.AddScoped<ICourseEvaluationService, CourseEvaluationService>();
 
@@ -72,39 +53,29 @@ namespace BitirmeApi.Business.ServiceRegistration
             services.AddScoped<IAssessmentComponentOutcomeMappingDal, AssessmentComponentOutcomeMappingDal>();
             services.AddScoped<IAssessmentComponentOutcomeMappingService, AssessmentComponentOutcomeMappingService>();
 
-            // Öğrenci skor tabloları artık EnrollmentId kullanıyor
             services.AddScoped<IStudentAssessmentComponentScoreDal, StudentAssessmentComponentScoreDal>();
             services.AddScoped<IStudentAssessmentComponentScoreService, StudentAssessmentComponentScoreService>();
 
             services.AddScoped<IStudentAnswerDal, StudentAnswerDal>();
             services.AddScoped<IStudentAnswerService, StudentAnswerService>();
 
-            services.AddScoped<ICourseEvaluationLetterGradeRuleDal, CourseEvaluationLetterGradeRuleDal>();
-            services.AddScoped<ICourseEvaluationLetterGradeRuleService, CourseEvaluationLetterGradeRuleService>();
+            // ── Harf notu kuralları (program bazlı) ───────────────────────────────
+            services.AddScoped<ILetterGradeRuleDal, LetterGradeRuleDal>();
+            services.AddScoped<ILetterGradeRuleService, LetterGradeRuleService>();
 
-            services.AddScoped<IProgramLetterGradeRuleDal, ProgramLetterGradeRuleDal>();
-            services.AddScoped<IProgramLetterGradeRuleService, ProgramLetterGradeRuleService>();
-
-            // Katkı düzeyleri artık catalog CLO + CourseEvaluation FK üzerinden
-            services.AddScoped<IProgramOutcomeContributionDal, ProgramOutcomeContributionDal>();
-            services.AddScoped<IProgramOutcomeContributionService, ProgramOutcomeContributionService>();
+            // ── Sonuç Tabloları (DAL) ──────────────────────────────────────────────
+            services.AddScoped<ICloEvaluationResultDal, CloEvaluationResultDal>();
+            services.AddScoped<IStudentEvaluationResultDal, StudentEvaluationResultDal>();
 
             // ── Anket Sistemi ──────────────────────────────────────────────────────
             services.AddScoped<ISurveyDal, SurveyDal>();
             services.AddScoped<ISurveyService, SurveyService>();
 
             services.AddScoped<IQuestionDal, QuestionDal>();
-            services.AddScoped<IQuestionService, QuestionService>();
 
             services.AddScoped<ISubmissionDal, SubmissionDal>();
-            services.AddScoped<ISubmissionService, SubmissionService>();
 
             services.AddScoped<IAnswerDal, AnswerDal>();
-            services.AddScoped<IAnswerService, AnswerService>();
-
-            // Anket sonuç hesaplaması için yardımcı DAL'lar
-            services.AddScoped<ICloEvaluationResultDal, CloEvaluationResultDal>();
-            services.AddScoped<IStudentEvaluationResultDal, StudentEvaluationResultDal>();
 
             // ── Öğrenci Anket Servisi ──────────────────────────────────────────────
             services.AddScoped<IStudentSurveyService, StudentSurveyService>();

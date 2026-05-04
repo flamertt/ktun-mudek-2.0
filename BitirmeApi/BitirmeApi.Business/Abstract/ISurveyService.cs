@@ -4,20 +4,17 @@ namespace BitirmeApi.Business.Abstract
 {
     public interface ISurveyService
     {
-        // ── Anket CRUD ─────────────────────────────────────────────────────────────
-        Task<List<SurveyListDto>> GetByOfferingIdAsync(Guid offeringId, Guid teacherId);
-        Task<SurveyDetailDto?> GetByIdAsync(Guid id, Guid teacherId);
-        Task<SurveyDetailDto> CreateAsync(CreateSurveyDto dto, Guid teacherId);
-        Task<SurveyDetailDto> UpdateAsync(UpdateSurveyDto dto, Guid teacherId);
-        Task DeleteAsync(Guid id, Guid teacherId);
-        Task ToggleActiveAsync(Guid id, Guid teacherId);
+        Task<List<SurveyListDto>> GetByOfferingIdAsync(int externalCourseOfferingId, int externalTeacherId);
+        Task<SurveyDetailDto?> GetByIdAsync(Guid id, int externalTeacherId);
+        Task<SurveyDetailDto> CreateAsync(CreateSurveyDto dto, int externalTeacherId);
+        Task<SurveyDetailDto> UpdateAsync(UpdateSurveyDto dto, int externalTeacherId);
+        Task DeleteAsync(Guid id, int externalTeacherId);
+        Task ToggleActiveAsync(Guid id, int externalTeacherId);
 
-        // ── Soru (Likert) CRUD ─────────────────────────────────────────────────────
-        Task<SurveyQuestionDto> AddQuestionAsync(CreateSurveyQuestionDto dto, Guid teacherId);
-        Task<SurveyQuestionDto> UpdateQuestionAsync(UpdateSurveyQuestionDto dto, Guid teacherId);
-        Task DeleteQuestionAsync(Guid questionId, Guid teacherId);
+        Task<SurveyQuestionDto> AddQuestionAsync(CreateSurveyQuestionDto dto, int externalTeacherId);
+        Task<SurveyQuestionDto> UpdateQuestionAsync(UpdateSurveyQuestionDto dto, int externalTeacherId);
+        Task DeleteQuestionAsync(Guid questionId, int externalTeacherId);
 
-        // ── Sonuçlar ───────────────────────────────────────────────────────────────
-        Task<SurveyResultsDto> GetResultsAsync(Guid surveyId, Guid teacherId);
+        Task<SurveyResultsDto> GetResultsAsync(Guid surveyId, int externalTeacherId, string universityToken);
     }
 }

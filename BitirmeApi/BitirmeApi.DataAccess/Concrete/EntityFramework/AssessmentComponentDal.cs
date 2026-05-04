@@ -8,15 +8,12 @@ namespace BitirmeApi.DataAccess.Concrete.EntityFramework
 {
     public class AssessmentComponentDal : EfRepository<AssessmentComponent, ProjectDbContext>, IAssessmentComponentDal
     {
-        public AssessmentComponentDal(ProjectDbContext context) : base(context)
-        {
-        }
+        public AssessmentComponentDal(ProjectDbContext context) : base(context) { }
 
         public async Task<List<AssessmentComponent>> GetByExamIdWithDetailsAsync(Guid examId) =>
             await _context.AssessmentComponents
                 .Where(c => c.ExamId == examId)
                 .Include(c => c.OutcomeMappings)
-                    .ThenInclude(m => m.CourseLearningOutcome)
                 .AsNoTracking()
                 .OrderBy(c => c.OrderIndex)
                 .ToListAsync();
@@ -25,7 +22,6 @@ namespace BitirmeApi.DataAccess.Concrete.EntityFramework
             await _context.AssessmentComponents
                 .Where(c => c.Id == id)
                 .Include(c => c.OutcomeMappings)
-                    .ThenInclude(m => m.CourseLearningOutcome)
                 .AsNoTracking()
                 .FirstOrDefaultAsync();
 
@@ -34,7 +30,6 @@ namespace BitirmeApi.DataAccess.Concrete.EntityFramework
                 .Where(c => c.Id == id)
                 .Include(c => c.Exam)
                     .ThenInclude(e => e.CourseEvaluation)
-                        .ThenInclude(ev => ev.CourseOffering)
                 .AsNoTracking()
                 .FirstOrDefaultAsync();
 

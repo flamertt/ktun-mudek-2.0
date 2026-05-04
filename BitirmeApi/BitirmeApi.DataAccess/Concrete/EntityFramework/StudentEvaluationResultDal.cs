@@ -10,21 +10,10 @@ namespace BitirmeApi.DataAccess.Concrete.EntityFramework
     {
         public StudentEvaluationResultDal(ProjectDbContext context) : base(context) { }
 
-        public async Task<HashSet<Guid>> GetPassingStudentIdsAsync(Guid courseOfferingId)
-        {
-            // IsPassed = true olan kayıtların Enrollment'ı üzerinden StudentId topla
-            var passingEnrollmentIds = await _context.StudentEvaluationResults
-                .Where(r => r.CourseOfferingId == courseOfferingId && r.IsPassed)
-                .Select(r => r.EnrollmentId)
-                .ToListAsync();
-
-            if (passingEnrollmentIds.Count == 0)
-                return new HashSet<Guid>();
-
-            return await _context.Enrollments
-                .Where(e => passingEnrollmentIds.Contains(e.Id))
-                .Select(e => e.StudentId)
+        public async Task<HashSet<int>> GetPassingStudentIdsAsync(int externalCourseOfferingId) =>
+            await _context.StudentEvaluationResults
+                .Where(r => r.ExternalCourseOfferingId == externalCourseOfferingId && r.IsPassed)
+                .Select(r => r.ExternalStudentId)
                 .ToHashSetAsync();
-        }
     }
 }

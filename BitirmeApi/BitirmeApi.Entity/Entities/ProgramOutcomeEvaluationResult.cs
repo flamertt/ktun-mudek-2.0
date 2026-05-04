@@ -6,20 +6,26 @@ namespace BitirmeApi.Entity.Entities
 {
     /// <summary>
     /// PÇ / PO başarı skoru (offering bazlı, tek snapshot).
-    /// Unique: (CourseOfferingId, ProgramOutcomeId)
+    /// Unique: (ExternalCourseOfferingId, ExternalProgramOutcomeId)
     /// </summary>
     public class ProgramOutcomeEvaluationResult : IEntity
     {
         [Required, Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid Id { get; set; }
 
+        /// <summary>Üniversite API CourseOffering ID</summary>
         [Required]
-        public Guid CourseOfferingId { get; set; }
-        public CourseOffering CourseOffering { get; set; } = default!;
+        public int ExternalCourseOfferingId { get; set; }
 
+        /// <summary>Üniversite API ProgramOutcome ID</summary>
         [Required]
-        public Guid ProgramOutcomeId { get; set; }
-        public ProgramOutcome ProgramOutcome { get; set; } = default!;
+        public int ExternalProgramOutcomeId { get; set; }
+
+        [MaxLength(64)]
+        public string? ProgramOutcomeCode { get; set; }
+
+        [MaxLength(256)]
+        public string? ProgramOutcomeTitle { get; set; }
 
         public decimal? AchievementScore { get; set; }
 

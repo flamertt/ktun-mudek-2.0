@@ -5,28 +5,26 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace BitirmeApi.Entity.Entities
 {
     /// <summary>
-    /// Bir ders değerlendirmesinde (CourseEvaluation) katalog CLO'nun
-    /// belirli bir program çıktısına katkı düzeyini tutar.
-    /// Unique: (CourseEvaluationId, CourseLearningOutcomeId, ProgramOutcomeCode)
+    /// Bir ders değerlendirmesinde CLO'nun belirli bir PÇ'ye katkı düzeyi.
+    /// Unique: (CourseEvaluationId, ExternalCloId, ProgramOutcomeCode)
     /// </summary>
     public class ProgramOutcomeContribution : IEntity
     {
         [Required, Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid Id { get; set; }
 
-        /// <summary>Hangi ders değerlendirmesine ait</summary>
         [Required]
         public Guid CourseEvaluationId { get; set; }
 
         [ForeignKey("CourseEvaluationId")]
         public CourseEvaluation CourseEvaluation { get; set; } = default!;
 
-        /// <summary>Katalog CLO — tek CLO kaynağı</summary>
+        /// <summary>Üniversite API CLO ID (int)</summary>
         [Required]
-        public Guid CourseLearningOutcomeId { get; set; }
+        public int ExternalCloId { get; set; }
 
-        [ForeignKey("CourseLearningOutcomeId")]
-        public CourseLearningOutcome CourseLearningOutcome { get; set; } = default!;
+        [MaxLength(64)]
+        public string? CloCode { get; set; }
 
         /// <summary>Program çıktısı kodu: PÇ1, PÇ2, ... PÇ11</summary>
         [Required, MaxLength(64)]

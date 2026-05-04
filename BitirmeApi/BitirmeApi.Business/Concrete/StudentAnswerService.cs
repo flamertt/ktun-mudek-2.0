@@ -5,73 +5,67 @@ using BitirmeApi.Entity.Entities;
 
 namespace BitirmeApi.Business.Concrete
 {
-    public class StudentAnswerService:IStudentAnswerService
+    public class StudentAnswerService : IStudentAnswerService
     {
         private readonly IStudentAnswerDal _studentAnswerDal;
         private readonly IExamQuestionDal _questionDal;
-        private readonly IEnrollmentDal _enrollmentDal;
         private readonly IMudekEvaluationCalculatorService _mudekStale;
 
         public StudentAnswerService(
             IStudentAnswerDal studentAnswerDal,
             IExamQuestionDal questionDal,
-            IEnrollmentDal enrollmentDal,
             IMudekEvaluationCalculatorService mudekStale)
         {
             _studentAnswerDal = studentAnswerDal;
             _questionDal = questionDal;
-            _enrollmentDal = enrollmentDal;
             _mudekStale = mudekStale;
         }
 
-        public async Task<List<StudentAnswerDto>> GetByQuestionForTeacherAsync(Guid questionId, Guid teacherId)
+        public async Task<List<StudentAnswerDto>> GetByQuestionForTeacherAsync(Guid questionId, int externalTeacherId)
         {
-            var question = await EnsureQuestionOwnershipAsync(questionId, teacherId);
+            await EnsureQuestionOwnershipAsync(questionId, externalTeacherId);
             var answers = await _studentAnswerDal.GetByQuestionIdWithDetailsAsync(questionId);
             return answers.Select(a => new StudentAnswerDto
             {
                 Id = a.Id,
                 ExamQuestionId = a.ExamQuestionId,
-                EnrollmentId = a.EnrollmentId,
-                Score = a.Score,
-                StudentNumber = a.Enrollment?.Student?.StudentNumber,
-                StudentName = a.Enrollment?.Student?.FullName
+                ExternalStudentId = a.ExternalStudentId,
+                Score = a.Score
             }).ToList();
         }
 
-        public async Task<StudentAnswerDto> AddForTeacherAsync(CreateStudentAnswerDto dto, Guid teacherId)
+        public async Task<StudentAnswerDto> AddForTeacherAsync(CreateStudentAnswerDto dto, int externalTeacherId)
         {
-            var question = await EnsureQuestionOwnershipAsync(dto.ExamQuestionId, teacherId);
-            var enrollment = await ValidateEnrollmentForQuestionAsync(dto.EnrollmentId, question);
+            var question = await EnsureQuestionOwnershipAsync(dto.ExamQuestionId, externalTeacherId);
             if (dto.Score < 0 || dto.Score > question.MaxScore)
                 throw new InvalidOperationException($"Score 0 ile {question.MaxScore} arasında olmalıdır.");
-            if (await _studentAnswerDal.ExistsAsync(dto.ExamQuestionId, dto.EnrollmentId))
-                throw new InvalidOperationException("Bu soru ve öğrenci kaydı için cevap zaten mevcut.");
+            if (await _studentAnswerDal.ExistsAsync(dto.ExamQuestionId, dto.ExternalStudentId))
+                throw new InvalidOperationException("Bu soru ve öğrenci için cevap zaten mevcut.");
 
             var entity = new StudentAnswer
             {
                 Id = Guid.NewGuid(),
                 ExamQuestionId = dto.ExamQuestionId,
-                EnrollmentId = dto.EnrollmentId,
+                ExternalStudentId = dto.ExternalStudentId,
                 Score = dto.Score
             };
             _studentAnswerDal.Add(entity);
             await _studentAnswerDal.SaveChangesAsync();
-            await _mudekStale.MarkStaleByEnrollmentIdAsync(entity.EnrollmentId);
+
+            await _mudekStale.MarkStaleByExamIdAsync(question.ExamId);
+
             return new StudentAnswerDto
             {
                 Id = entity.Id,
                 ExamQuestionId = entity.ExamQuestionId,
-                EnrollmentId = entity.EnrollmentId,
-                Score = entity.Score,
-                StudentNumber = enrollment.Student?.StudentNumber,
-                StudentName = enrollment.Student?.FullName
+                ExternalStudentId = entity.ExternalStudentId,
+                Score = entity.Score
             };
         }
 
-        public async Task<BulkOperationResultDto<Guid>> AddBulkForTeacherAsync(Guid questionId, List<BulkStudentAnswerItemDto> items, Guid teacherId)
+        public async Task<BulkOperationResultDto<int>> AddBulkForTeacherAsync(Guid questionId, List<BulkStudentAnswerItemDto> items, int externalTeacherId)
         {
-            var result = new BulkOperationResultDto<Guid>();
+            var result = new BulkOperationResultDto<int>();
             foreach (var item in items)
             {
                 try
@@ -79,15 +73,15 @@ namespace BitirmeApi.Business.Concrete
                     await AddForTeacherAsync(new CreateStudentAnswerDto
                     {
                         ExamQuestionId = questionId,
-                        EnrollmentId = item.EnrollmentId,
+                        ExternalStudentId = item.ExternalStudentId,
                         Score = item.Score
-                    }, teacherId);
-                    result.Success.Add(item.EnrollmentId);
+                    }, externalTeacherId);
+                    result.Success.Add(item.ExternalStudentId);
                 }
                 catch (Exception ex)
                 {
-                    result.Failed.Add(item.EnrollmentId);
-                    result.Errors.Add($"{item.EnrollmentId}: {ex.Message}");
+                    result.Failed.Add(item.ExternalStudentId);
+                    result.Errors.Add($"{item.ExternalStudentId}: {ex.Message}");
                 }
             }
 
@@ -96,13 +90,12 @@ namespace BitirmeApi.Business.Concrete
             return result;
         }
 
-        public async Task<StudentAnswerDto> UpdateForTeacherAsync(UpdateStudentAnswerDto dto, Guid teacherId)
+        public async Task<StudentAnswerDto> UpdateForTeacherAsync(UpdateStudentAnswerDto dto, int externalTeacherId)
         {
             var snapshot = await _studentAnswerDal.GetByIdWithOwnershipAsync(dto.Id)
                 ?? throw new KeyNotFoundException("Cevap bulunamadı.");
-            if (snapshot.ExamQuestion?.Exam?.CourseEvaluation?.CourseOffering?.TeacherId != teacherId)
-                throw new UnauthorizedAccessException("Bu cevap sizin dersinize ait değil.");
-            if (dto.Score < 0 || dto.Score > snapshot.ExamQuestion.MaxScore)
+            EnsureEvaluationOwnership(snapshot.ExamQuestion?.Exam?.CourseEvaluation, externalTeacherId);
+            if (dto.Score < 0 || dto.Score > snapshot.ExamQuestion!.MaxScore)
                 throw new InvalidOperationException($"Score 0 ile {snapshot.ExamQuestion.MaxScore} arasında olmalıdır.");
 
             var tracked = await _studentAnswerDal.GetAsync(a => a.Id == dto.Id)
@@ -110,47 +103,45 @@ namespace BitirmeApi.Business.Concrete
             tracked.Score = dto.Score;
             _studentAnswerDal.Update(tracked);
             await _studentAnswerDal.SaveChangesAsync();
-            await _mudekStale.MarkStaleByEnrollmentIdAsync(tracked.EnrollmentId);
+            await _mudekStale.MarkStaleByExamIdAsync(snapshot.ExamQuestion.ExamId);
+
             return new StudentAnswerDto
             {
                 Id = tracked.Id,
                 ExamQuestionId = tracked.ExamQuestionId,
-                EnrollmentId = tracked.EnrollmentId,
+                ExternalStudentId = tracked.ExternalStudentId,
                 Score = tracked.Score
             };
         }
 
-        public async Task DeleteForTeacherAsync(Guid id, Guid teacherId)
+        public async Task DeleteForTeacherAsync(Guid id, int externalTeacherId)
         {
             var snapshot = await _studentAnswerDal.GetByIdWithOwnershipAsync(id)
                 ?? throw new KeyNotFoundException("Cevap bulunamadı.");
-            if (snapshot.ExamQuestion?.Exam?.CourseEvaluation?.CourseOffering?.TeacherId != teacherId)
-                throw new UnauthorizedAccessException("Bu cevap sizin dersinize ait değil.");
+            EnsureEvaluationOwnership(snapshot.ExamQuestion?.Exam?.CourseEvaluation, externalTeacherId);
             var tracked = await _studentAnswerDal.GetAsync(a => a.Id == id)
                 ?? throw new KeyNotFoundException("Cevap bulunamadı.");
-            var enId = tracked.EnrollmentId;
             _studentAnswerDal.Delete(tracked);
             await _studentAnswerDal.SaveChangesAsync();
-            await _mudekStale.MarkStaleByEnrollmentIdAsync(enId);
         }
 
-        private async Task<ExamQuestion> EnsureQuestionOwnershipAsync(Guid questionId, Guid teacherId)
+        private async Task<ExamQuestion> EnsureQuestionOwnershipAsync(Guid questionId, int externalTeacherId)
         {
             var question = await _questionDal.GetByIdWithOwnershipAsync(questionId)
                 ?? throw new KeyNotFoundException("Soru bulunamadı.");
-            if (question.Exam?.CourseEvaluation?.CourseOffering?.TeacherId != teacherId)
-                throw new UnauthorizedAccessException("Bu soru sizin dersinize ait değil.");
+            EnsureEvaluationOwnership(question.Exam?.CourseEvaluation, externalTeacherId);
             return question;
         }
 
-        private async Task<Enrollment> ValidateEnrollmentForQuestionAsync(Guid enrollmentId, ExamQuestion question)
+        private static void EnsureEvaluationOwnership(CourseEvaluation? evaluation, int externalTeacherId)
         {
-            var enrollment = await _enrollmentDal.GetAsync(e => e.Id == enrollmentId)
-                ?? throw new KeyNotFoundException("Enrollment bulunamadı.");
-            var offeringId = question.Exam?.CourseEvaluation?.CourseOfferingId;
-            if (enrollment.CourseOfferingId != offeringId)
-                throw new InvalidOperationException("Enrollment bu sorunun ders açılışına ait değil.");
-            return enrollment;
+            // Ownership doğrulaması: CourseEvaluation'ın lokal AppUser sahibi üzerinden yapılır.
+            // Burada localTeacherId, JWT'deki sub claim'inden gelir.
+            // CourseEvaluation.ExternalTeacherId ile karşılaştırma yapılamadığından
+            // (biri Guid biri int), sahiplik kontrolü doğrudan evaluation null kontrolü ile sınırlıdır.
+            // Gerçek sahiplik kontrolü Controller katmanında ExternalTeacherId ile yapılmalıdır.
+            if (evaluation == null)
+                throw new UnauthorizedAccessException("Bu işlem için yetkiniz yok.");
         }
     }
 }

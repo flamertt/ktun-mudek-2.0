@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using BitirmeApi.Business.Abstract;
 using BitirmeApi.Business.DTO;
+using BitirmeApi.Business.Integration.Abstract;
 using BitirmeApi.DataAccess.Abstract;
 using BitirmeApi.Entity.Entities;
 
@@ -11,59 +12,56 @@ namespace BitirmeApi.Business.Concrete
         private readonly ISurveyDal _surveyDal;
         private readonly IQuestionDal _questionDal;
         private readonly ISubmissionDal _submissionDal;
-        private readonly ICourseOfferingDal _offeringDal;
-        private readonly IEnrollmentDal _enrollmentDal;
-        private readonly ICourseLearningOutcomeDal _cloDal;
+        private readonly ICourseEvaluationDal _courseEvalDal;
         private readonly ICloEvaluationResultDal _cloEvalDal;
         private readonly IStudentEvaluationResultDal _studentEvalDal;
+        private readonly IUniversityApiService _universityApi;
         private readonly IMapper _mapper;
 
         public SurveyService(
             ISurveyDal surveyDal,
             IQuestionDal questionDal,
             ISubmissionDal submissionDal,
-            ICourseOfferingDal offeringDal,
-            IEnrollmentDal enrollmentDal,
-            ICourseLearningOutcomeDal cloDal,
+            ICourseEvaluationDal courseEvalDal,
             ICloEvaluationResultDal cloEvalDal,
             IStudentEvaluationResultDal studentEvalDal,
+            IUniversityApiService universityApi,
             IMapper mapper)
         {
             _surveyDal = surveyDal;
             _questionDal = questionDal;
             _submissionDal = submissionDal;
-            _offeringDal = offeringDal;
-            _enrollmentDal = enrollmentDal;
-            _cloDal = cloDal;
+            _courseEvalDal = courseEvalDal;
             _cloEvalDal = cloEvalDal;
             _studentEvalDal = studentEvalDal;
+            _universityApi = universityApi;
             _mapper = mapper;
         }
 
         // ── Anket CRUD ─────────────────────────────────────────────────────────────
 
-        public async Task<List<SurveyListDto>> GetByOfferingIdAsync(Guid offeringId, Guid teacherId)
+        public async Task<List<SurveyListDto>> GetByOfferingIdAsync(int externalCourseOfferingId, int externalTeacherId)
         {
-            await VerifyOfferingOwnershipAsync(offeringId, teacherId);
-            return _mapper.Map<List<SurveyListDto>>(await _surveyDal.GetByOfferingIdAsync(offeringId));
+            await VerifyOfferingOwnershipAsync(externalCourseOfferingId, externalTeacherId);
+            return _mapper.Map<List<SurveyListDto>>(await _surveyDal.GetByOfferingIdAsync(externalCourseOfferingId));
         }
 
-        public async Task<SurveyDetailDto?> GetByIdAsync(Guid id, Guid teacherId)
+        public async Task<SurveyDetailDto?> GetByIdAsync(Guid id, int externalTeacherId)
         {
             var survey = await _surveyDal.GetByIdWithDetailsAsync(id);
             if (survey == null) return null;
-            VerifySurveyOwnership(survey, teacherId);
+            await VerifyOfferingOwnershipAsync(survey.ExternalCourseOfferingId, externalTeacherId);
             return _mapper.Map<SurveyDetailDto>(survey);
         }
 
-        public async Task<SurveyDetailDto> CreateAsync(CreateSurveyDto dto, Guid teacherId)
+        public async Task<SurveyDetailDto> CreateAsync(CreateSurveyDto dto, int externalTeacherId)
         {
-            await VerifyOfferingOwnershipAsync(dto.CourseOfferingId, teacherId);
+            await VerifyOfferingOwnershipAsync(dto.ExternalCourseOfferingId, externalTeacherId);
 
             var entity = new Survey
             {
                 Id = Guid.NewGuid(),
-                CourseOfferingId = dto.CourseOfferingId,
+                ExternalCourseOfferingId = dto.ExternalCourseOfferingId,
                 Title = dto.Title,
                 Description = dto.Description,
                 IsActive = dto.IsActive,
@@ -76,11 +74,11 @@ namespace BitirmeApi.Business.Concrete
             return _mapper.Map<SurveyDetailDto>((await _surveyDal.GetByIdWithDetailsAsync(entity.Id))!);
         }
 
-        public async Task<SurveyDetailDto> UpdateAsync(UpdateSurveyDto dto, Guid teacherId)
+        public async Task<SurveyDetailDto> UpdateAsync(UpdateSurveyDto dto, int externalTeacherId)
         {
             var snapshot = await _surveyDal.GetByIdWithDetailsAsync(dto.Id)
                 ?? throw new KeyNotFoundException("Anket bulunamadı.");
-            VerifySurveyOwnership(snapshot, teacherId);
+            await VerifyOfferingOwnershipAsync(snapshot.ExternalCourseOfferingId, externalTeacherId);
 
             var tracked = await _surveyDal.GetAsync(s => s.Id == dto.Id)
                 ?? throw new KeyNotFoundException("Anket bulunamadı.");
@@ -95,11 +93,11 @@ namespace BitirmeApi.Business.Concrete
             return _mapper.Map<SurveyDetailDto>((await _surveyDal.GetByIdWithDetailsAsync(dto.Id))!);
         }
 
-        public async Task DeleteAsync(Guid id, Guid teacherId)
+        public async Task DeleteAsync(Guid id, int externalTeacherId)
         {
             var snapshot = await _surveyDal.GetByIdWithDetailsAsync(id)
                 ?? throw new KeyNotFoundException("Anket bulunamadı.");
-            VerifySurveyOwnership(snapshot, teacherId);
+            await VerifyOfferingOwnershipAsync(snapshot.ExternalCourseOfferingId, externalTeacherId);
 
             if (snapshot.Submissions.Any())
                 throw new InvalidOperationException("Ankete ait gönderimler bulunduğu için silinemez.");
@@ -111,11 +109,11 @@ namespace BitirmeApi.Business.Concrete
             await _surveyDal.SaveChangesAsync();
         }
 
-        public async Task ToggleActiveAsync(Guid id, Guid teacherId)
+        public async Task ToggleActiveAsync(Guid id, int externalTeacherId)
         {
             var snapshot = await _surveyDal.GetByIdWithDetailsAsync(id)
                 ?? throw new KeyNotFoundException("Anket bulunamadı.");
-            VerifySurveyOwnership(snapshot, teacherId);
+            await VerifyOfferingOwnershipAsync(snapshot.ExternalCourseOfferingId, externalTeacherId);
 
             var tracked = await _surveyDal.GetAsync(s => s.Id == id)
                 ?? throw new KeyNotFoundException("Anket bulunamadı.");
@@ -127,15 +125,12 @@ namespace BitirmeApi.Business.Concrete
 
         // ── Soru (Likert) CRUD ─────────────────────────────────────────────────────
 
-        public async Task<SurveyQuestionDto> AddQuestionAsync(CreateSurveyQuestionDto dto, Guid teacherId)
+        public async Task<SurveyQuestionDto> AddQuestionAsync(CreateSurveyQuestionDto dto, int externalTeacherId)
         {
             var survey = await _surveyDal.GetByIdWithDetailsAsync(dto.SurveyId)
                 ?? throw new KeyNotFoundException("Anket bulunamadı.");
-            VerifySurveyOwnership(survey, teacherId);
+            await VerifyOfferingOwnershipAsync(survey.ExternalCourseOfferingId, externalTeacherId);
             ValidateScale(dto.ScaleMin, dto.ScaleMax);
-
-            if (dto.CourseLearningOutcomeId.HasValue)
-                await ValidateCloForOfferingAsync(dto.CourseLearningOutcomeId.Value, survey.CourseOffering.CourseId);
 
             var entity = new Question
             {
@@ -147,26 +142,24 @@ namespace BitirmeApi.Business.Concrete
                 IsRequired = dto.IsRequired,
                 ScaleMin = dto.ScaleMin,
                 ScaleMax = dto.ScaleMax,
-                CourseLearningOutcomeId = dto.CourseLearningOutcomeId
+                ExternalCloId = dto.ExternalCloId,
+                CloCode = dto.CloCode,
+                CloDescription = dto.CloDescription
             };
 
             _questionDal.Add(entity);
             await _questionDal.SaveChangesAsync();
 
-            // CLO bilgisini de getir
-            var saved = await _questionDal.GetByIdWithSurveyAsync(entity.Id)!;
-            return _mapper.Map<SurveyQuestionDto>(saved);
+            var saved = await _questionDal.GetByIdWithSurveyAsync(entity.Id);
+            return _mapper.Map<SurveyQuestionDto>(saved!);
         }
 
-        public async Task<SurveyQuestionDto> UpdateQuestionAsync(UpdateSurveyQuestionDto dto, Guid teacherId)
+        public async Task<SurveyQuestionDto> UpdateQuestionAsync(UpdateSurveyQuestionDto dto, int externalTeacherId)
         {
             var question = await _questionDal.GetByIdWithSurveyAsync(dto.Id)
                 ?? throw new KeyNotFoundException("Soru bulunamadı.");
-            VerifySurveyOwnership(question.Survey, teacherId);
+            await VerifyOfferingOwnershipAsync(question.Survey.ExternalCourseOfferingId, externalTeacherId);
             ValidateScale(dto.ScaleMin, dto.ScaleMax);
-
-            if (dto.CourseLearningOutcomeId.HasValue)
-                await ValidateCloForOfferingAsync(dto.CourseLearningOutcomeId.Value, question.Survey.CourseOffering.CourseId);
 
             var tracked = await _questionDal.GetAsync(q => q.Id == dto.Id)
                 ?? throw new KeyNotFoundException("Soru bulunamadı.");
@@ -176,20 +169,22 @@ namespace BitirmeApi.Business.Concrete
             tracked.IsRequired = dto.IsRequired;
             tracked.ScaleMin = dto.ScaleMin;
             tracked.ScaleMax = dto.ScaleMax;
-            tracked.CourseLearningOutcomeId = dto.CourseLearningOutcomeId;
+            tracked.ExternalCloId = dto.ExternalCloId;
+            tracked.CloCode = dto.CloCode;
+            tracked.CloDescription = dto.CloDescription;
 
             _questionDal.Update(tracked);
             await _questionDal.SaveChangesAsync();
 
-            var saved = await _questionDal.GetByIdWithSurveyAsync(tracked.Id)!;
-            return _mapper.Map<SurveyQuestionDto>(saved);
+            var saved = await _questionDal.GetByIdWithSurveyAsync(tracked.Id);
+            return _mapper.Map<SurveyQuestionDto>(saved!);
         }
 
-        public async Task DeleteQuestionAsync(Guid questionId, Guid teacherId)
+        public async Task DeleteQuestionAsync(Guid questionId, int externalTeacherId)
         {
             var question = await _questionDal.GetByIdWithSurveyAsync(questionId)
                 ?? throw new KeyNotFoundException("Soru bulunamadı.");
-            VerifySurveyOwnership(question.Survey, teacherId);
+            await VerifyOfferingOwnershipAsync(question.Survey.ExternalCourseOfferingId, externalTeacherId);
 
             var tracked = await _questionDal.GetAsync(q => q.Id == questionId)
                 ?? throw new KeyNotFoundException("Soru bulunamadı.");
@@ -200,31 +195,32 @@ namespace BitirmeApi.Business.Concrete
 
         // ── Sonuçlar ───────────────────────────────────────────────────────────────
 
-        public async Task<SurveyResultsDto> GetResultsAsync(Guid surveyId, Guid teacherId)
+        public async Task<SurveyResultsDto> GetResultsAsync(Guid surveyId, int externalTeacherId, string universityToken)
         {
             var survey = await _surveyDal.GetByIdWithDetailsAsync(surveyId)
                 ?? throw new KeyNotFoundException("Anket bulunamadı.");
-            VerifySurveyOwnership(survey, teacherId);
+            await VerifyOfferingOwnershipAsync(survey.ExternalCourseOfferingId, externalTeacherId);
 
-            // 1. Katılım istatistikleri
-            var enrolledCount = await _enrollmentDal.GetCountByOfferingAsync(survey.CourseOfferingId);
+            // 1. Üniversite API'den kayıtlı öğrenci sayısını al
+            var students = await _universityApi.GetStudentsForOfferingAsync(
+                externalTeacherId, survey.ExternalCourseOfferingId, universityToken);
+            var enrolledCount = students?.Count ?? 0;
 
-            // 2. Geçen öğrencileri belirle (MÜDEK hesabı yapılmamışsa boş → tümünü kullan)
-            var passingIds = await _studentEvalDal.GetPassingStudentIdsAsync(survey.CourseOfferingId);
+            // 2. Geçen öğrenci ID'leri (MÜDEK hesaplanmışsa)
+            var passingIds = await _studentEvalDal.GetPassingStudentIdsAsync(survey.ExternalCourseOfferingId);
             bool filterApplied = passingIds.Count > 0;
 
-            // 3. Gönderimler
+            // 3. Tüm gönderimler
             var allSubmissions = await _submissionDal.GetBySurveyIdWithAnswersAsync(surveyId);
             var submissions = filterApplied
-                ? allSubmissions.Where(s => passingIds.Contains(s.UserId)).ToList()
-                : allSubmissions;
+                ? allSubmissions.Where(s => passingIds.Contains(s.ExternalStudentId)).ToList()
+                : allSubmissions.ToList();
 
             var questions = survey.Questions.OrderBy(q => q.OrderIndex).ToList();
 
-            // 3. Soru bazlı hesaplama
+            // 4. Soru bazlı hesaplama
             var questionResults = questions.Select(q =>
             {
-                // 0 hariç yanıtlar
                 var nonZeroAnswers = submissions
                     .SelectMany(s => s.Answers)
                     .Where(a => a.QuestionId == q.Id
@@ -232,7 +228,6 @@ namespace BitirmeApi.Business.Concrete
                              && a.ValueNumeric.Value > 0)
                     .ToList();
 
-                // Dağılım (0 dahil)
                 var distribution = new Dictionary<int, int>();
                 for (int i = q.ScaleMin; i <= q.ScaleMax; i++)
                     distribution[i] = 0;
@@ -261,8 +256,8 @@ namespace BitirmeApi.Business.Concrete
                     QuestionId = q.Id,
                     Text = q.Text,
                     OrderIndex = q.OrderIndex,
-                    CourseLearningOutcomeId = q.CourseLearningOutcomeId,
-                    CloCode = q.CourseLearningOutcome?.Code,
+                    ExternalCloId = q.ExternalCloId,
+                    CloCode = q.CloCode,
                     ResponseCount = nonZeroAnswers.Count,
                     AverageScore = avg,
                     ScorePercentage = pct,
@@ -270,21 +265,20 @@ namespace BitirmeApi.Business.Concrete
                 };
             }).ToList();
 
-            // 4. DÖÇ bazlı hesaplama
+            // 5. DÖÇ bazlı hesaplama
             var cloResults = new List<CloSurveyResultDto>();
 
             var cloGroups = questions
-                .Where(q => q.CourseLearningOutcomeId.HasValue && q.CourseLearningOutcome != null)
-                .GroupBy(q => q.CourseLearningOutcomeId!.Value)
+                .Where(q => q.ExternalCloId.HasValue)
+                .GroupBy(q => q.ExternalCloId!.Value)
                 .ToList();
 
-            // MÜDEK Combined skorları (tracked — güncelleyeceğiz)
-            var mudekRows = await _cloEvalDal.GetCombinedByOfferingAsync(survey.CourseOfferingId);
+            var mudekRows = await _cloEvalDal.GetCombinedByOfferingAsync(survey.ExternalCourseOfferingId);
 
             foreach (var group in cloGroups)
             {
                 var cloId = group.Key;
-                var clo = group.First().CourseLearningOutcome!;
+                var firstQ = group.First();
 
                 var questionPcts = group
                     .Select(q => questionResults.FirstOrDefault(r => r.QuestionId == q.Id)?.ScorePercentage)
@@ -296,8 +290,7 @@ namespace BitirmeApi.Business.Concrete
                     ? Math.Round(questionPcts.Average(), 2)
                     : null;
 
-                // MÜDEK skoru — AchievementScore 0-1 değeri, 100 ile çarp
-                var mudekRow = mudekRows.FirstOrDefault(m => m.CourseLearningOutcomeId == cloId);
+                var mudekRow = mudekRows.FirstOrDefault(m => m.ExternalCloId == cloId);
                 decimal? mudekScore = mudekRow?.AchievementScore.HasValue == true
                     ? Math.Round(mudekRow.AchievementScore!.Value * 100m, 2)
                     : null;
@@ -317,9 +310,9 @@ namespace BitirmeApi.Business.Concrete
 
                 cloResults.Add(new CloSurveyResultDto
                 {
-                    CloId = cloId,
-                    CloCode = clo.Code,
-                    CloDescription = clo.Description,
+                    ExternalCloId = cloId,
+                    CloCode = firstQ.CloCode,
+                    CloDescription = firstQ.CloDescription,
                     QuestionCount = group.Count(),
                     SurveyScore = surveyScore,
                     MudekScore = mudekScore,
@@ -327,13 +320,10 @@ namespace BitirmeApi.Business.Concrete
                     Evaluation = evaluation
                 });
 
-                // 5. MÜDEK CloEvaluationResult tablosunu güncelle
                 if (mudekRow != null && surveyScore.HasValue)
                 {
-                    mudekRow.SurveyScore = surveyScore.Value / 100m; // 0-1 aralığında sakla
-                    mudekRow.SurveyDifference = diff.HasValue
-                        ? diff.Value / 100m
-                        : null;
+                    mudekRow.SurveyScore = surveyScore.Value / 100m;
+                    mudekRow.SurveyDifference = diff.HasValue ? diff.Value / 100m : null;
                     _cloEvalDal.Update(mudekRow);
                 }
             }
@@ -358,32 +348,19 @@ namespace BitirmeApi.Business.Concrete
 
         // ── Yardımcı metotlar ──────────────────────────────────────────────────────
 
-        private async Task VerifyOfferingOwnershipAsync(Guid offeringId, Guid teacherId)
+        private async Task VerifyOfferingOwnershipAsync(int externalCourseOfferingId, int externalTeacherId)
         {
-            var offering = await _offeringDal.GetAsync(o => o.Id == offeringId)
-                ?? throw new KeyNotFoundException("Ders açılışı bulunamadı.");
-            if (offering.TeacherId != teacherId)
+            var evaluation = await _courseEvalDal.GetByOfferingIdAsync(externalCourseOfferingId);
+            if (evaluation == null)
+                throw new KeyNotFoundException("Bu ders açılışına ait değerlendirme bulunamadı.");
+            if (evaluation.ExternalTeacherId != externalTeacherId)
                 throw new UnauthorizedAccessException("Bu ders açılışı size ait değil.");
-        }
-
-        private static void VerifySurveyOwnership(Survey survey, Guid teacherId)
-        {
-            if (survey.CourseOffering?.TeacherId != teacherId)
-                throw new UnauthorizedAccessException("Bu anket size ait değil.");
         }
 
         private static void ValidateScale(int min, int max)
         {
             if (min < 0 || max > 10 || min >= max)
                 throw new InvalidOperationException("Geçersiz Likert ölçeği. min ≥ 0, max ≤ 10 ve min < max olmalıdır.");
-        }
-
-        private async Task ValidateCloForOfferingAsync(Guid cloId, Guid courseId)
-        {
-            var clo = await _cloDal.GetAsync(c => c.Id == cloId)
-                ?? throw new KeyNotFoundException($"DÖÇ bulunamadı: {cloId}");
-            if (clo.CourseId != courseId)
-                throw new InvalidOperationException("Seçilen DÖÇ bu dersin kursu ile eşleşmiyor.");
         }
     }
 }

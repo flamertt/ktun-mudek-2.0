@@ -61,10 +61,8 @@ namespace BitirmeApi.Business.Concrete
 
         public async Task<AssessmentComponentDto> UpdateAsync(UpdateAssessmentComponentDto updateDto)
         {
-            var existingEntity = await _componentDal.GetAsync(c => c.Id == updateDto.Id);
-            if (existingEntity == null)
-                throw new KeyNotFoundException($"Assessment component with ID {updateDto.Id} not found");
-
+            var existingEntity = await _componentDal.GetAsync(c => c.Id == updateDto.Id)
+                ?? throw new KeyNotFoundException($"Assessment component bulunamadı: {updateDto.Id}");
             _mapper.Map(updateDto, existingEntity);
             existingEntity.UpdatedAt = DateTime.UtcNow;
             _componentDal.Update(existingEntity);
@@ -74,35 +72,35 @@ namespace BitirmeApi.Business.Concrete
 
         public async Task DeleteAsync(Guid id)
         {
-            var entity = await _componentDal.GetAsync(c => c.Id == id);
-            if (entity == null) throw new KeyNotFoundException($"Assessment component with ID {id} not found");
+            var entity = await _componentDal.GetAsync(c => c.Id == id)
+                ?? throw new KeyNotFoundException($"Assessment component bulunamadı: {id}");
             _componentDal.Delete(entity);
             await _componentDal.SaveChangesAsync();
         }
 
-        public async Task<List<AssessmentComponentListDto>> GetByExamIdForTeacherAsync(Guid examId, Guid teacherId)
+        public async Task<List<AssessmentComponentListDto>> GetByExamIdForTeacherAsync(Guid examId, int externalTeacherId)
         {
             var exam = await _examDal.GetByIdWithOwnershipAsync(examId)
                 ?? throw new KeyNotFoundException("Sınav bulunamadı.");
-            if (exam.CourseEvaluation?.CourseOffering?.TeacherId != teacherId)
+            if (exam.CourseEvaluation?.ExternalTeacherId != externalTeacherId)
                 throw new UnauthorizedAccessException("Bu sınav size ait değil.");
             return await GetByExamIdAsync(examId);
         }
 
-        public async Task<AssessmentComponentDto?> GetByIdForTeacherAsync(Guid id, Guid teacherId)
+        public async Task<AssessmentComponentDto?> GetByIdForTeacherAsync(Guid id, int externalTeacherId)
         {
             var component = await _componentDal.GetByIdWithOwnershipAsync(id);
             if (component == null) return null;
-            if (component.Exam?.CourseEvaluation?.CourseOffering?.TeacherId != teacherId)
+            if (component.Exam?.CourseEvaluation?.ExternalTeacherId != externalTeacherId)
                 throw new UnauthorizedAccessException("Bu component size ait değil.");
             return await GetByIdAsync(id);
         }
 
-        public async Task<AssessmentComponentDto> AddForTeacherAsync(CreateAssessmentComponentDto createDto, Guid teacherId)
+        public async Task<AssessmentComponentDto> AddForTeacherAsync(CreateAssessmentComponentDto createDto, int externalTeacherId)
         {
             var exam = await _examDal.GetByIdWithOwnershipAsync(createDto.ExamId)
                 ?? throw new KeyNotFoundException("Sınav bulunamadı.");
-            if (exam.CourseEvaluation?.CourseOffering?.TeacherId != teacherId)
+            if (exam.CourseEvaluation?.ExternalTeacherId != externalTeacherId)
                 throw new UnauthorizedAccessException("Bu sınav size ait değil.");
             if (createDto.MaxScore <= 0) throw new InvalidOperationException("MaxScore 0'dan büyük olmalıdır.");
             if (createDto.WeightPercentage.HasValue && (createDto.WeightPercentage < 0 || createDto.WeightPercentage > 100))
@@ -114,11 +112,11 @@ namespace BitirmeApi.Business.Concrete
             return added;
         }
 
-        public async Task<AssessmentComponentDto> UpdateForTeacherAsync(UpdateAssessmentComponentDto updateDto, Guid teacherId)
+        public async Task<AssessmentComponentDto> UpdateForTeacherAsync(UpdateAssessmentComponentDto updateDto, int externalTeacherId)
         {
             var snapshot = await _componentDal.GetByIdWithOwnershipAsync(updateDto.Id)
                 ?? throw new KeyNotFoundException("Component bulunamadı.");
-            if (snapshot.Exam?.CourseEvaluation?.CourseOffering?.TeacherId != teacherId)
+            if (snapshot.Exam?.CourseEvaluation?.ExternalTeacherId != externalTeacherId)
                 throw new UnauthorizedAccessException("Bu component size ait değil.");
             if (updateDto.MaxScore <= 0) throw new InvalidOperationException("MaxScore 0'dan büyük olmalıdır.");
             if (updateDto.WeightPercentage.HasValue && (updateDto.WeightPercentage < 0 || updateDto.WeightPercentage > 100))
@@ -130,11 +128,11 @@ namespace BitirmeApi.Business.Concrete
             return updated;
         }
 
-        public async Task DeleteForTeacherAsync(Guid id, Guid teacherId)
+        public async Task DeleteForTeacherAsync(Guid id, int externalTeacherId)
         {
             var snapshot = await _componentDal.GetByIdWithOwnershipAsync(id)
                 ?? throw new KeyNotFoundException("Component bulunamadı.");
-            if (snapshot.Exam?.CourseEvaluation?.CourseOffering?.TeacherId != teacherId)
+            if (snapshot.Exam?.CourseEvaluation?.ExternalTeacherId != externalTeacherId)
                 throw new UnauthorizedAccessException("Bu component size ait değil.");
             if ((await _scoreDal.GetListAsync(s => s.AssessmentComponentId == id)).Any() ||
                 (await _mappingDal.GetListAsync(m => m.AssessmentComponentId == id)).Any())

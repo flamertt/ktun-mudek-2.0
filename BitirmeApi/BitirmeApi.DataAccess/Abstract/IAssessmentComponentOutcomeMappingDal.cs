@@ -7,7 +7,7 @@ namespace BitirmeApi.DataAccess.Abstract
     {
         Task<List<AssessmentComponentOutcomeMapping>> GetByComponentIdWithDetailsAsync(Guid componentId);
         Task<AssessmentComponentOutcomeMapping?> GetByIdWithOwnershipAsync(Guid id);
-        Task<AssessmentComponentOutcomeMapping?> GetByComponentAndCloAsync(Guid componentId, Guid cloId);
-        Task<bool> ExistsAsync(Guid componentId, Guid cloId);
+        Task<AssessmentComponentOutcomeMapping?> GetByComponentAndCloAsync(Guid componentId, int externalCloId);
+        Task<bool> ExistsAsync(Guid componentId, int externalCloId);
     }
 }

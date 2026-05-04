@@ -1,112 +1,55 @@
 using BitirmeApi.Business.Abstract;
 using BitirmeApi.Business.DTO;
+using BitirmeApi.Business.Integration.Abstract;
+using Microsoft.Extensions.Logging;
 
 namespace BitirmeApi.Business.Helpers
 {
+    /// <summary>
+    /// Tüm kimlik doğrulama üniversite API'si üzerinden yapılır.
+    /// Üniversite API'nin döndürdüğü token doğrudan istemciye iletilir — yerel JWT üretilmez.
+    /// </summary>
     public class AuthService : IAuthService
     {
-        private readonly IAppUserService _userService;
-        private readonly IJwtService _jwtService;
+        private readonly IUniversityApiService _universityApi;
+        private readonly ILogger<AuthService> _logger;
 
-        public AuthService(IAppUserService userService, IJwtService jwtService)
+        public AuthService(IUniversityApiService universityApi, ILogger<AuthService> logger)
         {
-            _userService = userService;
-            _jwtService = jwtService;
+            _universityApi = universityApi;
+            _logger = logger;
         }
 
-        public async Task<AuthResult> AdminLoginAsync(LoginDto loginDto)
+        public Task<AuthResult> AdminLoginAsync(LoginDto loginDto)   => LoginInternalAsync(loginDto);
+        public Task<AuthResult> TeacherLoginAsync(LoginDto loginDto)  => LoginInternalAsync(loginDto);
+        public Task<AuthResult> StudentLoginAsync(LoginDto loginDto)  => LoginInternalAsync(loginDto);
+        public Task<AuthResult> UniversityLoginAsync(LoginDto loginDto) => LoginInternalAsync(loginDto);
+
+        private async Task<AuthResult> LoginInternalAsync(LoginDto loginDto)
         {
-            var user = await _userService.ValidateUserAsync(loginDto.Email, loginDto.Password);
+            var uniResponse = await _universityApi.LoginAsync(loginDto.Email, loginDto.Password);
+            if (uniResponse == null)
+                return AuthResult.Unauthorized("Üniversite sisteminde doğrulama başarısız");
 
-            if (user == null)
-                return AuthResult.Unauthorized("Email veya şifre hatalı");
+            var uniToken = uniResponse.GetToken();
+            if (string.IsNullOrEmpty(uniToken))
+                return AuthResult.Unauthorized("Üniversite API'den token alınamadı");
 
-            if (user.Role != "Admin")
-                return AuthResult.Forbidden("Bu endpoint sadece Admin kullanıcılar içindir");
-
-            if (!user.IsActive)
-                return AuthResult.Unauthorized("Hesabınız aktif değil");
-
-            var token = _jwtService.GenerateToken(user);
-            await _userService.UpdateLastLoginAsync(user.Id);
+            // Rol üniversite token'ından olduğu gibi alınır, normalize edilmez
+            var role = uniResponse.GetRole();
+            _logger.LogInformation("Kullanıcı giriş yaptı: {Email}, rol: {Role}", loginDto.Email, role);
 
             return AuthResult.Ok(new AuthResponseDto
             {
-                Token = token,
+                Token = uniToken,
                 User = new AuthUserResponseDto
                 {
-                    Id = user.Id,
-                    FullName = user.FullName,
-                    Email = user.Email,
-                    Role = user.Role
+                    ExternalId = uniResponse.GetId(),
+                    FullName = uniResponse.GetFullName(),
+                    Email = loginDto.Email,
+                    Role = role
                 },
-                Message = "Admin girişi başarılı"
-            });
-        }
-
-        public async Task<AuthResult> TeacherLoginAsync(LoginDto loginDto)
-        {
-            var user = await _userService.ValidateUserAsync(loginDto.Email, loginDto.Password);
-
-            if (user == null)
-                return AuthResult.Unauthorized("Email veya şifre hatalı");
-
-            if (user.Role != "Teacher")
-                return AuthResult.Forbidden("Bu endpoint sadece Öğretmen kullanıcılar içindir");
-
-            if (!user.IsActive)
-                return AuthResult.Unauthorized("Hesabınız aktif değil");
-
-            var token = _jwtService.GenerateToken(user);
-            await _userService.UpdateLastLoginAsync(user.Id);
-
-            return AuthResult.Ok(new AuthResponseDto
-            {
-                Token = token,
-                User = new AuthUserResponseDto
-                {
-                    Id = user.Id,
-                    FullName = user.FullName,
-                    Email = user.Email,
-                    Role = user.Role,
-                    Title = user.Title,
-                    ProgramEntityId = user.ProgramEntityId,
-                    ProgramName = user.ProgramName
-                },
-                Message = "Öğretmen girişi başarılı"
-            });
-        }
-
-        public async Task<AuthResult> StudentLoginAsync(LoginDto loginDto)
-        {
-            var user = await _userService.ValidateUserAsync(loginDto.Email, loginDto.Password);
-
-            if (user == null)
-                return AuthResult.Unauthorized("Email veya şifre hatalı");
-
-            if (user.Role != "Student")
-                return AuthResult.Forbidden("Bu endpoint sadece Öğrenci kullanıcılar içindir");
-
-            if (!user.IsActive)
-                return AuthResult.Unauthorized("Hesabınız aktif değil");
-
-            var token = _jwtService.GenerateToken(user);
-            await _userService.UpdateLastLoginAsync(user.Id);
-
-            return AuthResult.Ok(new AuthResponseDto
-            {
-                Token = token,
-                User = new AuthUserResponseDto
-                {
-                    Id = user.Id,
-                    FullName = user.FullName,
-                    Email = user.Email,
-                    Role = user.Role,
-                    StudentNumber = user.StudentNumber,
-                    ProgramEntityId = user.ProgramEntityId,
-                    ProgramName = user.ProgramName
-                },
-                Message = "Öğrenci girişi başarılı"
+                Message = "Giriş başarılı"
             });
         }
     }

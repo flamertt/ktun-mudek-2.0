@@ -6,25 +6,31 @@ namespace BitirmeApi.Entity.Entities
 {
     /// <summary>
     /// Soru veya assessment component bazlı başarı metrikleri.
-    /// Soru satırı: ExamQuestionId dolu; bileşen satırı: AssessmentComponentId dolu (tersine unique filtreli indeksler).
+    /// Soru satırı: ExamQuestionId dolu; bileşen satırı: AssessmentComponentId dolu.
     /// </summary>
     public class ExamQuestionEvaluationResult : IEntity
     {
         [Required, Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid Id { get; set; }
 
+        /// <summary>Üniversite API CourseOffering ID</summary>
         [Required]
-        public Guid CourseOfferingId { get; set; }
-        public CourseOffering CourseOffering { get; set; } = default!;
+        public int ExternalCourseOfferingId { get; set; }
 
         [Required]
         public Guid ExamId { get; set; }
+
+        [ForeignKey("ExamId")]
         public Exam Exam { get; set; } = default!;
 
         public Guid? ExamQuestionId { get; set; }
+
+        [ForeignKey("ExamQuestionId")]
         public ExamQuestion? ExamQuestion { get; set; }
 
         public Guid? AssessmentComponentId { get; set; }
+
+        [ForeignKey("AssessmentComponentId")]
         public AssessmentComponent? AssessmentComponent { get; set; }
 
         public int QuestionNumber { get; set; }

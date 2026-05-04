@@ -23,7 +23,6 @@ namespace BitirmeApi.DataAccess.Concrete.EntityFramework
                 .Where(e => e.Id == id)
                 .Include(e => e.Questions)
                     .ThenInclude(q => q.OutcomeMappings)
-                        .ThenInclude(m => m.CourseLearningOutcome)
                 .AsNoTracking()
                 .FirstOrDefaultAsync();
 
@@ -31,7 +30,6 @@ namespace BitirmeApi.DataAccess.Concrete.EntityFramework
             await _context.Exams
                 .Where(e => e.Id == id)
                 .Include(e => e.CourseEvaluation)
-                    .ThenInclude(ev => ev.CourseOffering)
                 .AsNoTracking()
                 .FirstOrDefaultAsync();
 

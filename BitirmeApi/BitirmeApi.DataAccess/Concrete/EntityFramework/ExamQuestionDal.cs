@@ -14,7 +14,6 @@ namespace BitirmeApi.DataAccess.Concrete.EntityFramework
             await _context.ExamQuestions
                 .Where(q => q.ExamId == examId)
                 .Include(q => q.OutcomeMappings)
-                    .ThenInclude(m => m.CourseLearningOutcome)
                 .OrderBy(q => q.QuestionNumber)
                 .AsNoTracking()
                 .ToListAsync();
@@ -23,7 +22,6 @@ namespace BitirmeApi.DataAccess.Concrete.EntityFramework
             await _context.ExamQuestions
                 .Where(q => q.Id == id)
                 .Include(q => q.OutcomeMappings)
-                    .ThenInclude(m => m.CourseLearningOutcome)
                 .AsNoTracking()
                 .FirstOrDefaultAsync();
 
@@ -32,7 +30,6 @@ namespace BitirmeApi.DataAccess.Concrete.EntityFramework
                 .Where(q => q.Id == id)
                 .Include(q => q.Exam)
                     .ThenInclude(e => e.CourseEvaluation)
-                        .ThenInclude(ev => ev.CourseOffering)
                 .AsNoTracking()
                 .FirstOrDefaultAsync();
 

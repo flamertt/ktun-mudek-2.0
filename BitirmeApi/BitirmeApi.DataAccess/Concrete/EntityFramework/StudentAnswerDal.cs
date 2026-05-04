@@ -6,18 +6,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BitirmeApi.DataAccess.Concrete.EntityFramework
 {
-    public class StudentAnswerDal:EfRepository<StudentAnswer,ProjectDbContext>,IStudentAnswerDal
+    public class StudentAnswerDal : EfRepository<StudentAnswer, ProjectDbContext>, IStudentAnswerDal
     {
-        public StudentAnswerDal(ProjectDbContext context):base(context)
-        {
-            
-        }
+        public StudentAnswerDal(ProjectDbContext context) : base(context) { }
 
         public async Task<List<StudentAnswer>> GetByQuestionIdWithDetailsAsync(Guid questionId) =>
             await _context.StudentAnswers
                 .Where(a => a.ExamQuestionId == questionId)
-                .Include(a => a.Enrollment)
-                    .ThenInclude(e => e.Student)
                 .AsNoTracking()
                 .ToListAsync();
 
@@ -27,17 +22,15 @@ namespace BitirmeApi.DataAccess.Concrete.EntityFramework
                 .Include(a => a.ExamQuestion)
                     .ThenInclude(q => q.Exam)
                         .ThenInclude(e => e.CourseEvaluation)
-                            .ThenInclude(ev => ev.CourseOffering)
-                .Include(a => a.Enrollment)
                 .AsNoTracking()
                 .FirstOrDefaultAsync();
 
-        public async Task<StudentAnswer?> GetByQuestionAndEnrollmentAsync(Guid questionId, Guid enrollmentId) =>
+        public async Task<StudentAnswer?> GetByQuestionAndStudentAsync(Guid questionId, int externalStudentId) =>
             await _context.StudentAnswers.FirstOrDefaultAsync(a =>
-                a.ExamQuestionId == questionId && a.EnrollmentId == enrollmentId);
+                a.ExamQuestionId == questionId && a.ExternalStudentId == externalStudentId);
 
-        public async Task<bool> ExistsAsync(Guid questionId, Guid enrollmentId) =>
+        public async Task<bool> ExistsAsync(Guid questionId, int externalStudentId) =>
             await _context.StudentAnswers.AnyAsync(a =>
-                a.ExamQuestionId == questionId && a.EnrollmentId == enrollmentId);
+                a.ExamQuestionId == questionId && a.ExternalStudentId == externalStudentId);
     }
 }

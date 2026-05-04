@@ -8,15 +8,11 @@ namespace BitirmeApi.DataAccess.Concrete.EntityFramework
 {
     public class StudentAssessmentComponentScoreDal : EfRepository<StudentAssessmentComponentScore, ProjectDbContext>, IStudentAssessmentComponentScoreDal
     {
-        public StudentAssessmentComponentScoreDal(ProjectDbContext context) : base(context)
-        {
-        }
+        public StudentAssessmentComponentScoreDal(ProjectDbContext context) : base(context) { }
 
         public async Task<List<StudentAssessmentComponentScore>> GetByComponentIdWithDetailsAsync(Guid componentId) =>
             await _context.StudentAssessmentComponentScores
                 .Where(s => s.AssessmentComponentId == componentId)
-                .Include(s => s.Enrollment)
-                    .ThenInclude(e => e.Student)
                 .AsNoTracking()
                 .ToListAsync();
 
@@ -26,17 +22,15 @@ namespace BitirmeApi.DataAccess.Concrete.EntityFramework
                 .Include(s => s.AssessmentComponent)
                     .ThenInclude(c => c.Exam)
                         .ThenInclude(e => e.CourseEvaluation)
-                            .ThenInclude(ev => ev.CourseOffering)
-                .Include(s => s.Enrollment)
                 .AsNoTracking()
                 .FirstOrDefaultAsync();
 
-        public async Task<StudentAssessmentComponentScore?> GetByComponentAndEnrollmentAsync(Guid componentId, Guid enrollmentId) =>
+        public async Task<StudentAssessmentComponentScore?> GetByComponentAndStudentAsync(Guid componentId, int externalStudentId) =>
             await _context.StudentAssessmentComponentScores.FirstOrDefaultAsync(s =>
-                s.AssessmentComponentId == componentId && s.EnrollmentId == enrollmentId);
+                s.AssessmentComponentId == componentId && s.ExternalStudentId == externalStudentId);
 
-        public async Task<bool> ExistsAsync(Guid componentId, Guid enrollmentId) =>
+        public async Task<bool> ExistsAsync(Guid componentId, int externalStudentId) =>
             await _context.StudentAssessmentComponentScores.AnyAsync(s =>
-                s.AssessmentComponentId == componentId && s.EnrollmentId == enrollmentId);
+                s.AssessmentComponentId == componentId && s.ExternalStudentId == externalStudentId);
     }
 }

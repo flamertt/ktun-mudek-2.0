@@ -1,20 +1,16 @@
-using BitirmeApi.Business.DTO;
+using BitirmeApi.Entity.Entities;
 
 namespace BitirmeApi.Business.Abstract
 {
     public interface IAcademicTermService
     {
-        Task<List<AcademicTermListDto>> GetAllAsync();
-        Task<AcademicTermDto?> GetActiveAsync();
-        Task<AcademicTermDto?> GetByIdAsync(Guid id);
-        Task<AcademicTermDto> CreateAsync(AcademicTermCreateDto dto);
-        Task<AcademicTermDto> UpdateAsync(AcademicTermUpdateDto dto);
+        /// <summary>DB'deki en güncel (en büyük Id) dönemi döner. Yoksa null.</summary>
+        Task<AcademicTerm?> GetActiveAsync();
 
-        /// <summary>Belirtilen dönemi aktif yap, diğerlerini pasif et</summary>
-        Task<AcademicTermDto> SetActiveAsync(Guid id);
-        Task DeleteAsync(Guid id);
-
-        // ── Validation helper ─────────────────────────────────────────────────────
-        Task<bool> ExistsAsync(Guid id);
+        /// <summary>
+        /// Üniversite API'sinden tüm dönemleri çeker, en büyük Id'liyi bulur
+        /// ve DB'ye ekler (yoksa) veya günceller (varsa).
+        /// </summary>
+        Task<AcademicTerm> SyncActiveAsync(string universityToken);
     }
 }

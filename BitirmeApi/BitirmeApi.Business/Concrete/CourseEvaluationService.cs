@@ -1,6 +1,7 @@
 using AutoMapper;
 using BitirmeApi.Business.Abstract;
 using BitirmeApi.Business.DTO;
+using BitirmeApi.Business.Integration.Abstract;
 using BitirmeApi.DataAccess.Abstract;
 using BitirmeApi.Entity.Entities;
 
@@ -9,20 +10,18 @@ namespace BitirmeApi.Business.Concrete
     public class CourseEvaluationService : ICourseEvaluationService
     {
         private readonly ICourseEvaluationDal _evalDal;
-        private readonly ICourseOfferingDal _offeringDal;
+        private readonly IUniversityApiService _universityApi;
         private readonly IMapper _mapper;
 
         public CourseEvaluationService(
             ICourseEvaluationDal evalDal,
-            ICourseOfferingDal offeringDal,
+            IUniversityApiService universityApi,
             IMapper mapper)
         {
             _evalDal = evalDal;
-            _offeringDal = offeringDal;
+            _universityApi = universityApi;
             _mapper = mapper;
         }
-
-        // ── Okuma ────────────────────────────────────────────────────────────────
 
         public async Task<List<CourseEvaluationListDto>> GetAllAsync()
         {
@@ -36,32 +35,40 @@ namespace BitirmeApi.Business.Concrete
             return entity != null ? _mapper.Map<CourseEvaluationDetailDto>(entity) : null;
         }
 
-        public async Task<CourseEvaluationDetailDto?> GetByOfferingIdAsync(Guid courseOfferingId)
+        public async Task<CourseEvaluationDetailDto?> GetByOfferingIdAsync(int externalCourseOfferingId)
         {
-            var entity = await _evalDal.GetByOfferingIdWithDetailsAsync(courseOfferingId);
+            var entity = await _evalDal.GetByOfferingIdAsync(externalCourseOfferingId);
             return entity != null ? _mapper.Map<CourseEvaluationDetailDto>(entity) : null;
         }
 
-        // ── Yazma — sahiplik serviste doğrulanır ─────────────────────────────────
-
-        public async Task<CourseEvaluationDetailDto> CreateForTeacherAsync(CourseEvaluationCreateDto dto, Guid teacherId)
+        public async Task<List<CourseEvaluationListDto>> GetByTeacherIdAsync(int externalTeacherId)
         {
-            // 1) Offering var mı ve bu öğretmene mi atanmış?
-            var offering = await _offeringDal.GetAsync(o => o.Id == dto.CourseOfferingId)
-                ?? throw new KeyNotFoundException("Ders açılışı bulunamadı.");
+            var list = await _evalDal.GetByTeacherIdAsync(externalTeacherId);
+            return _mapper.Map<List<CourseEvaluationListDto>>(list);
+        }
 
-            if (offering.TeacherId != teacherId)
-                throw new UnauthorizedAccessException("Bu ders açılışı size atanmamış; değerlendirme oluşturamazsınız.");
+        public async Task<CourseEvaluationDetailDto> CreateForTeacherAsync(CourseEvaluationCreateDto dto, int externalTeacherId, string universityToken)
+        {
+            // Üniversite API'sinden offering'i doğrula
+            var offeringDetail = await _universityApi.GetCourseOfferingDetailAsync(externalTeacherId, dto.ExternalCourseOfferingId, universityToken);
+            if (offeringDetail == null)
+                throw new KeyNotFoundException("Ders açılışı üniversite sisteminde bulunamadı.");
 
-            // 2) Zaten bir değerlendirme var mı?
-            var existing = await _evalDal.GetAsync(e => e.CourseOfferingId == dto.CourseOfferingId);
+            // Zaten değerlendirme var mı?
+            var existing = await _evalDal.GetByOfferingIdAsync(dto.ExternalCourseOfferingId);
             if (existing != null)
                 throw new InvalidOperationException("Bu ders açılışı için zaten bir değerlendirme mevcut.");
 
             var entity = new CourseEvaluation
             {
                 Id = Guid.NewGuid(),
-                CourseOfferingId = dto.CourseOfferingId,
+                ExternalCourseOfferingId = dto.ExternalCourseOfferingId,
+                ExternalCourseId = dto.ExternalCourseId > 0 ? dto.ExternalCourseId : offeringDetail.CourseId,
+                ExternalProgramId = dto.ExternalProgramId > 0 ? dto.ExternalProgramId : offeringDetail.ProgramId,
+                ExternalTeacherId = externalTeacherId,
+                CourseCode = dto.CourseCode ?? offeringDetail.CourseCode,
+                CourseName = dto.CourseName ?? offeringDetail.CourseName,
+                AcademicTermName = dto.AcademicTermName,
                 CreatedDate = DateTime.UtcNow,
                 StudentFeedbackEvaluation = dto.StudentFeedbackEvaluation,
                 ProgramOutcomeEvaluation = dto.ProgramOutcomeEvaluation,
@@ -76,14 +83,12 @@ namespace BitirmeApi.Business.Concrete
             return _mapper.Map<CourseEvaluationDetailDto>(result!);
         }
 
-        public async Task<CourseEvaluationDetailDto> UpdateForTeacherAsync(CourseEvaluationUpdateDto dto, Guid teacherId)
+        public async Task<CourseEvaluationDetailDto> UpdateForTeacherAsync(CourseEvaluationUpdateDto dto, int externalTeacherId)
         {
-            // 1) Değerlendirme var mı ve offering detayları include edilmiş mi?
             var entity = await _evalDal.GetByIdWithDetailsAsync(dto.Id)
                 ?? throw new KeyNotFoundException("Değerlendirme bulunamadı.");
 
-            // 2) Bu offering bu öğretmene mi atanmış?
-            if (entity.CourseOffering?.TeacherId != teacherId)
+            if (entity.ExternalTeacherId != externalTeacherId)
                 throw new UnauthorizedAccessException("Bu değerlendirmeyi güncelleme yetkiniz yok.");
 
             entity.StudentFeedbackEvaluation = dto.StudentFeedbackEvaluation;
@@ -99,14 +104,12 @@ namespace BitirmeApi.Business.Concrete
             return _mapper.Map<CourseEvaluationDetailDto>(result!);
         }
 
-        public async Task DeleteForTeacherAsync(Guid id, Guid teacherId)
+        public async Task DeleteForTeacherAsync(Guid id, int externalTeacherId)
         {
-            // 1) Değerlendirme var mı?
             var entity = await _evalDal.GetByIdWithDetailsAsync(id)
                 ?? throw new KeyNotFoundException("Değerlendirme bulunamadı.");
 
-            // 2) Bu offering bu öğretmene mi atanmış?
-            if (entity.CourseOffering?.TeacherId != teacherId)
+            if (entity.ExternalTeacherId != externalTeacherId)
                 throw new UnauthorizedAccessException("Bu değerlendirmeyi silme yetkiniz yok.");
 
             _evalDal.Delete(entity);

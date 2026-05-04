@@ -20,7 +20,7 @@ namespace BitirmeApi.DataAccess.Concrete.EntityFramework
         public async Task<int> CountBySurveyIdAsync(Guid surveyId) =>
             await _context.Submissions.CountAsync(s => s.SurveyId == surveyId);
 
-        public async Task<bool> HasStudentSubmittedAsync(Guid surveyId, Guid userId) =>
-            await _context.Submissions.AnyAsync(s => s.SurveyId == surveyId && s.UserId == userId);
+        public async Task<bool> HasStudentSubmittedByExternalIdAsync(Guid surveyId, int externalStudentId) =>
+            await _context.Submissions.AnyAsync(s => s.SurveyId == surveyId && s.ExternalStudentId == externalStudentId);
     }
 }

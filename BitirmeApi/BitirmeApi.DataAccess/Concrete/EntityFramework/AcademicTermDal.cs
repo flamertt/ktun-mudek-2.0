@@ -10,18 +10,9 @@ namespace BitirmeApi.DataAccess.Concrete.EntityFramework
     {
         public AcademicTermDal(ProjectDbContext context) : base(context) { }
 
-        public async Task<AcademicTerm?> GetActiveTermAsync()
-        {
-            return await _context.Set<AcademicTerm>()
-                .AsNoTracking()
-                .FirstOrDefaultAsync(t => t.IsActive);
-        }
-
-        public async Task DeactivateAllAsync()
-        {
-            await _context.Set<AcademicTerm>()
-                .Where(t => t.IsActive)
-                .ExecuteUpdateAsync(s => s.SetProperty(t => t.IsActive, false));
-        }
+        public async Task<AcademicTerm?> GetActiveAsync() =>
+            await _context.AcademicTerms
+                .OrderByDescending(t => t.Id)
+                .FirstOrDefaultAsync();
     }
 }

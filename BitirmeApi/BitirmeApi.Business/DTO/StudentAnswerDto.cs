@@ -4,16 +4,14 @@ namespace BitirmeApi.Business.DTO
     {
         public Guid Id { get; set; }
         public Guid ExamQuestionId { get; set; }
-        public Guid EnrollmentId { get; set; }
+        public int ExternalStudentId { get; set; }
         public decimal Score { get; set; }
-        public string? StudentNumber { get; set; }
-        public string? StudentName { get; set; }
     }
 
     public class CreateStudentAnswerDto
     {
         public Guid ExamQuestionId { get; set; }
-        public Guid EnrollmentId { get; set; }
+        public int ExternalStudentId { get; set; }
         public decimal Score { get; set; }
     }
 
@@ -25,7 +23,7 @@ namespace BitirmeApi.Business.DTO
 
     public class BulkStudentAnswerItemDto
     {
-        public Guid EnrollmentId { get; set; }
+        public int ExternalStudentId { get; set; }
         public decimal Score { get; set; }
     }
 

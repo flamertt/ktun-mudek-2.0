@@ -4,21 +4,14 @@ namespace BitirmeApi.Business.Abstract
 {
     public interface IExamService
     {
-        /// <summary>Bir değerlendirmeye ait sınavlar</summary>
         Task<List<ExamListDto>> GetByEvaluationIdAsync(Guid evaluationId);
-        Task<List<ExamListDto>> GetByEvaluationIdForTeacherAsync(Guid evaluationId, Guid teacherId);
+        Task<List<ExamListDto>> GetByEvaluationIdForTeacherAsync(Guid evaluationId, int externalTeacherId);
 
         Task<ExamDetailDto?> GetByIdAsync(Guid id);
-        Task<ExamDetailDto?> GetByIdForTeacherAsync(Guid id, Guid teacherId);
+        Task<ExamDetailDto?> GetByIdForTeacherAsync(Guid id, int externalTeacherId);
 
-        /// <summary>
-        /// Değerlendirmeye sınav ekler.
-        /// Ownership: CourseEvaluation.CourseOffering.TeacherId == teacherId
-        /// </summary>
-        Task<ExamDetailDto> CreateAsync(CreateExamDto dto, Guid teacherId);
-
-        Task<ExamDetailDto> UpdateAsync(UpdateExamDto dto, Guid teacherId);
-
-        Task DeleteAsync(Guid id, Guid teacherId);
+        Task<ExamDetailDto> CreateAsync(CreateExamDto dto, int externalTeacherId);
+        Task<ExamDetailDto> UpdateAsync(UpdateExamDto dto, int externalTeacherId);
+        Task DeleteAsync(Guid id, int externalTeacherId);
     }
 }

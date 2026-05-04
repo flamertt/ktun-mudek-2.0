@@ -6,8 +6,7 @@ namespace BitirmeApi.Entity.Entities
 {
     /// <summary>
     /// Öğrencinin sınav sorusuna verdiği cevap / aldığı puan.
-    /// StudentEnrollment yerine Enrollment kullanılır (tek öğrenci kayıt modeli).
-    /// Unique: (ExamQuestionId, EnrollmentId)
+    /// Unique: (ExamQuestionId, ExternalStudentId)
     /// </summary>
     public class StudentAnswer : IEntity
     {
@@ -20,12 +19,9 @@ namespace BitirmeApi.Entity.Entities
         [ForeignKey("ExamQuestionId")]
         public ExamQuestion ExamQuestion { get; set; } = default!;
 
-        /// <summary>Tek öğrenci kayıt modeli: Enrollment</summary>
+        /// <summary>Üniversite API Student ID (int)</summary>
         [Required]
-        public Guid EnrollmentId { get; set; }
-
-        [ForeignKey("EnrollmentId")]
-        public Enrollment Enrollment { get; set; } = default!;
+        public int ExternalStudentId { get; set; }
 
         public decimal Score { get; set; }
     }
