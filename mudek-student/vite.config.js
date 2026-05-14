@@ -12,6 +12,7 @@ const API_BASE_URL = 'http://localhost:5010'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
+  base: '/student/',
   define: {
     'import.meta.env.VITE_API_BASE_URL': JSON.stringify(API_BASE_URL),
   },

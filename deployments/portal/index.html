@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MÜDEK Değerlendirme Sistemi</title>
+    <link rel="icon" type="image/x-icon" href="fav.ico" />
+    <link
+      rel="preconnect"
+      href="https://fonts.googleapis.com"
+    />
+    <link
+      rel="preconnect"
+      href="https://fonts.gstatic.com"
+      crossorigin
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Manrope:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --md-background: #fff8f7;
+        --md-surface: #fff8f7;
+        --md-on-surface: #261816;
+        --md-on-surface-variant: #5a403e;
+        --md-surface-container-lowest: #ffffff;
+        --md-surface-container-low: #fff0ef;
+        --md-surface-container-high: #fee2df;
+        --md-outline-variant: #e2beba;
+        --md-primary: #920410;
+        --md-primary-container: #b52525;
+        --md-on-primary: #ffffff;
+        --md-on-primary-container: #ffcdc8;
+        --md-secondary: #4c616c;
+        --md-tertiary: #004c6c;
+        --md-error: #ba1a1a;
+
+        --sans: 'Inter', system-ui, 'Segoe UI', Roboto, sans-serif;
+        --heading: 'Manrope', 'Inter', system-ui, sans-serif;
+
+        --page-card-bg: #ffffff;
+        --page-card-border: color-mix(in srgb, var(--md-outline-variant) 55%, transparent);
+        --page-card-shadow: 0 1px 3px color-mix(in srgb, var(--md-on-surface) 6%, transparent);
+        --page-card-radius: 1rem;
+      }
+
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+      body {
+        min-height: 100svh;
+        display: grid;
+        place-items: center;
+        padding: 28px 16px;
+        font-family: var(--sans);
+        color: var(--md-on-surface);
+        background-color: var(--md-background);
+        background-image:
+          linear-gradient(
+            155deg,
+            color-mix(in srgb, var(--md-primary-container) 22%, transparent) 0%,
+            rgba(38, 24, 22, 0.42) 42%,
+            rgba(26, 12, 12, 0.58) 100%
+          ),
+          url('background.jpg');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+      }
+
+      .wrapper {
+        width: 100%;
+        max-width: 52rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2.5rem;
+      }
+
+      /* Header (logo + başlık) */
+      .header {
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1.25rem;
+      }
+
+      .logo {
+        width: 100%;
+        max-width: 13rem;
+        height: auto;
+        object-fit: contain;
+        display: block;
+      }
+
+      .title {
+        font-family: var(--heading);
+        font-size: clamp(1.25rem, 4vw, 1.75rem);
+        font-weight: 800;
+        letter-spacing: -0.025em;
+        color: #ffffff;
+        text-shadow: 0 2px 12px rgba(0,0,0,0.4);
+      }
+
+      .subtitle {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: rgba(255,255,255,0.72);
+        letter-spacing: 0.01em;
+        margin-top: -0.5rem;
+      }
+
+      /* Kart grubu */
+      .cards {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.25rem;
+        width: 100%;
+      }
+
+      @media (max-width: 640px) {
+        .cards {
+          grid-template-columns: 1fr;
+          max-width: 22rem;
+        }
+      }
+
+      /* Tek kart */
+      .card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+        padding: 2rem 1.5rem;
+        border-radius: var(--page-card-radius);
+        background: var(--page-card-bg);
+        border: 1px solid var(--page-card-border);
+        box-shadow:
+          0 4px 24px rgba(38, 24, 22, 0.14),
+          0 1px 4px rgba(38, 24, 22, 0.06);
+        text-decoration: none;
+        color: inherit;
+        cursor: pointer;
+        transition:
+          transform 0.18s ease,
+          box-shadow 0.18s ease,
+          background 0.15s ease;
+        outline: none;
+      }
+
+      .card:hover {
+        transform: translateY(-4px);
+        box-shadow:
+          0 12px 32px rgba(38, 24, 22, 0.18),
+          0 4px 10px rgba(38, 24, 22, 0.08);
+      }
+
+      .card:active {
+        transform: translateY(-1px);
+      }
+
+      .card:focus-visible {
+        outline: 2px solid var(--md-primary);
+        outline-offset: 3px;
+      }
+
+      /* İkon dairesi */
+      .icon-wrap {
+        width: 3.5rem;
+        height: 3.5rem;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        flex-shrink: 0;
+      }
+
+      .icon-wrap.admin {
+        background: color-mix(in srgb, var(--md-primary-container) 14%, transparent);
+        color: var(--md-primary-container);
+      }
+
+      .icon-wrap.teacher {
+        background: color-mix(in srgb, var(--md-tertiary) 12%, transparent);
+        color: var(--md-tertiary);
+      }
+
+      .icon-wrap.student {
+        background: color-mix(in srgb, var(--md-secondary) 14%, transparent);
+        color: var(--md-secondary);
+      }
+
+      .card-title {
+        font-family: var(--heading);
+        font-size: 1.0625rem;
+        font-weight: 800;
+        letter-spacing: -0.015em;
+        color: var(--md-on-surface);
+        text-align: center;
+      }
+
+      .card-desc {
+        font-size: 0.8125rem;
+        font-weight: 500;
+        line-height: 1.5;
+        color: var(--md-on-surface-variant);
+        text-align: center;
+      }
+
+      /* Git butonu */
+      .card-btn {
+        display: flex;
+        align-items: center;
+        gap: 0.375rem;
+        margin-top: 0.25rem;
+        padding: 0.625rem 1.25rem;
+        border-radius: 0.5rem;
+        border: none;
+        font-family: var(--heading);
+        font-size: 0.875rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background 0.15s ease;
+        text-decoration: none;
+        color: var(--md-on-primary);
+      }
+
+      .card-btn.admin {
+        background: var(--md-primary-container);
+      }
+      .card-btn.admin:hover {
+        background: var(--md-primary);
+      }
+
+      .card-btn.teacher {
+        background: var(--md-tertiary);
+      }
+      .card-btn.teacher:hover {
+        background: color-mix(in srgb, var(--md-tertiary) 85%, #000 15%);
+      }
+
+      .card-btn.student {
+        background: var(--md-secondary);
+      }
+      .card-btn.student:hover {
+        background: color-mix(in srgb, var(--md-secondary) 85%, #000 15%);
+      }
+
+      /* Alt güven rozetleri */
+      .trust {
+        display: flex;
+        gap: 1.5rem;
+        opacity: 0.38;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      .trust-item {
+        display: flex;
+        align-items: center;
+        gap: 0.375rem;
+      }
+
+      .trust-icon {
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #fff;
+      }
+
+      .trust-label {
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: #fff;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="header">
+        <img class="logo" src="login_logo.png" alt="KTÜN Logo" />
+        <h1 class="title">MÜDEK Değerlendirme Sistemi</h1>
+        <p class="subtitle">Kırıkkale Teknik Üniversitesi — Mühendislik Eğitim Programları</p>
+      </header>
+
+      <div class="cards">
+        <!-- Admin Paneli -->
+        <a class="card" href="/admin/" target="_blank" rel="noopener noreferrer">
+          <div class="icon-wrap admin">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+          </div>
+          <span class="card-title">Admin Paneli</span>
+          <span class="card-desc">Fakülte, bölüm, ders ve kullanıcı yönetimi. Program çıktıları ve CLO-PO eşleştirmesi.</span>
+          <span class="card-btn admin">
+            Giriş Yap
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          </span>
+        </a>
+
+        <!-- Öğretmen Paneli -->
+        <a class="card" href="/teacher/" target="_blank" rel="noopener noreferrer">
+          <div class="icon-wrap teacher">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+              <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+            </svg>
+          </div>
+          <span class="card-title">Öğretmen Paneli</span>
+          <span class="card-desc">Sınav bileşenleri, soru girişi, puan kaydı ve MÜDEK hesaplama sonuçları.</span>
+          <span class="card-btn teacher">
+            Giriş Yap
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          </span>
+        </a>
+
+        <!-- Öğrenci Paneli -->
+        <a class="card" href="/student/" target="_blank" rel="noopener noreferrer">
+          <div class="icon-wrap student">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m22 10-10-8L2 10l10 8 10-8Z"/>
+              <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+            </svg>
+          </div>
+          <span class="card-title">Öğrenci Paneli</span>
+          <span class="card-desc">Kayıtlı derslerinizi görüntüleyin ve ders anketlerini doldurun.</span>
+          <span class="card-btn student">
+            Giriş Yap
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          </span>
+        </a>
+      </div>
+
+      <div class="trust">
+        <div class="trust-item">
+          <span class="trust-icon">✓</span>
+          <span class="trust-label">Güvenli Bağlantı</span>
+        </div>
+        <div class="trust-item">
+          <span class="trust-icon">✓</span>
+          <span class="trust-label">SSL Şifreli</span>
+        </div>
+        <div class="trust-item">
+          <span class="trust-icon">✓</span>
+          <span class="trust-label">MÜDEK Uyumlu</span>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

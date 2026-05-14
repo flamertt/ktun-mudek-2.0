@@ -12,6 +12,7 @@ const DEV_API_TARGET = process.env.VITE_DEV_API_PROXY_TARGET ?? 'http://localhos
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
+  base: '/admin/',
   server: {
     proxy: {
       '/api': {
