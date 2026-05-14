@@ -1,0 +1,118 @@
+name: mudek
+
+# Kullanım:
+#   cp deployments/.env.example deployments/.env   # şifreleri doldur
+#   docker compose -f deployments/docker-compose.yml --env-file deployments/.env up -d --build
+
+services:
+
+  # ── Veritabanı ──────────────────────────────────────────────────────────────
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: mudek-db
+    restart: unless-stopped
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "${DB_SA_PASSWORD}"
+    volumes:
+      - db-data:/var/opt/mssql
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P '${DB_SA_PASSWORD}' -Q 'SELECT 1' -No"]
+      interval: 15s
+      timeout: 10s
+      retries: 8
+      start_period: 30s
+
+  # ── Backend API (.NET 8) ─────────────────────────────────────────────────────
+  api:
+    build:
+      context: ..
+      dockerfile: deployments/api.Dockerfile
+    container_name: mudek-api
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_HTTP_PORTS: "8080"
+      ConnectionStrings__DefaultConnection: >-
+        Server=db,1433;Database=MudekDbAcademic;
+        User Id=sa;Password=${DB_SA_PASSWORD};
+        TrustServerCertificate=True;
+    networks:
+      - backend
+      - proxy
+
+  # ── Portal (giriş sayfası) ───────────────────────────────────────────────────
+  portal:
+    build:
+      context: ..
+      dockerfile: deployments/portal.Dockerfile
+    container_name: mudek-portal
+    restart: unless-stopped
+    networks:
+      - proxy
+
+  # ── Admin Paneli ─────────────────────────────────────────────────────────────
+  mudek-admin:
+    build:
+      context: ..
+      dockerfile: deployments/mudek-admin.Dockerfile
+      args:
+        VITE_API_BASE_URL: "${SITE_ORIGIN}"
+    container_name: mudek-admin
+    restart: unless-stopped
+    networks:
+      - proxy
+
+  # ── Öğretmen Paneli ──────────────────────────────────────────────────────────
+  mudek-teacher:
+    build:
+      context: ..
+      dockerfile: deployments/mudek-teacher.Dockerfile
+      args:
+        VITE_API_BASE_URL: "${SITE_ORIGIN}"
+    container_name: mudek-teacher
+    restart: unless-stopped
+    networks:
+      - proxy
+
+  # ── Öğrenci Paneli ───────────────────────────────────────────────────────────
+  mudek-student:
+    build:
+      context: ..
+      dockerfile: deployments/mudek-student.Dockerfile
+      args:
+        VITE_API_BASE_URL: "${SITE_ORIGIN}"
+    container_name: mudek-student
+    restart: unless-stopped
+    networks:
+      - proxy
+
+  # ── Nginx Reverse Proxy ──────────────────────────────────────────────────────
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: mudek-nginx
+    restart: unless-stopped
+    depends_on:
+      - portal
+      - mudek-admin
+      - mudek-teacher
+      - mudek-student
+      - api
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    networks:
+      - proxy
+
+volumes:
+  db-data:
+
+networks:
+  backend:
+  proxy:
