@@ -32,8 +32,20 @@ builder.Services.AddAuthentication(options =>
         ValidateLifetime = !isDevelopment,
         ValidateIssuerSigningKey = false,
         RequireSignedTokens = false,
+        RequireExpirationTime = false,
         // Login tarafında claim'ler JwtSecurityToken ile okunuyor; JsonWebTokenHandler bazı üretici JWT'lerinde 401 üretebiliyor.
         SignatureValidator = (token, _) => new JwtSecurityTokenHandler().ReadJwtToken(token),
+        // SignatureValidator JwtSecurityToken döndürünce default LifetimeValidator notBefore/expires parametrelerini
+        // null alıyor ve "missing Expiration Time" (IDX10225) hatası üretiyor. Token'daki exp'i doğrudan okuruz.
+        LifetimeValidator = (notBefore, expires, securityToken, _) =>
+        {
+            var now = DateTime.UtcNow;
+            var validTo = expires
+                ?? (securityToken as JwtSecurityToken)?.ValidTo
+                ?? DateTime.MinValue;
+            if (validTo == DateTime.MinValue) return true; // exp yoksa geç (üniversite token'ı zaten kısa ömürlü)
+            return validTo.Add(TimeSpan.FromMinutes(5)) > now;
+        },
         ClockSkew = TimeSpan.FromMinutes(isDevelopment ? 30 : 5)
     };
     options.Events = new JwtBearerEvents
